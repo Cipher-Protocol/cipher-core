@@ -1,0 +1,18 @@
+{
+  "plugins": ["prettier"],
+  "extends": "solhint:recommended",
+  "rules": {
+    "no-console": "warn",
+    "prettier/prettier": "error",
+    "no-unused-vars": "error",
+    "contract-name-camelcase": "error",
+    "event-name-camelcase": "error",
+    "func-name-mixedcase": "error",
+    "func-param-name-mixedcase": "error",
+    "modifier-name-mixedcase": "error",
+    "var-name-mixedcase": "error",
+    "imports-on-top": "error",
+    "func-visibility": ["warn", { "ignoreConstructors": true }],
+    "compiler-version": ["error", "^0.8.17"]
+  }
+}
