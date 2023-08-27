@@ -7,18 +7,18 @@ if [ ! -d "$BUILD_DIR" ]; then
     mkdir -p "$BUILD_DIR" 
 fi
 
-circom ./circuits/withdraw.circom --r1cs --wasm --sym --c -o ./build/circuits/withdraw
+circom ./circuits/withdraw.circom --r1cs --wasm --sym --c -o "$BUILD_DIR"
 
-node ./build/circuits/withdraw/withdraw_js/generate_witness.js ./build/circuits/withdraw/withdraw_js/withdraw.wasm ./test/circuit/withdraw/input.json ./build/circuits/withdraw/witness.wtns
+node "$BUILD_DIR"/withdraw_js/generate_witness.js "$BUILD_DIR"/withdraw_js/withdraw.wasm ./test/circuit/withdraw/input.json "$BUILD_DIR"/witness.wtns
 
-snarkjs groth16 setup ./build/circuits/withdraw/withdraw.r1cs ./ptau/pot14_final.ptau ./build/circuits/withdraw/withdraw_0000.zkey
+snarkjs groth16 setup "$BUILD_DIR"/withdraw.r1cs ./ptau/pot14_final.ptau "$BUILD_DIR"/withdraw_0000.zkey
 
-snarkjs zkey contribute ./build/circuits/withdraw/withdraw_0000.zkey ./build/circuits/withdraw/withdraw_0001.zkey --name="1st Contributor LFG!!" -v
+snarkjs zkey contribute "$BUILD_DIR"/withdraw_0000.zkey "$BUILD_DIR"/withdraw_0001.zkey --name="1st Contributor LFG!!" -v
 
-snarkjs zkey export verificationkey ./build/circuits/withdraw/withdraw_0001.zkey ./build/circuits/withdraw/verification_key.json
+snarkjs zkey export verificationkey "$BUILD_DIR"/withdraw_0001.zkey "$BUILD_DIR"/verification_key.json
 
-snarkjs groth16 prove ./build/circuits/withdraw/withdraw_0001.zkey ./build/circuits/withdraw/witness.wtns ./build/circuits/withdraw/proof.json ./build/circuits/withdraw/public.json
+snarkjs groth16 prove "$BUILD_DIR"/withdraw_0001.zkey "$BUILD_DIR"/witness.wtns "$BUILD_DIR"/proof.json "$BUILD_DIR"/public.json
 
-snarkjs groth16 verify ./build/circuits/withdraw/verification_key.json ./build/circuits/withdraw/public.json ./build/circuits/withdraw/proof.json
+snarkjs groth16 verify "$BUILD_DIR"/verification_key.json "$BUILD_DIR"/public.json "$BUILD_DIR"/proof.json
 
 

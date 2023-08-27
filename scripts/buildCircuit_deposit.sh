@@ -7,18 +7,18 @@ if [ ! -d "$BUILD_DIR" ]; then
     mkdir -p "$BUILD_DIR" 
 fi
 
-circom ./circuits/deposit.circom --r1cs --wasm --sym --c -o ./build/circuits/deposit
+circom ./circuits/deposit.circom --r1cs --wasm --sym --c -o "$BUILD_DIR"
 
-node ./build/circuits/deposit/deposit_js/generate_witness.js ./build/circuits/deposit/deposit_js/deposit.wasm ./test/circuit/deposit/input.json ./build/circuits/deposit/witness.wtns
+node "$BUILD_DIR"/deposit_js/generate_witness.js "$BUILD_DIR"/deposit_js/deposit.wasm ./test/circuit/deposit/input.json "$BUILD_DIR"/witness.wtns
 
-snarkjs groth16 setup ./build/circuits/deposit/deposit.r1cs ./ptau/pot12_final.ptau ./build/circuits/deposit/deposit_0000.zkey
+snarkjs groth16 setup "$BUILD_DIR"/deposit.r1cs ./ptau/pot12_final.ptau "$BUILD_DIR"/deposit_0000.zkey
 
-snarkjs zkey contribute ./build/circuits/deposit/deposit_0000.zkey ./build/circuits/deposit/deposit_0001.zkey --name="1st Contributor LFG!!" -v
+snarkjs zkey contribute "$BUILD_DIR"/deposit_0000.zkey "$BUILD_DIR"/deposit_0001.zkey --name="1st Contributor LFG!!" -v
 
-snarkjs zkey export verificationkey ./build/circuits/deposit/deposit_0001.zkey ./build/circuits/deposit/verification_key.json
+snarkjs zkey export verificationkey "$BUILD_DIR"/deposit_0001.zkey "$BUILD_DIR"/verification_key.json
 
-snarkjs groth16 prove ./build/circuits/deposit/deposit_0001.zkey ./build/circuits/deposit/witness.wtns ./build/circuits/deposit/proof.json ./build/circuits/deposit/public.json
+snarkjs groth16 prove "$BUILD_DIR"/deposit_0001.zkey "$BUILD_DIR"/witness.wtns "$BUILD_DIR"/proof.json "$BUILD_DIR"/public.json
 
-snarkjs groth16 verify ./build/circuits/deposit/verification_key.json ./build/circuits/deposit/public.json ./build/circuits/deposit/proof.json
+snarkjs groth16 verify "$BUILD_DIR"/verification_key.json "$BUILD_DIR"/public.json "$BUILD_DIR"/proof.json
 
 
