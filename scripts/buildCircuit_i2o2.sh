@@ -1,5 +1,11 @@
-mkdir -p ./build
-mkdir -p ./build/utxo_i2o2
+#!/bin/bash
+
+BUILD_DIR=./build/utxo_i2o2
+
+if [ ! -d "$BUILD_DIR" ]; then
+    echo "No build directory found. Creating build directory..."
+    mkdir -p "$BUILD_DIR" 
+fi
 
 circom ./circuits/utxo.circom --r1cs --wasm --sym --c -o ./build/utxo_i2o2
 
