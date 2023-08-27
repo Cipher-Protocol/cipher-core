@@ -5,8 +5,8 @@
   "license": "MIT",
   "author": "ray880301@gmail.com",
   "scripts": {
-    "build:deposit": "sh ./scripts/buildCircuit_i0o2.sh",
-    "build:withdraw": "sh ./scripts/buildCircuit_i2o2.sh"
+    "build:deposit": "sh ./scripts/buildCircuit_deposit.sh",
+    "build:withdraw": "sh ./scripts/buildCircuit_withdraw.sh"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
