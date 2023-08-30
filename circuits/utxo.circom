@@ -1,5 +1,6 @@
 pragma circom 2.1.6;
 
+include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/poseidon.circom";
 include "./merkleProof.circom";
 include "./keypair.circom";
@@ -9,10 +10,10 @@ Utxo structure:
 {
     amount,
     pubkey,
-    blinding, // random number
+    salt
 }
 
-commitment = hash(amount, pubKey, blinding)
+commitment = hash(amount, pubKey, salt)
 nullifier = hash(commitment, merklePath, sign(privKey, commitment, merklePath))
 */
 
@@ -21,15 +22,16 @@ template Utxo(levels, nIns, nOuts, zeroLeaf) {
     signal input root; // public
     // extAmount = external amount used for deposits and withdrawals
     // correct extAmount range is enforced on the smart contract
-    // publicAmount = extAmount - fee
-    signal input publicAmount; // public
+
+    signal input publicInAmt; // public
+    signal input publicOutAmt; // public
     signal input extDataHash; // public
 
     // data for transaction inputs
     signal input inputNullifier[nIns]; // public
     signal input inAmount[nIns];
     signal input inPrivateKey[nIns];
-    signal input inBlinding[nIns];
+    signal input inSalt[nIns];
     signal input inPathIndices[nIns];
     signal input inPathElements[nIns][levels];
 
@@ -37,7 +39,7 @@ template Utxo(levels, nIns, nOuts, zeroLeaf) {
     signal input outputCommitment[nOuts]; // public
     signal input outAmount[nOuts];
     signal input outPubkey[nOuts];
-    signal input outBlinding[nOuts];
+    signal input outSalt[nOuts];
 
     component inKeypair[nIns];
     component inSignature[nIns];
@@ -45,8 +47,31 @@ template Utxo(levels, nIns, nOuts, zeroLeaf) {
     component inNullifierHasher[nIns];
     component inTree[nIns];
     component inCheckRoot[nIns];
-    var sumIns = 0;
 
+    component publicInAmtCheck;
+    component publicOutAmtCheck;
+
+    // check public input amount greater than or equal to zero
+    // publicInAmtCheck = GreaterEqThan(252);
+    // publicInAmtCheck.in[0] <== publicInAmt;
+    // publicInAmtCheck.in[1] <== 0;
+    // publicInAmtCheck.out === 1;
+    publicInAmtCheck = LessThan(252);
+    publicInAmtCheck.in[0] <== publicInAmt;
+    publicInAmtCheck.in[1] <== 0;
+    publicInAmtCheck.out === 0;
+
+    // check public output amount greater than or equal to zero
+    // publicOutAmtCheck = GreaterEqThan(252);
+    // publicOutAmtCheck.in[0] <== publicOutAmt;
+    // publicOutAmtCheck.in[1] <== 0;
+    // publicOutAmtCheck.out === 1;
+    publicOutAmtCheck = LessThan(252);
+    publicOutAmtCheck.in[0] <== publicOutAmt;
+    publicOutAmtCheck.in[1] <== 0;
+    publicOutAmtCheck.out === 0;
+
+    var sumIns = 0;
     // verify correctness of transaction inputs
     for (var tx = 0; tx < nIns; tx++) {
         inKeypair[tx] = Keypair();
@@ -55,7 +80,7 @@ template Utxo(levels, nIns, nOuts, zeroLeaf) {
         inCommitmentHasher[tx] = Poseidon(3);
         inCommitmentHasher[tx].inputs[0] <== inAmount[tx];
         inCommitmentHasher[tx].inputs[1] <== inKeypair[tx].publicKey;
-        inCommitmentHasher[tx].inputs[2] <== inBlinding[tx];
+        inCommitmentHasher[tx].inputs[2] <== inSalt[tx];
 
         inSignature[tx] = Signature();
         inSignature[tx].privateKey <== inPrivateKey[tx];
@@ -97,7 +122,7 @@ template Utxo(levels, nIns, nOuts, zeroLeaf) {
         outCommitmentHasher[tx] = Poseidon(3);
         outCommitmentHasher[tx].inputs[0] <== outAmount[tx];
         outCommitmentHasher[tx].inputs[1] <== outPubkey[tx];
-        outCommitmentHasher[tx].inputs[2] <== outBlinding[tx];
+        outCommitmentHasher[tx].inputs[2] <== outSalt[tx];
         outCommitmentHasher[tx].out === outputCommitment[tx];
 
         // Check that amount fits into 248 bits to prevent overflow
@@ -121,7 +146,7 @@ template Utxo(levels, nIns, nOuts, zeroLeaf) {
     }
 
     // verify amount invariant
-    sumIns + publicAmount === sumOuts;
+    sumIns + publicInAmt === sumOuts + publicOutAmt;
 
     // optional safety constraint to make sure extDataHash cannot be changed
     signal extDataSquare <== extDataHash * extDataHash;

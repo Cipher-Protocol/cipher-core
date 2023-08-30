@@ -1,17 +1,9 @@
-const poseidon = require("poseidon-encryption");
+import { SignatureInputArgs } from "../type";
+import { calcPoseidonHash } from "./calcPoseidonHash";
 
-export const calcSignature = (
-  privateKey: string,
-  commitment: string,
-  merklePath: string
-) => {
-  const input = [privateKey, commitment, merklePath];
-  const signature = poseidon.poseidon(input).toString();
+export const calcSignature = (args: SignatureInputArgs) => {
+  const inputArgs = [args.privateKey, args.commitment, args.merklePath];
+  const signature = calcPoseidonHash(inputArgs);
   // console.log("signature", signature);
   return signature;
 };
-// calcSignature(
-//   "0x00",
-//   "15997751684126047741117699664175740081703119285231532664403667222083395872102",
-//   "1"
-// );

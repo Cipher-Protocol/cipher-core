@@ -1,11 +1,12 @@
 {
   "root": "0x00",
-  "publicAmount": "300",
+  "publicInAmt": "300",
+  "publicOutAmt": "0",
   "extDataHash": "123",
   "inputNullifier": [],
   "inAmount": [],
   "inPrivateKey": [],
-  "inBlinding": [],
+  "inSalt": [],
   "inPathIndices": [],
   "inPathElements": [],
   "outputCommitment": [
@@ -17,5 +18,5 @@
     "19014214495641488759237505126948346942972912379615652741039992445865937985820",
     "19014214495641488759237505126948346942972912379615652741039992445865937985820"
   ],
-  "outBlinding": ["666", "888"]
+  "outSalt": ["666", "888"]
 }

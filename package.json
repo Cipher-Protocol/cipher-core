@@ -5,8 +5,8 @@
   "license": "MIT",
   "author": "ray880301@gmail.com",
   "scripts": {
-    "build:deposit": "sh ./scripts/buildCircuit_deposit.sh",
-    "build:withdraw": "sh ./scripts/buildCircuit_withdraw.sh"
+    "build:test:deposit": "sh ./scripts/test/buildCircuit_deposit.sh",
+    "build:test:withdraw": "sh ./scripts/test/buildCircuit_withdraw.sh"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
@@ -40,6 +40,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "@zk-kit/incremental-merkle-tree.sol": "^1.7.0",
     "circom_tester": "^0.0.19",
     "circomlib": "^2.0.5",
     "circomlibjs": "^0.1.7",

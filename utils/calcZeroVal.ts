@@ -1,5 +1,5 @@
 import { DEFAULT_ZERO_LEAF_VALUE } from "../config";
-const poseidon = require("poseidon-encryption");
+import { calcPoseidonHash } from "./calcPoseidonHash";
 
 // calculate zero value for merkle tree
 export const calcZeroValue = (
@@ -9,7 +9,7 @@ export const calcZeroValue = (
   const zeroValueArr: String[] = [];
   let zeroValue = defaultZeroLeafValue;
   for (let i = 0; i < treeLevel; i++) {
-    zeroValue = poseidon.poseidon([zeroValue, zeroValue]).toString();
+    zeroValue = calcPoseidonHash([zeroValue, zeroValue]);
     zeroValueArr.push(zeroValue);
     // console.log(`LEVEL${i + 1}_NODE_ZERO_VALUE = "${zeroValueArr[i]}"`);
   }
