@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BUILD_DIR=../build/circuits/withdraw
+BUILD_DIR=./build/circuits/withdraw
 
 if [ ! -d "$BUILD_DIR" ]; then
     echo "No build directory found. Creating build directory..."

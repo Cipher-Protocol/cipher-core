@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BUILD_DIR=../build/circuits/deposit
+BUILD_DIR=./build/circuits/deposit
 
 if [ ! -d "$BUILD_DIR" ]; then
     echo "No build directory found. Creating build directory..."

@@ -4,6 +4,7 @@ include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/poseidon.circom";
 include "./merkleProof.circom";
 include "./keypair.circom";
+include "./signature.circom";
 
 /*
 Utxo structure:
@@ -14,134 +15,99 @@ Utxo structure:
 }
 
 commitment = hash(amount, pubKey, salt)
-nullifier = hash(commitment, merklePath, sign(privKey, commitment, merklePath))
+nullifier = hash(commitment, leafIdx, sign(privKey, commitment, leafIdx))
 */
 
-// Universal JoinSplit transaction with nIns inputs and 2 outputs
-template Utxo(levels, nIns, nOuts, zeroLeaf) {
+// Universal JoinSplit transaction with n inputs and m outputs
+template Utxo(levels, nIns, mOuts, zeroLeaf) {
     signal input root; // public
-    // extAmount = external amount used for deposits and withdrawals
-    // correct extAmount range is enforced on the smart contract
-
     signal input publicInAmt; // public
     signal input publicOutAmt; // public
     signal input extDataHash; // public
 
-    // data for transaction inputs
+    // utxo input signals
     signal input inputNullifier[nIns]; // public
     signal input inAmount[nIns];
-    signal input inPrivateKey[nIns];
+    signal input inPrivKey[nIns];
     signal input inSalt[nIns];
     signal input inPathIndices[nIns];
     signal input inPathElements[nIns][levels];
 
-    // data for transaction outputs
-    signal input outputCommitment[nOuts]; // public
-    signal input outAmount[nOuts];
-    signal input outPubkey[nOuts];
-    signal input outSalt[nOuts];
+    // utxo output signals
+    signal input outputCommitment[mOuts]; // public
+    signal input outAmount[mOuts];
+    signal input outPubkey[mOuts];
+    signal input outSalt[mOuts];
 
-    component inKeypair[nIns];
-    component inSignature[nIns];
-    component inCommitmentHasher[nIns];
-    component inNullifierHasher[nIns];
-    component inTree[nIns];
-    component inCheckRoot[nIns];
+    // internal calculation signals
+    signal inPubKey[nIns];
+    signal inCommitmentHash[nIns];
+    signal inSignature[nIns];
+    signal inNullifier[nIns];
+    signal inTreeRoot[nIns];
+    signal outCommitmentHash[mOuts];
 
-    component publicInAmtCheck;
-    component publicOutAmtCheck;
-
-    // check public input amount greater than or equal to zero
-    // publicInAmtCheck = GreaterEqThan(252);
-    // publicInAmtCheck.in[0] <== publicInAmt;
-    // publicInAmtCheck.in[1] <== 0;
-    // publicInAmtCheck.out === 1;
-    publicInAmtCheck = LessThan(252);
-    publicInAmtCheck.in[0] <== publicInAmt;
-    publicInAmtCheck.in[1] <== 0;
-    publicInAmtCheck.out === 0;
-
-    // check public output amount greater than or equal to zero
-    // publicOutAmtCheck = GreaterEqThan(252);
-    // publicOutAmtCheck.in[0] <== publicOutAmt;
-    // publicOutAmtCheck.in[1] <== 0;
-    // publicOutAmtCheck.out === 1;
-    publicOutAmtCheck = LessThan(252);
-    publicOutAmtCheck.in[0] <== publicOutAmt;
-    publicOutAmtCheck.in[1] <== 0;
-    publicOutAmtCheck.out === 0;
-
+    // initialize sumIns and sumOuts
     var sumIns = 0;
-    // verify correctness of transaction inputs
-    for (var tx = 0; tx < nIns; tx++) {
-        inKeypair[tx] = Keypair();
-        inKeypair[tx].privateKey <== inPrivateKey[tx];
-
-        inCommitmentHasher[tx] = Poseidon(3);
-        inCommitmentHasher[tx].inputs[0] <== inAmount[tx];
-        inCommitmentHasher[tx].inputs[1] <== inKeypair[tx].publicKey;
-        inCommitmentHasher[tx].inputs[2] <== inSalt[tx];
-
-        inSignature[tx] = Signature();
-        inSignature[tx].privateKey <== inPrivateKey[tx];
-        inSignature[tx].commitment <== inCommitmentHasher[tx].out;
-        inSignature[tx].merklePath <== inPathIndices[tx];
-
-        inNullifierHasher[tx] = Poseidon(3);
-        inNullifierHasher[tx].inputs[0] <== inCommitmentHasher[tx].out;
-        inNullifierHasher[tx].inputs[1] <== inPathIndices[tx];
-        inNullifierHasher[tx].inputs[2] <== inSignature[tx].out;
-        inNullifierHasher[tx].out === inputNullifier[tx];
-
-        inTree[tx] = MerkleProof(levels);
-        inTree[tx].leaf <== inCommitmentHasher[tx].out;
-        inTree[tx].pathIndices <== inPathIndices[tx];
-        for (var i = 0; i < levels; i++) {
-            inTree[tx].pathElements[i] <== inPathElements[tx][i];
-        }
-
-        // check merkle proof only if amount is non-zero
-        inCheckRoot[tx] = ForceEqualIfEnabled();
-        inCheckRoot[tx].in[0] <== root;
-        inCheckRoot[tx].in[1] <== inTree[tx].root;
-        inCheckRoot[tx].enabled <== inAmount[tx];
-
-        // We don't need to range check input amounts, since all inputs are valid UTXOs that
-        // were already checked as outputs in the previous transaction (or zero amount UTXOs that don't
-        // need to be checked either).
-
-        sumIns += inAmount[tx];
-    }
-
-    component outCommitmentHasher[nOuts];
-    component outAmountCheck[nOuts];
     var sumOuts = 0;
 
-    // verify correctness of transaction outputs
-    for (var tx = 0; tx < nOuts; tx++) {
-        outCommitmentHasher[tx] = Poseidon(3);
-        outCommitmentHasher[tx].inputs[0] <== outAmount[tx];
-        outCommitmentHasher[tx].inputs[1] <== outPubkey[tx];
-        outCommitmentHasher[tx].inputs[2] <== outSalt[tx];
-        outCommitmentHasher[tx].out === outputCommitment[tx];
+    // check public input amount greater than or equal to zero
+    _ <== Num2Bits(252)(publicInAmt);
+    signal signal_pub_in_gtEq <== GreaterEqThan(252)([publicInAmt,0]);
+    signal_pub_in_gtEq === 1;
 
-        // Check that amount fits into 248 bits to prevent overflow
-        outAmountCheck[tx] = Num2Bits(248);
-        outAmountCheck[tx].in <== outAmount[tx];
+    // check public output amount greater than or equal to zero
+    _ <== Num2Bits(252)(publicOutAmt);
+    signal signal_pub_out_gtEq <== GreaterEqThan(252)([publicOutAmt,0]);
+    signal_pub_out_gtEq === 1;
 
-        sumOuts += outAmount[tx];
+
+    // verify correctness of utxo inputs
+    for (var i = 0; i < nIns; i++) {
+        // calculate public key from input private key
+        inPubKey[i] <== Keypair()(inPrivKey[i]);
+
+        // calculate input commitment hash from input signal
+        inCommitmentHash[i] <== Poseidon(3)([inAmount[i], inPubKey[i], inSalt[i]]);
+        
+        // calculate signature from input signal
+        inSignature[i] <== Signature()(inPrivKey[i], inCommitmentHash[i], inPathIndices[i]);
+        
+        // calculate nullifier from input signal
+        inNullifier[i] <== Poseidon(3)([inCommitmentHash[i], inPathIndices[i], inSignature[i]]);
+        // check that nullifier matches the public input
+        inNullifier[i] === inputNullifier[i];
+
+        // calculate input root from input signal
+        inTreeRoot[i] <== MerkleProof(levels)(inCommitmentHash[i], inPathElements[i], inPathIndices[i]);
+        // check that calculated root matches the public input signal root if inAmount is not zero
+        ForceEqualIfEnabled()(inAmount[i], [inTreeRoot[i], root]);
+
+        // update sumIns
+        sumIns += inAmount[i];
     }
 
-    // check that there are no same nullifiers among all inputs
-    component sameNullifiers[nIns * (nIns - 1) / 2];
+    // verify correctness of utxo outputs
+    for (var i = 0; i < mOuts; i++) {
+        // calculate output commitment hash
+        outCommitmentHash[i] <== Poseidon(3)([outAmount[i], outPubkey[i], outSalt[i]]);
+        // check that output commitment hash matches the public input
+        outCommitmentHash[i] === outputCommitment[i];
+        // Check that amount fits into 248 bits to prevent overflow
+        _ <== Num2Bits(248)(outAmount[i]);
+
+        sumOuts += outAmount[i];
+    }
+
+    // check that nullifiers are not the same 
+    signal sameNullifiers[nIns * (nIns - 1) / 2];
     var index = 0;
     for (var i = 0; i < nIns - 1; i++) {
       for (var j = i + 1; j < nIns; j++) {
-          sameNullifiers[index] = IsEqual();
-          sameNullifiers[index].in[0] <== inputNullifier[i];
-          sameNullifiers[index].in[1] <== inputNullifier[j];
-          sameNullifiers[index].out === 0;
-          index++;
+            // check is not equal
+            sameNullifiers[index] <== IsEqual()([inputNullifier[i], inputNullifier[j]]);
+            sameNullifiers[index] === 0;
+            index++;
       }
     }
 
