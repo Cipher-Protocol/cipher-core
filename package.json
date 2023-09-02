@@ -5,6 +5,7 @@
   "license": "MIT",
   "author": "ray880301@gmail.com",
   "scripts": {
+    "build:circuit": "ts-node ./scripts/build_circuit.ts",
     "build:test:deposit": "sh ./scripts/test/buildCircuit_deposit.sh",
     "build:test:withdraw": "sh ./scripts/test/buildCircuit_withdraw.sh"
   },
@@ -46,6 +47,7 @@
     "circomlibjs": "^0.1.7",
     "ffjavascript": "^0.2.60",
     "merkletreejs": "^0.3.10",
-    "poseidon-encryption": "^1.0.2"
+    "poseidon-encryption": "^1.0.2",
+    "snarkjs": "^0.7.0"
   }
 }
