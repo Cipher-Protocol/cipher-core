@@ -5,6 +5,7 @@
   "license": "MIT",
   "author": "ray880301@gmail.com",
   "scripts": {
+    "build": "ts-node scripts/build.ts",
     "build:test:deposit": "sh ./scripts/test/buildCircuit_deposit.sh",
     "build:test:withdraw": "sh ./scripts/test/buildCircuit_withdraw.sh"
   },
