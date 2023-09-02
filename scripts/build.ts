@@ -41,17 +41,12 @@ async function main() {
       zeroLeaf:
         "6366925358513780640586497246669654262631579502674952490807991049566930320",
     });
-    const { r1csPath, finalZkeyPath, vkeyPath } = await generateZkey(
-      fullName,
-      mainCircomPath
-    );
+    const result = await generateZkey(fullName, mainCircomPath);
     depositCircomList.push({
+      ...result,
       createTime: new Date().toISOString(),
       fullName,
       mainCircomPath,
-      r1csPath,
-      finalZkeyPath,
-      vkeyPath,
     });
   }
 
@@ -70,17 +65,12 @@ async function main() {
       zeroLeaf:
         "6366925358513780640586497246669654262631579502674952490807991049566930320",
     });
-    const { r1csPath, finalZkeyPath, vkeyPath } = await generateZkey(
-      fullName,
-      mainCircomPath
-    );
+    const result = await generateZkey(fullName, mainCircomPath);
     withdrawCircomList.push({
+      ...result,
       createTime: new Date().toISOString(),
       fullName,
       mainCircomPath,
-      r1csPath,
-      finalZkeyPath,
-      vkeyPath,
     });
   }
 
@@ -127,7 +117,11 @@ async function generateZkey(circomName: string, mainCircomPath: string) {
   const outputDir = resolve(mainCircomPath, `../`);
   const ptauPath = PTAU_PATH;
 
-  const { r1csPath } = await buildCircom(mainCircomPath, circomName, outputDir);
+  const { r1csPath, constraints } = await buildCircom(
+    mainCircomPath,
+    circomName,
+    outputDir
+  );
 
   console.time(`generate ${circomName}`);
   const zkey0Path = resolve(outputDir, `${circomName}_zkey_0.zkey`);
@@ -148,6 +142,7 @@ async function generateZkey(circomName: string, mainCircomPath: string) {
   console.timeEnd(`generate ${circomName}`);
   console.log(`generate ${circomName} done.`);
   return {
+    constraints,
     r1csPath,
     zkey0Path,
     zkey1Path,
@@ -165,12 +160,17 @@ async function buildCircom(
   mkdirSync(outputDir, { recursive: true });
   const r1csPath = resolve(outputDir, `${circomName}.r1cs`);
 
-  await exec(`circom ${mainCircomPath} --r1cs --wasm --output ${outputDir}`);
+  const { stdout } = await exec(
+    `circom ${mainCircomPath} --r1cs --wasm --output ${outputDir}`
+  );
+  const regex = /non-linear constraints:\s+(\d+)/;
+  const match = stdout.match(regex);
 
   console.timeEnd(`build ${mainCircomPath}`);
 
   return {
     r1csPath,
+    constraints: match ? match[1] : null,
   };
 }
 
