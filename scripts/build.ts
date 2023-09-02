@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const snarkjs = require("snarkjs");
 import { resolve } from "path";
-import { writeFileSync, mkdirSync, rmSync, appendFileSync } from "fs";
+import {
+  writeFileSync,
+  mkdirSync,
+  rmSync,
+  appendFileSync,
+  readFileSync,
+} from "fs";
 import util from "util";
 import * as dotenv from "dotenv";
 const _exec = util.promisify(require("child_process").exec);
@@ -12,6 +18,13 @@ dotenv.config();
 
 const groth16 = snarkjs.groth16;
 
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+
 async function main() {
   const levels = 5;
   const buildInfoPath = resolve(__dirname, "../build/build-info.json");
@@ -19,7 +32,7 @@ async function main() {
    * Make deposit circom
    */
   const depositCircomList: any[] = [];
-  for (let index = 1; index <= 3; index++) {
+  for (let index = 1; index <= 1; index++) {
     const { fullName, mainCircomPath } = await makeMainCircom("deposit", {
       levels,
       nIns: 0,
@@ -48,7 +61,7 @@ async function main() {
    * Make withdraw circom
    */
   const withdrawCircomList: any[] = [];
-  for (let index = 1; index <= 3; index++) {
+  for (let index = 1; index <= 1; index++) {
     const { fullName, mainCircomPath } = await makeMainCircom("withdraw", {
       levels,
       nIns: 2 ** index,
@@ -128,6 +141,9 @@ async function generateZkey(circomName: string, mainCircomPath: string) {
 
   const vkeyPath = resolve(outputDir, `${circomName}_vkey.json`);
   await exportVkey(finalZkeyPath, vkeyPath);
+
+  const solidityVerifierPath = resolve(outputDir, `${circomName}_verifier.sol`);
+  await exportSolidityVerifier(finalZkeyPath, solidityVerifierPath);
 
   console.timeEnd(`generate ${circomName}`);
   console.log(`generate ${circomName} done.`);
@@ -226,6 +242,30 @@ async function exportVkey(finalZkeyPath: string, vkeyPath: string) {
   writeFileSync(vkeyPath, JSON.stringify(vKey, null, 2));
 }
 
+async function exportSolidityVerifier(
+  finalZkeyPath: string,
+  solidityVerifierPath: string
+) {
+  function readTemplate(name: string) {
+    return readFileSync(
+      resolve(__dirname, "../node_modules/snarkjs/templates", name),
+      "utf8"
+    );
+  }
+  const templates = {
+    groth16: readTemplate("verifier_groth16.sol.ejs"),
+    plonk: readTemplate("verifier_plonk.sol.ejs"),
+  };
+  const solidity = await snarkjs.zKey.exportSolidityVerifier(
+    finalZkeyPath,
+    templates,
+    console
+  );
+
+  writeFileSync(solidityVerifierPath, solidity);
+  return solidity;
+}
+
 const cmdLogs: string[] = [];
 function exec(
   cmd: string
@@ -246,10 +286,3 @@ function exec(
       });
   });
 }
-
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
