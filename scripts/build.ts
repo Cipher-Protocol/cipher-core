@@ -11,6 +11,7 @@ import {
 } from "fs";
 import util from "util";
 import * as dotenv from "dotenv";
+import { DEFAULT_TREE_HEIGHT, DEFAULT_ZERO_LEAF_VALUE } from "../config";
 const _exec = util.promisify(require("child_process").exec);
 
 const PTAU_PATH = resolve(__dirname, "../ptau/pot14_final.ptau");
@@ -18,8 +19,6 @@ const IS_CLEAR_CIRCOM_BUILD_DIR = true;
 const BASE_DIR = resolve(__dirname, "../build/circuits");
 const UTXO_CONFIG_PATH = resolve(__dirname, "../utxo_config.json");
 dotenv.config();
-
-const groth16 = snarkjs.groth16;
 
 interface UtxoConfigInterface {
   nIns: number;
@@ -34,7 +33,7 @@ main()
   });
 
 async function main() {
-  const levels = 5;
+  const levels = DEFAULT_TREE_HEIGHT;
   if (!existsSync(BASE_DIR)) {
     mkdirSync(BASE_DIR, { recursive: true });
   }
@@ -53,8 +52,7 @@ async function main() {
       nIns: config.nIns,
       mOuts: config.mOuts,
       // TODO: zeroLeaf should be generated
-      zeroLeaf:
-        "6366925358513780640586497246669654262631579502674952490807991049566930320",
+      zeroLeaf: DEFAULT_ZERO_LEAF_VALUE,
     });
     const result = await generateZkey(name, mainCircomPath);
     circuitOutputList.push({
