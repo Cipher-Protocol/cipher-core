@@ -1,21 +1,14 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const snarkjs = require("snarkjs");
 import { resolve } from "path";
-import {
-  writeFileSync,
-  mkdirSync,
-  rmSync,
-  appendFileSync,
-  readFileSync,
-  existsSync,
-} from "fs";
+import { writeFileSync, mkdirSync, rmSync, readFileSync, existsSync } from "fs";
 import util from "util";
 import * as dotenv from "dotenv";
 import { DEFAULT_TREE_HEIGHT, DEFAULT_ZERO_LEAF_VALUE } from "../config";
 const _exec = util.promisify(require("child_process").exec);
 
-const PTAU_PATH = resolve(__dirname, "../ptau/pot14_final.ptau");
-const IS_CLEAR_CIRCOM_BUILD_DIR = true;
+const PTAU_PATH = resolve(__dirname, "../ptau/pot16_final.ptau");
+const IS_CLEAR_CIRCOM_BUILD_DIR = false;
 const BASE_DIR = resolve(__dirname, "../build/circuits");
 const UTXO_CONFIG_PATH = resolve(__dirname, "../utxo_config.json");
 dotenv.config();
