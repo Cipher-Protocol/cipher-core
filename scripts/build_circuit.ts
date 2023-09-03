@@ -2,7 +2,7 @@
 import fs from "fs";
 import path from "path";
 import UTXO_CONFIG_JASON from ".././utxo_config.json";
-import { DEFAULT_ZERO_LEAF_VALUE, TREE_HEIGHT } from "../config";
+import { DEFAULT_ZERO_LEAF_VALUE, DEFAULT_TREE_HEIGHT } from "../config";
 
 export const buildCircuit = () => {
   UTXO_CONFIG_JASON.map((item) => {
@@ -10,7 +10,7 @@ export const buildCircuit = () => {
 include "../../../circuits/utxo.circom";
 
 /// utxo circuit for input n, output m 
-component main {public [root, publicInAmt, publicOutAmt, extDataHash, inputNullifier, outputCommitment]} = Utxo(${TREE_HEIGHT}, ${item.nIns}, ${item.mOuts}, ${DEFAULT_ZERO_LEAF_VALUE});
+component main {public [root, publicInAmt, publicOutAmt, extDataHash, inputNullifier, outputCommitment]} = Utxo(${DEFAULT_TREE_HEIGHT}, ${item.nIns}, ${item.mOuts}, ${DEFAULT_ZERO_LEAF_VALUE});
 `;
 
     const fileName = path.join(

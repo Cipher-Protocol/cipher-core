@@ -18,4 +18,4 @@ export const LEVEL5_NODE_ZERO_VALUE =
 
 export const DEFAULT_PRIVATE_KEY = "0x00";
 
-export const TREE_HEIGHT = 5;
+export const DEFAULT_TREE_HEIGHT = 5;
