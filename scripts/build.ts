@@ -34,6 +34,9 @@ main()
 
 async function main() {
   const levels = DEFAULT_TREE_HEIGHT;
+  if (IS_CLEAR_CIRCOM_BUILD_DIR) {
+    rmSync(BASE_DIR, { recursive: true, force: true });
+  }
   if (!existsSync(BASE_DIR)) {
     mkdirSync(BASE_DIR, { recursive: true });
   }
@@ -63,7 +66,7 @@ async function main() {
     });
   }
 
-  appendFileSync(buildInfoPath, JSON.stringify(circuitOutputList, null, 2));
+  writeFileSync(buildInfoPath, JSON.stringify(circuitOutputList, null, 2));
 }
 
 async function makeMainCircom(spec: {
@@ -75,9 +78,6 @@ async function makeMainCircom(spec: {
   const name = `h${spec.levels}n${spec.nIns}m${spec.mOuts}`;
   const outDir = resolve(BASE_DIR, `./${name}`);
   const mainCircomPath = resolve(outDir, `${name}.circom`);
-  if (IS_CLEAR_CIRCOM_BUILD_DIR) {
-    rmSync(outDir, { recursive: true, force: true });
-  }
   mkdirSync(outDir, { recursive: true });
 
   const circomSourceCode = `
