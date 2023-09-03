@@ -6,7 +6,7 @@ export const calcZeroValue = (
   defaultZeroLeafValue: string,
   treeLevel: number
 ) => {
-  const zeroValueArr: String[] = [];
+  const zeroValueArr: string[] = [];
   let zeroValue = defaultZeroLeafValue;
   for (let i = 0; i < treeLevel; i++) {
     zeroValue = calcPoseidonHash([zeroValue, zeroValue]);
