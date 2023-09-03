@@ -41,7 +41,7 @@ async function main() {
    * Make deposit circom
    */
   const circuitOutputList: any[] = [];
-  for (let index = 0; index <= utxoConfigList.length; index++) {
+  for (let index = 0; index < utxoConfigList.length; index++) {
     const config = utxoConfigList[index];
     const { name, mainCircomPath } = await makeMainCircom({
       levels,
