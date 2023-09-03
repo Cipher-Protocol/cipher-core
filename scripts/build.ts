@@ -7,6 +7,7 @@ import {
   rmSync,
   appendFileSync,
   readFileSync,
+  existsSync,
 } from "fs";
 import util from "util";
 import * as dotenv from "dotenv";
@@ -14,9 +15,16 @@ const _exec = util.promisify(require("child_process").exec);
 
 const PTAU_PATH = resolve(__dirname, "../ptau/pot14_final.ptau");
 const IS_CLEAR_CIRCOM_BUILD_DIR = true;
+const BASE_DIR = resolve(__dirname, "../build/circuits");
+const UTXO_CONFIG_PATH = resolve(__dirname, "../utxo_config.json");
 dotenv.config();
 
 const groth16 = snarkjs.groth16;
+
+interface UtxoConfigInterface {
+  nIns: number;
+  mOuts: number;
+}
 
 main()
   .then(() => process.exit(0))
@@ -27,86 +35,67 @@ main()
 
 async function main() {
   const levels = 5;
-  const buildInfoPath = resolve(__dirname, "../build/build-info.json");
+  if (!existsSync(BASE_DIR)) {
+    mkdirSync(BASE_DIR, { recursive: true });
+  }
+  const buildInfoPath = resolve(BASE_DIR, "build-info.json");
+  const utxoConfigList = JSON.parse(
+    readFileSync(UTXO_CONFIG_PATH, "utf8")
+  ) as unknown as UtxoConfigInterface[];
   /**
    * Make deposit circom
    */
-  const depositCircomList: any[] = [];
-  for (let index = 1; index <= 1; index++) {
-    const { fullName, mainCircomPath } = await makeMainCircom("deposit", {
+  const circuitOutputList: any[] = [];
+  for (let index = 0; index <= utxoConfigList.length; index++) {
+    const config = utxoConfigList[index];
+    const { name, mainCircomPath } = await makeMainCircom({
       levels,
-      nIns: 0,
-      nOuts: 2 ** index,
+      nIns: config.nIns,
+      mOuts: config.mOuts,
       // TODO: zeroLeaf should be generated
       zeroLeaf:
         "6366925358513780640586497246669654262631579502674952490807991049566930320",
     });
-    const result = await generateZkey(fullName, mainCircomPath);
-    depositCircomList.push({
+    const result = await generateZkey(name, mainCircomPath);
+    circuitOutputList.push({
       ...result,
-      createTime: new Date().toISOString(),
-      fullName,
+      name,
       mainCircomPath,
+      createTime: new Date().toISOString(),
     });
   }
 
-  appendFileSync(buildInfoPath, JSON.stringify(depositCircomList, null, 2));
-
-  /**
-   * Make withdraw circom
-   */
-  const withdrawCircomList: any[] = [];
-  for (let index = 1; index <= 1; index++) {
-    const { fullName, mainCircomPath } = await makeMainCircom("withdraw", {
-      levels,
-      nIns: 2 ** index,
-      nOuts: 2 ** index,
-      // TODO: zeroLeaf should be generated
-      zeroLeaf:
-        "6366925358513780640586497246669654262631579502674952490807991049566930320",
-    });
-    const result = await generateZkey(fullName, mainCircomPath);
-    withdrawCircomList.push({
-      ...result,
-      createTime: new Date().toISOString(),
-      fullName,
-      mainCircomPath,
-    });
-  }
-
-  appendFileSync(buildInfoPath, JSON.stringify(withdrawCircomList, null, 2));
+  appendFileSync(buildInfoPath, JSON.stringify(circuitOutputList, null, 2));
 }
 
-async function makeMainCircom(
-  name: string,
-  spec: {
-    levels: number;
-    nIns: number;
-    nOuts: number;
-    zeroLeaf: string;
-  }
-) {
-  const fullName = `${name}-${spec.levels}-${spec.nIns}-${spec.nOuts}`;
-  const baseDir = resolve(__dirname, `../build/${fullName}`);
-  const mainCircomPath = resolve(baseDir, `${fullName}.circom`);
+async function makeMainCircom(spec: {
+  levels: number;
+  nIns: number;
+  mOuts: number;
+  zeroLeaf: string;
+}) {
+  const name = `h${spec.levels}n${spec.nIns}m${spec.mOuts}`;
+  const outDir = resolve(BASE_DIR, `./${name}`);
+  const mainCircomPath = resolve(outDir, `${name}.circom`);
   if (IS_CLEAR_CIRCOM_BUILD_DIR) {
-    rmSync(baseDir, { recursive: true, force: true });
+    rmSync(outDir, { recursive: true, force: true });
   }
-  mkdirSync(baseDir, { recursive: true });
+  mkdirSync(outDir, { recursive: true });
 
   const circomSourceCode = `
 pragma circom 2.1.5;
 
-include "../../circuits/utxo.circom";
+include "../../../circuits/utxo.circom";
 
-/// deposit input ${spec.nIns}, output ${spec.nOuts} circuit
-component main {public [root, publicInAmt, publicOutAmt, extDataHash, inputNullifier, outputCommitment]} = Utxo(${spec.levels}, ${spec.nIns}, ${spec.nOuts}, ${spec.zeroLeaf});
+/// deposit input ${spec.nIns}, output ${spec.mOuts} circuit
+component main {public [root, publicInAmt, publicOutAmt, extDataHash, inputNullifier, outputCommitment]}
+  = Utxo(${spec.levels}, ${spec.nIns}, ${spec.mOuts}, ${spec.zeroLeaf});
 `;
 
   writeFileSync(mainCircomPath, circomSourceCode);
   return {
-    fullName,
-    baseDir,
+    name,
+    outDir,
     mainCircomPath,
   };
 }
