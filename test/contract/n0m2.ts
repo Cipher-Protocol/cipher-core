@@ -36,7 +36,8 @@ describe("n0m2", function () {
         c: [proofJSON.pi_c[0], proofJSON.pi_c[1]],
         publicInputs: publicJSON,
       };
-      utxo.verify(verifier.address, proof);
+      console.log(proof);
+      await utxo.verify(verifier.address, proof);
     });
   });
 });
