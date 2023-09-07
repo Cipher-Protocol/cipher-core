@@ -110,10 +110,10 @@ async function generateZkey(circomName: string, mainCircomPath: string) {
   const zkey1Path = resolve(outputDir, `${circomName}_0001.zkey`);
   await contributeZkey(zkey0Path, zkey1Path, "zkey 1 random string");
 
-  const finalZkeyPath = resolve(outputDir, `${circomName}_zkey_final.zkey`);
+  const finalZkeyPath = resolve(outputDir, `${circomName}_final.zkey`);
   await finalizeZkey(r1csPath, ptauPath, zkey1Path, finalZkeyPath);
 
-  const vkeyPath = resolve(outputDir, `${circomName}_vkey.json`);
+  const vkeyPath = resolve(outputDir, `verification_key.json`);
   await exportVkey(finalZkeyPath, vkeyPath);
 
   const solidityVerifierPath = resolve(outputDir, `${circomName}_verifier.sol`);

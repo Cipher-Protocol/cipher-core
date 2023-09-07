@@ -29,7 +29,7 @@ contract Utxo is UtxoStorage {
         uint256[2] a;
         uint256[2][2] b;
         uint256[2] c;
-        uint256[] publicInputs;
+        uint256[6] publicInputs;
     }
 
     function verify(address verifierAddr, Proof memory proof) external {
