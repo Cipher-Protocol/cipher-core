@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
-    "lib": [
-      "esnext"
-    ],
+    "lib": ["esnext"],
     "target": "es2020",
     "module": "commonjs",
     "esModuleInterop": true,
@@ -12,13 +10,11 @@
     "allowJs": true,
     "checkJs": false,
     "allowUnreachableCode": true,
-    "typeRoots": ["./scripts"],
+    "typeRoots": ["./scripts"]
   },
-  "include":[
-    "scripts/**/*.js",
-    "test/**/*.ts"
-  ],
+  "include": ["scripts/**/*.ts", "test/**/*.ts"],
   "ts-node": {
     "files": true
   },
+  "files": ["./hardhat.config.ts"]
 }
