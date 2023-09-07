@@ -104,10 +104,10 @@ async function generateZkey(circomName: string, mainCircomPath: string) {
   );
 
   console.time(`generate ${circomName}`);
-  const zkey0Path = resolve(outputDir, `${circomName}_zkey_0.zkey`);
+  const zkey0Path = resolve(outputDir, `${circomName}_0000.zkey`);
   await setup(r1csPath, ptauPath, zkey0Path);
 
-  const zkey1Path = resolve(outputDir, `${circomName}_zkey_1.zkey`);
+  const zkey1Path = resolve(outputDir, `${circomName}_0001.zkey`);
   await contributeZkey(zkey0Path, zkey1Path, "zkey 1 random string");
 
   const finalZkeyPath = resolve(outputDir, `${circomName}_zkey_final.zkey`);
