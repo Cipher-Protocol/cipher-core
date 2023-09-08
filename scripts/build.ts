@@ -108,7 +108,7 @@ async function generateZkey(circomName: string, mainCircomPath: string) {
   await setup(r1csPath, ptauPath, zkey0Path);
 
   const zkey1Path = resolve(outputDir, `${circomName}_0001.zkey`);
-  await contributeZkey(zkey0Path, zkey1Path, "zkey 1 random string");
+  await contributeZkey(zkey0Path, zkey1Path, "some random text");
 
   const finalZkeyPath = resolve(outputDir, `${circomName}_final.zkey`);
   await finalizeZkey(r1csPath, ptauPath, zkey1Path, finalZkeyPath);

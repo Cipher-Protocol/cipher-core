@@ -7,6 +7,7 @@
   "scripts": {
     "build:circuit": "ts-node scripts/build.ts",
     "build:contract": "hardhat compile && hardhat typechain",
+    "test:contract": "hardhat test",
     "verify:test:h5n0m2": "sh ./scripts/test/verifyh5n0m2.sh",
     "verify:test:h5n2m2": "sh ./scripts/test/verifyh5n2m2.sh"
   },
