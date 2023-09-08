@@ -9,6 +9,7 @@ include "./signature.circom";
 /*
 Utxo structure:
 {
+    tokenAddr, ?
     amount,
     pubkey,
     salt

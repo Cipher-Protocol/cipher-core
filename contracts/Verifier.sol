@@ -27,7 +27,7 @@ contract Verifier is VerifierConfig {
     // Base field size
     uint256 constant q = 21888242871839275222246405745257275088696311157297823662689037894645226208583;
 
-    // Verifn2m2_ication Key data
+    // Verification Key data
     uint256 constant alphax = 20491192805390485299153009773594534940189261866228447918068658471970481763042;
     uint256 constant alphay = 9383485363053290200918347156157836566562967994039712273449902621266178545958;
     uint256 constant betax1 = 4252822878758300859123897981450591353533073413197771768651442665752259397132;
@@ -50,7 +50,7 @@ contract Verifier is VerifierConfig {
         uint[2][2] calldata _pB,
         uint[2] calldata _pC,
         uint[] calldata _pubSignals, // remove fix size
-        bytes1 _type
+        bytes2 _type
     ) public view returns (bool) {
         assembly {
             function checkField(v) {
@@ -88,13 +88,13 @@ contract Verifier is VerifierConfig {
 
             function getDelta(utxoType) -> deltax1, deltax2, deltay1, deltay2 {
                 switch utxoType
-                case 0x02 {
+                case 0x0002 {
                     deltax1 := n0m2_deltax1
                     deltax2 := n0m2_deltax2
                     deltay1 := n0m2_deltay1
                     deltay2 := n0m2_deltay2
                 }
-                case 0x22 {
+                case 0x0202 {
                     deltax1 := n2m2_deltax1
                     deltax2 := n2m2_deltax2
                     deltay1 := n2m2_deltay1
@@ -107,11 +107,11 @@ contract Verifier is VerifierConfig {
 
             function getIC0(utxoType) -> IC0x, IC0y {
                 switch utxoType
-                case 0x02 {
+                case 0x0002 {
                     IC0x := n0m2_IC0x
                     IC0y := n0m2_IC0y
                 }
-                case 0x22 {
+                case 0x0202 {
                     IC0x := n2m2_IC0x
                     IC0y := n2m2_IC0y
                 }
@@ -122,7 +122,7 @@ contract Verifier is VerifierConfig {
 
             function g1_mulAccC_dispatcher(_pVk, utxoType, pubSignals) {
                 switch utxoType
-                case 0x02 {
+                case 0x0002 {
                     g1_mulAccC(_pVk, n0m2_IC1x, n0m2_IC1y, calldataload(add(pubSignals, 0)))
                     g1_mulAccC(_pVk, n0m2_IC2x, n0m2_IC2y, calldataload(add(pubSignals, 32)))
                     g1_mulAccC(_pVk, n0m2_IC3x, n0m2_IC3y, calldataload(add(pubSignals, 64)))
@@ -130,7 +130,7 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n0m2_IC5x, n0m2_IC5y, calldataload(add(pubSignals, 128)))
                     g1_mulAccC(_pVk, n0m2_IC6x, n0m2_IC6y, calldataload(add(pubSignals, 160)))
                 }
-                case 0x22 {
+                case 0x0202 {
                     g1_mulAccC(_pVk, n2m2_IC1x, n2m2_IC1y, calldataload(add(pubSignals, 0)))
                     g1_mulAccC(_pVk, n2m2_IC2x, n2m2_IC2y, calldataload(add(pubSignals, 32)))
                     g1_mulAccC(_pVk, n2m2_IC3x, n2m2_IC3y, calldataload(add(pubSignals, 64)))
