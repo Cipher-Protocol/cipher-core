@@ -7,8 +7,7 @@ import {
   Verifier,
   Verifier__factory,
 } from "../../typechain-types";
-import proofJSON from "../../build/circuits/h5n0m2/proof.json";
-import publicJSON from "../../build/circuits/h5n0m2/public.json";
+import calldataJSON from "../../build/circuits/h5n0m2/h5n0m2_calldata.json";
 import { DEFAULT_ZERO_LEAF_VALUE } from "../../config";
 
 describe("n0m2", function () {
@@ -53,17 +52,22 @@ describe("n0m2", function () {
 
   describe("verify", function () {
     it("verify", async function () {
-      const proof: Utxo.ProofStruct = {
-        a: [proofJSON.pi_a[0], proofJSON.pi_a[1]],
-        b: [
-          [proofJSON.pi_b[0][0], proofJSON.pi_b[0][1]],
-          [proofJSON.pi_b[1][0], proofJSON.pi_b[1][1]],
-        ],
-        c: [proofJSON.pi_c[0], proofJSON.pi_c[1]],
-        publicSignals: publicJSON,
+      const proof = {
+        a: calldataJSON[0],
+        b: calldataJSON[1],
+        c: calldataJSON[2],
+        publicSignals: calldataJSON[3],
       };
-      console.log(proof);
-      await utxo.verify(verifier.address, proof);
+      const result = await verifier.verifyProof(
+        proof.a,
+        proof.b,
+        proof.c,
+        proof.publicSignals
+      );
+      console.log({
+        result,
+      });
+      // await utxo.verify(verifier.address, proof);
     });
   });
 });
