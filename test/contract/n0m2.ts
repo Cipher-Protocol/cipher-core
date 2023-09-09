@@ -58,16 +58,7 @@ describe("n0m2", function () {
         c: calldataJSON[2],
         publicSignals: calldataJSON[3],
       };
-      const result = await verifier.verifyProof(
-        proof.a,
-        proof.b,
-        proof.c,
-        proof.publicSignals
-      );
-      console.log({
-        result,
-      });
-      // await utxo.verify(verifier.address, proof);
+      await utxo.verify(verifier.address, proof as any);
     });
   });
 });
