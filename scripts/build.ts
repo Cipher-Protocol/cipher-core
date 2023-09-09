@@ -13,9 +13,12 @@ const BASE_DIR = resolve(__dirname, "../build/circuits");
 const UTXO_CONFIG_PATH = resolve(__dirname, "../utxo_config.json");
 dotenv.config();
 
+const groth16 = snarkjs.groth16;
+
 interface UtxoConfigInterface {
   nIns: number;
   mOuts: number;
+  inputPath: string;
 }
 
 main()
@@ -41,22 +44,32 @@ async function main() {
    * Make deposit circom
    */
   const circuitOutputList: any[] = [];
-  for (let index = 0; index < utxoConfigList.length; index++) {
-    const config = utxoConfigList[index];
-    const { name, mainCircomPath } = await makeMainCircom({
+  for (let index = 0; index <= utxoConfigList.length; index++) {
+    const utxoConfig = utxoConfigList[index];
+    const spec = {
       levels,
-      nIns: config.nIns,
-      mOuts: config.mOuts,
+      nIns: utxoConfig.nIns,
+      mOuts: utxoConfig.mOuts,
       // TODO: zeroLeaf should be generated
       zeroLeaf: DEFAULT_ZERO_LEAF_VALUE,
-    });
+    };
+    const { name, mainCircomPath } = await makeMainCircom(spec);
     const result = await generateZkey(name, mainCircomPath);
     circuitOutputList.push({
+      spec,
       ...result,
       name,
       mainCircomPath,
       createTime: new Date().toISOString(),
     });
+
+    const circomBaseDir = resolve(BASE_DIR, `./${name}`);
+    await prove(
+      name,
+      circomBaseDir,
+      result.finalZkeyPath,
+      resolve(__dirname, "../", utxoConfig.inputPath)
+    );
   }
 
   writeFileSync(buildInfoPath, JSON.stringify(circuitOutputList, null, 2));
@@ -244,6 +257,96 @@ async function exportSolidityVerifier(
 
   writeFileSync(solidityVerifierPath, solidity);
   return solidity;
+}
+
+export async function prove(
+  circuitName: string,
+  circomBaseDir: string,
+  zkeyPath: string,
+  inputPath: string
+) {
+  const witnessPath = resolve(circomBaseDir, `${circuitName}_witness.wtns`);
+  await generateWitness(circuitName, circomBaseDir, inputPath, witnessPath);
+
+  const { proof, publicSignals } = await generateProof(zkeyPath, witnessPath);
+
+  const calldataPath = resolve(circomBaseDir, `${circuitName}_calldata.json`);
+  const { calldata } = await generateSolidityCalldata(
+    proof,
+    publicSignals,
+    calldataPath
+  );
+
+  return {
+    witnessPath,
+    calldataPath,
+    calldata,
+  };
+}
+
+async function generateWitness(
+  circuitName: string,
+  circomBaseDir: string,
+  inputPath: string,
+  witnessPath: string
+) {
+  const jsGenWitnessPath = resolve(
+    circomBaseDir,
+    `${circuitName}_js/generate_witness.js`
+  );
+  const cppGenWitnessPath = resolve(
+    circomBaseDir,
+    `${circuitName}_cpp/${circuitName}`
+  );
+
+  if (existsSync(cppGenWitnessPath)) {
+    const { stdout } = await exec(
+      `${cppGenWitnessPath} ${inputPath} ${witnessPath}`
+    );
+
+    return {
+      stdout,
+      witnessPath,
+    };
+  } else if (existsSync(jsGenWitnessPath)) {
+    const wasmPath = resolve(
+      circomBaseDir,
+      `${circuitName}_js/${circuitName}.wasm`
+    );
+    const { stdout } = await exec(
+      `node ${jsGenWitnessPath} ${wasmPath} ${inputPath} ${witnessPath}`
+    );
+
+    return {
+      stdout,
+      witnessPath,
+    };
+  } else {
+    throw new Error(`No witness generator found for ${circuitName}`);
+  }
+}
+
+async function generateProof(zkeyPath: string, witnessPath: string) {
+  const { proof, publicSignals } = await groth16.prove(zkeyPath, witnessPath);
+  return {
+    proof,
+    publicSignals,
+  };
+}
+
+async function generateSolidityCalldata(
+  proof: any,
+  publicSignals: any,
+  calldataPath: string
+) {
+  const stdout = await groth16.exportSolidityCallData(proof, publicSignals);
+  const raw = `[${stdout}]`;
+  const calldata = JSON.parse(raw);
+  writeFileSync(calldataPath, raw);
+  return {
+    calldata,
+    calldataPath,
+  };
 }
 
 const cmdLogs: string[] = [];
