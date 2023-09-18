@@ -4,13 +4,14 @@ pragma solidity ^0.8.20;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IncrementalBinaryTree, IncrementalTreeData} from "@zk-kit/incremental-merkle-tree.sol/IncrementalBinaryTree.sol";
-import {UtxoStorage} from "./UtxoStorage.sol";
+import {UtxoStorage, TreeData} from "./UtxoStorage.sol";
 import {IVerifier} from "./interfaces/IVerifier.sol";
 
 contract Utxo is UtxoStorage {
     using SafeERC20 for IERC20;
     using IncrementalBinaryTree for IncrementalTreeData;
 
+    error CurrencyAlreadyInitialized(Currency currency);
     error InvalidMsgValue(uint256 msgValue);
     error AmountInconsistent(uint256 amount, uint256 transferredAmt);
     error TransferFailed(address payable receiver, uint256 amount, bytes data);
@@ -20,8 +21,9 @@ contract Utxo is UtxoStorage {
     error InvalidProof(Proof proof);
     error InvalidRecipientAddr(address recipientAddr);
 
-    event NewNullifier(uint256 nullifier);
-    event NewCommitment(uint256 commitment, uint32 leafIndex);
+    event NewTree(Currency currency, uint256 merkleTreeDepth, uint256 zeroValue);
+    event NewNullifier(Currency currency, uint256 nullifier);
+    event NewCommitment(Currency currency, uint256 commitment, uint256 leafIndex);
 
     struct PublicInfo {
         bytes2 utxoType;
@@ -49,11 +51,22 @@ contract Utxo is UtxoStorage {
     }
 
     constructor(uint256 merkleTreeDepth, uint256 zeroValue, address verifierAddr) UtxoStorage(verifierAddr) {
-        _treeData.init(merkleTreeDepth, zeroValue);
+        Currency currency = Currency.wrap(DEFAULT_ETH_ADDRESS);
+        treeData[currency].incrementalTreeData.init(merkleTreeDepth, zeroValue);
+        emit NewTree(currency, merkleTreeDepth, zeroValue);
+    }
+
+    function init(Currency currency, uint256 merkleTreeDepth, uint256 zeroValue) external {
+        TreeData storage tree = treeData[currency];
+        if (tree.incrementalTreeData.depth != 0) revert CurrencyAlreadyInitialized(currency);
+        tree.incrementalTreeData.init(merkleTreeDepth, zeroValue);
+        emit NewTree(currency, merkleTreeDepth, zeroValue);
     }
 
     function create(UtxoData memory utxoData, PublicInfo memory publicInfo) external payable {
         IERC20 token = IERC20(_parseData(publicInfo.data));
+        Currency currency = _tokenToCurrency(token);
+        TreeData storage tree = treeData[currency];
 
         /// before core logic
         if (utxoData.publicInAmt > 0) {
@@ -68,23 +81,23 @@ contract Utxo is UtxoStorage {
 
         /// core logic
         for (uint256 i; i < utxoData.inputNullifiers.length; ++i) {
-            if (_nullifiers[utxoData.inputNullifiers[i]]) revert InvalidNullifier(utxoData.inputNullifiers[i]);
+            if (tree.nullifiers[utxoData.inputNullifiers[i]]) revert InvalidNullifier(utxoData.inputNullifiers[i]);
         }
 
-        if (!_verifier.verifyProof(utxoData.proof.a, utxoData.proof.b, utxoData.proof.c, utxoData.proof.publicSignals))
+        if (!verifier.verifyProof(utxoData.proof.a, utxoData.proof.b, utxoData.proof.c, utxoData.proof.publicSignals))
             revert InvalidProof(utxoData.proof);
 
         for (uint256 i; i < utxoData.inputNullifiers.length; ++i) {
             uint256 nullifier = utxoData.inputNullifiers[i];
-            _nullifiers[nullifier] = true;
-            emit NewNullifier(nullifier);
+            tree.nullifiers[nullifier] = true;
+            emit NewNullifier(currency, nullifier);
         }
 
         for (uint256 i; i < utxoData.outputCommitments.length; ++i) {
             uint256 commitment = utxoData.outputCommitments[i];
             // insert commitment into the tree
-            _treeData.insert(commitment);
-            emit NewCommitment(commitment, _totalLeaves);
+            tree.incrementalTreeData.insert(commitment);
+            emit NewCommitment(currency, commitment, tree.incrementalTreeData.numberOfLeaves);
         }
 
         /// after core logic
@@ -96,6 +109,10 @@ contract Utxo is UtxoStorage {
         if (publicInfo.fee > 0) {
             _transfer(token, publicInfo.relayer, publicInfo.fee);
         }
+    }
+
+    function _tokenToCurrency(IERC20 token) internal pure returns (Currency) {
+        return Currency.wrap(address(token));
     }
 
     function _checkUtxoType(bytes2 utxoType, uint256 nullifierNum, uint256 commitmentNum) internal pure {
