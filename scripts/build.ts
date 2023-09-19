@@ -83,12 +83,14 @@ async function main() {
       resolve(__dirname, "../contracts/test")
     );
 
-    await prove(
-      name,
-      circomBaseDir,
-      result.finalZkeyPath,
-      resolve(__dirname, "../", utxoConfig.inputPath)
-    );
+    if (utxoConfig?.inputPath) {
+      await prove(
+        name,
+        circomBaseDir,
+        result.finalZkeyPath,
+        resolve(__dirname, "../", utxoConfig.inputPath)
+      );
+    }
   }
 }
 
