@@ -19,7 +19,7 @@ describe("n0m2", function () {
   let verifier: Verifier;
   beforeEach(async function () {
     VerifierFactory = (await ethers.getContractFactory(
-      "VerifierH5N0M2"
+      "Verifier"
     )) as Verifier__factory;
     verifier = await VerifierFactory.deploy();
 
@@ -65,13 +65,14 @@ describe("n0m2", function () {
         inputPath
       );
 
-      const proof = {
+      const proof: Utxo.ProofStruct = {
         a: calldata[0],
         b: calldata[1],
         c: calldata[2],
         publicSignals: calldata[3],
       };
-      await utxo.verify(verifier.address, proof as any);
+      const type = "0x0002";
+      await utxo.verify(verifier.address, proof, type);
     });
   });
 });

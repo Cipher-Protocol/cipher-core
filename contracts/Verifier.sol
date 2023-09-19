@@ -88,13 +88,13 @@ contract Verifier is VerifierConfig {
 
             function getDelta(utxoType) -> deltax1, deltax2, deltay1, deltay2 {
                 switch utxoType
-                case 0x0002 {
+                case hex"0002" {
                     deltax1 := n0m2_deltax1
                     deltax2 := n0m2_deltax2
                     deltay1 := n0m2_deltay1
                     deltay2 := n0m2_deltay2
                 }
-                case 0x0202 {
+                case hex"0202" {
                     deltax1 := n2m2_deltax1
                     deltax2 := n2m2_deltax2
                     deltay1 := n2m2_deltay1
@@ -102,36 +102,40 @@ contract Verifier is VerifierConfig {
                 }
                 default {
                     // this is not allowed
+                    mstore(0, 0)
+                    return(0, 0x20)
                 }
             }
 
             function getIC0(utxoType) -> IC0x, IC0y {
                 switch utxoType
-                case 0x0002 {
+                case hex"0002" {
                     IC0x := n0m2_IC0x
                     IC0y := n0m2_IC0y
                 }
-                case 0x0202 {
+                case hex"0202" {
                     IC0x := n2m2_IC0x
                     IC0y := n2m2_IC0y
                 }
                 default {
                     // this is not allowed
+                    mstore(0, 0)
+                    return(0, 0x20)
                 }
             }
 
-            function g1_mulAccC_dispatcher(_pVk, utxoType, pubSignals) {
+            function g1_mulAccC_dispatcher(_pVk, pubSignals, utxoType) {
                 switch utxoType
-                case 0x0002 {
-                    g1_mulAccC(_pVk, n0m2_IC1x, n0m2_IC1y, calldataload(add(pubSignals, 0)))
+                case hex"0002" {
+                    g1_mulAccC(_pVk, n0m2_IC1x, n0m2_IC1y, calldataload(pubSignals))
                     g1_mulAccC(_pVk, n0m2_IC2x, n0m2_IC2y, calldataload(add(pubSignals, 32)))
                     g1_mulAccC(_pVk, n0m2_IC3x, n0m2_IC3y, calldataload(add(pubSignals, 64)))
                     g1_mulAccC(_pVk, n0m2_IC4x, n0m2_IC4y, calldataload(add(pubSignals, 96)))
                     g1_mulAccC(_pVk, n0m2_IC5x, n0m2_IC5y, calldataload(add(pubSignals, 128)))
                     g1_mulAccC(_pVk, n0m2_IC6x, n0m2_IC6y, calldataload(add(pubSignals, 160)))
                 }
-                case 0x0202 {
-                    g1_mulAccC(_pVk, n2m2_IC1x, n2m2_IC1y, calldataload(add(pubSignals, 0)))
+                case hex"0202" {
+                    g1_mulAccC(_pVk, n2m2_IC1x, n2m2_IC1y, calldataload(pubSignals))
                     g1_mulAccC(_pVk, n2m2_IC2x, n2m2_IC2y, calldataload(add(pubSignals, 32)))
                     g1_mulAccC(_pVk, n2m2_IC3x, n2m2_IC3y, calldataload(add(pubSignals, 64)))
                     g1_mulAccC(_pVk, n2m2_IC4x, n2m2_IC4y, calldataload(add(pubSignals, 96)))
@@ -142,6 +146,8 @@ contract Verifier is VerifierConfig {
                 }
                 default {
                     // this is not allowed
+                    mstore(0, 0)
+                    return(0, 0x20)
                 }
             }
 
@@ -154,24 +160,7 @@ contract Verifier is VerifierConfig {
                 mstore(add(_pVk, 32), IC0y)
 
                 // Compute the linear combination vk_x
-
-                // g1_mulAccC(_pVk, IC1x, IC1y, calldataload(add(pubSignals, 0)))
-
-                // g1_mulAccC(_pVk, IC2x, IC2y, calldataload(add(pubSignals, 32)))
-
-                // g1_mulAccC(_pVk, IC3x, IC3y, calldataload(add(pubSignals, 64)))
-
-                // g1_mulAccC(_pVk, IC4x, IC4y, calldataload(add(pubSignals, 96)))
-
-                // g1_mulAccC(_pVk, IC5x, IC5y, calldataload(add(pubSignals, 128)))
-
-                // g1_mulAccC(_pVk, IC6x, IC6y, calldataload(add(pubSignals, 160)))
-
-                // g1_mulAccC(_pVk, IC7x, IC7y, calldataload(add(pubSignals, 192)))
-
-                // g1_mulAccC(_pVk, IC8x, IC8y, calldataload(add(pubSignals, 224)))
-
-                g1_mulAccC_dispatcher(_pVk, utxoType, pubSignals)
+                g1_mulAccC_dispatcher(_pVk, pubSignals, utxoType)
 
                 // -A
                 mstore(_pPairing, calldataload(pA))
@@ -224,24 +213,6 @@ contract Verifier is VerifierConfig {
             mstore(0x40, add(pMem, pLastMem))
 
             // Validate that all evaluations ∈ F
-
-            // checkField(calldataload(add(_pubSignals, 0)))
-
-            // checkField(calldataload(add(_pubSignals, 32)))
-
-            // checkField(calldataload(add(_pubSignals, 64)))
-
-            // checkField(calldataload(add(_pubSignals, 96)))
-
-            // checkField(calldataload(add(_pubSignals, 128)))
-
-            // checkField(calldataload(add(_pubSignals, 160)))
-
-            // checkField(calldataload(add(_pubSignals, 192)))
-
-            // checkField(calldataload(add(_pubSignals, 224)))
-
-            // checkField(calldataload(add(_pubSignals, 256)))
 
             let end := mul(_pubSignals.length, 0x20)
             for {
