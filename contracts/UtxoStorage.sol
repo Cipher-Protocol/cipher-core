@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {IncrementalTreeData} from "@zk-kit/incremental-merkle-tree.sol/IncrementalBinaryTree.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IVerifier} from "./interfaces/IVerifier.sol";
 
 struct TreeData {
@@ -10,8 +11,6 @@ struct TreeData {
 }
 
 abstract contract UtxoStorage {
-    type Currency is address;
-
     address internal constant DEFAULT_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     uint256 internal constant SNARK_SCALAR_FIELD =
@@ -19,7 +18,7 @@ abstract contract UtxoStorage {
 
     IVerifier internal immutable verifier;
 
-    mapping(Currency => TreeData) internal treeData;
+    mapping(IERC20 => TreeData) internal treeData;
 
     constructor(address verifierAddr) {
         verifier = IVerifier(verifierAddr);

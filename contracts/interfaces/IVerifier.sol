@@ -4,9 +4,10 @@ pragma solidity ^0.8.20;
 
 interface IVerifier {
     function verifyProof(
-        uint256[2] memory a,
-        uint256[2][2] memory b,
-        uint256[2] memory c,
-        uint256[6] memory input
+        uint256[2] calldata _pA,
+        uint256[2][2] calldata _pB,
+        uint256[2] calldata _pC,
+        uint256[] calldata _pubSignals, // remove fix size
+        bytes2 _type
     ) external returns (bool);
 }
