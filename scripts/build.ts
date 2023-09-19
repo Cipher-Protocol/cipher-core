@@ -1,10 +1,18 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const snarkjs = require("snarkjs");
 import { resolve } from "path";
-import { writeFileSync, mkdirSync, rmSync, readFileSync, existsSync } from "fs";
+import {
+  writeFileSync,
+  appendFileSync,
+  mkdirSync,
+  rmSync,
+  readFileSync,
+  existsSync,
+} from "fs";
 import util from "util";
 import * as dotenv from "dotenv";
 import { DEFAULT_TREE_HEIGHT, DEFAULT_ZERO_LEAF_VALUE } from "../config";
+import { prove } from "./prove";
 const _exec = util.promisify(require("child_process").exec);
 
 const PTAU_PATH = resolve(__dirname, "../ptau/pot16_final.ptau");
@@ -43,9 +51,12 @@ async function main() {
   /**
    * Make deposit circom
    */
-  const circuitOutputList: any[] = [];
   for (let index = 0; index <= utxoConfigList.length; index++) {
+    const startTime = new Date().getTime();
     const utxoConfig = utxoConfigList[index];
+    if (!utxoConfig) {
+      continue;
+    }
     const spec = {
       levels,
       nIns: utxoConfig.nIns,
@@ -53,17 +64,25 @@ async function main() {
       // TODO: zeroLeaf should be generated
       zeroLeaf: DEFAULT_ZERO_LEAF_VALUE,
     };
-    const { name, mainCircomPath } = await makeMainCircom(spec);
+    const { name, circomBaseDir, mainCircomPath } = await makeMainCircom(spec);
     const result = await generateZkey(name, mainCircomPath);
-    circuitOutputList.push({
+    exportCircomBuildInfo(buildInfoPath, {
+      time: new Date().toLocaleTimeString(),
       spec,
       ...result,
       name,
       mainCircomPath,
       createTime: new Date().toISOString(),
+      costTime: new Date().getTime() - startTime,
     });
 
-    const circomBaseDir = resolve(BASE_DIR, `./${name}`);
+    const verifierPath = resolve(circomBaseDir, `${name}_verifier.sol`);
+    copyVerifierToContract(
+      `VerifierH${levels}N${spec.nIns}M${spec.mOuts}`,
+      verifierPath,
+      resolve(__dirname, "../contracts/test")
+    );
+
     await prove(
       name,
       circomBaseDir,
@@ -71,8 +90,11 @@ async function main() {
       resolve(__dirname, "../", utxoConfig.inputPath)
     );
   }
+}
 
-  writeFileSync(buildInfoPath, JSON.stringify(circuitOutputList, null, 2));
+function exportCircomBuildInfo(buildInfoPath: string, info: any) {
+  appendFileSync(buildInfoPath, JSON.stringify(info, null, 2));
+  appendFileSync(buildInfoPath, "\n");
 }
 
 async function makeMainCircom(spec: {
@@ -82,14 +104,17 @@ async function makeMainCircom(spec: {
   zeroLeaf: string;
 }) {
   const name = `h${spec.levels}n${spec.nIns}m${spec.mOuts}`;
-  const outDir = resolve(BASE_DIR, `./${name}`);
-  const mainCircomPath = resolve(outDir, `${name}.circom`);
-  mkdirSync(outDir, { recursive: true });
+  const circomBaseDir = resolve(
+    BASE_DIR,
+    `./h${spec.levels}/n${spec.nIns}m${spec.mOuts}`
+  );
+  const mainCircomPath = resolve(circomBaseDir, `${name}.circom`);
+  mkdirSync(circomBaseDir, { recursive: true });
 
   const circomSourceCode = `
 pragma circom 2.1.5;
 
-include "../../../circuits/utxo.circom";
+include "../../../../circuits/utxo.circom";
 
 /// deposit input ${spec.nIns}, output ${spec.mOuts} circuit
 component main {public [root, publicInAmt, publicOutAmt, extDataHash, inputNullifier, outputCommitment]}
@@ -99,7 +124,7 @@ component main {public [root, publicInAmt, publicOutAmt, extDataHash, inputNulli
   writeFileSync(mainCircomPath, circomSourceCode);
   return {
     name,
-    outDir,
+    circomBaseDir,
     mainCircomPath,
   };
 }
@@ -259,31 +284,6 @@ async function exportSolidityVerifier(
   return solidity;
 }
 
-export async function prove(
-  circuitName: string,
-  circomBaseDir: string,
-  zkeyPath: string,
-  inputPath: string
-) {
-  const witnessPath = resolve(circomBaseDir, `${circuitName}_witness.wtns`);
-  await generateWitness(circuitName, circomBaseDir, inputPath, witnessPath);
-
-  const { proof, publicSignals } = await generateProof(zkeyPath, witnessPath);
-
-  const calldataPath = resolve(circomBaseDir, `${circuitName}_calldata.json`);
-  const { calldata } = await generateSolidityCalldata(
-    proof,
-    publicSignals,
-    calldataPath
-  );
-
-  return {
-    witnessPath,
-    calldataPath,
-    calldata,
-  };
-}
-
 async function generateWitness(
   circuitName: string,
   circomBaseDir: string,
@@ -294,6 +294,7 @@ async function generateWitness(
     circomBaseDir,
     `${circuitName}_js/generate_witness.js`
   );
+  console.log(jsGenWitnessPath);
   const cppGenWitnessPath = resolve(
     circomBaseDir,
     `${circuitName}_cpp/${circuitName}`
@@ -334,19 +335,16 @@ async function generateProof(zkeyPath: string, witnessPath: string) {
   };
 }
 
-async function generateSolidityCalldata(
-  proof: any,
-  publicSignals: any,
-  calldataPath: string
+async function copyVerifierToContract(
+  name: string,
+  verifierPath: string,
+  contractDir: string
 ) {
-  const stdout = await groth16.exportSolidityCallData(proof, publicSignals);
-  const raw = `[${stdout}]`;
-  const calldata = JSON.parse(raw);
-  writeFileSync(calldataPath, raw);
-  return {
-    calldata,
-    calldataPath,
-  };
+  const content = readFileSync(verifierPath, "utf8");
+  writeFileSync(
+    resolve(contractDir, `${name}.sol`),
+    content.replace("Groth16Verifier", name)
+  );
 }
 
 const cmdLogs: string[] = [];
