@@ -1,15 +1,17 @@
 import { expect } from "chai";
-import { BigNumber, ContractFactory } from "ethers";
-import { ethers } from "hardhat";
+import { resolve } from "path";
+import hre from "hardhat";
+import "@nomiclabs/hardhat-ethers";
 import {
   Utxo,
   Utxo__factory,
   Verifier,
   Verifier__factory,
 } from "../../typechain-types";
-import calldataJSON from "../../build/circuits/h5n0m2/h5n0m2_calldata.json";
 import { DEFAULT_ZERO_LEAF_VALUE } from "../../config";
+import { prove } from "../../scripts/prove";
 
+const ethers = hre.ethers;
 describe("n0m2", function () {
   let UtxoFactory: Utxo__factory;
   let utxo: Utxo;
@@ -17,7 +19,7 @@ describe("n0m2", function () {
   let verifier: Verifier;
   beforeEach(async function () {
     VerifierFactory = (await ethers.getContractFactory(
-      "Verifier_h5n0m2"
+      "VerifierH5N0M2"
     )) as Verifier__factory;
     verifier = await VerifierFactory.deploy();
 
@@ -52,11 +54,22 @@ describe("n0m2", function () {
 
   describe("verify", function () {
     it("verify", async function () {
+      const circuitName = "h5n0m2";
+      const circomBaseDir = resolve(__dirname, `../../build/circuits/h5/n0m2`);
+      const zkeyPath = resolve(circomBaseDir, `h5n0m2_final.zkey`);
+      const inputPath = resolve(__dirname, "../circuit/h5n0m2/input.json");
+      const { calldata } = await prove(
+        circuitName,
+        circomBaseDir,
+        zkeyPath,
+        inputPath
+      );
+
       const proof = {
-        a: calldataJSON[0],
-        b: calldataJSON[1],
-        c: calldataJSON[2],
-        publicSignals: calldataJSON[3],
+        a: calldata[0],
+        b: calldata[1],
+        c: calldata[2],
+        publicSignals: calldata[3],
       };
       await utxo.verify(verifier.address, proof as any);
     });
