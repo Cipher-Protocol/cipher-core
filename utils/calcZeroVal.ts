@@ -6,13 +6,25 @@ export const calcZeroValue = (
   defaultZeroLeafValue: string,
   treeLevel: number
 ) => {
-  const zeroValueArr: string[] = [];
+  const zeroValueArr: string[] = [defaultZeroLeafValue];
   let zeroValue = defaultZeroLeafValue;
-  for (let i = 0; i < treeLevel; i++) {
+  for (let i = 0; i < treeLevel - 1; i++) {
     zeroValue = calcPoseidonHash([zeroValue, zeroValue]);
     zeroValueArr.push(zeroValue);
-    // console.log(`LEVEL${i + 1}_NODE_ZERO_VALUE = "${zeroValueArr[i]}"`);
+    // console.log(`LEVEL${i}_NODE_ZERO_VALUE = "${zeroValueArr[i]}"`);
   }
   return zeroValueArr;
 };
 // calcZeroValue(DEFAULT_ZERO_LEAF_VALUE, 5);
+
+export const calcInitRoot = (
+  defaultZeroLeafValue: string,
+  treeLevel: number
+) => {
+  let zeroValue = defaultZeroLeafValue;
+  for (let i = 0; i < treeLevel; i++) {
+    zeroValue = calcPoseidonHash([zeroValue, zeroValue]);
+    // console.log(`INIT_ROOT_VALUE = "${zeroValue[i]}"`);
+  }
+  return zeroValue;
+};

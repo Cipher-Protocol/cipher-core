@@ -13,6 +13,8 @@ struct TreeData {
 abstract contract UtxoStorage {
     address internal constant DEFAULT_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
+    uint256 internal constant DEFAULT_TREE_DEPTH = 20;
+
     uint256 internal constant SNARK_SCALAR_FIELD =
         21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
