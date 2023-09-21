@@ -23,7 +23,7 @@ contract Utxo is UtxoStorage, Ownable {
     error InvalidNullifier(uint256 nullifier);
     error InvalidPublicInfo(uint256 publicInfoHash, uint256 expectedPublicInfoHash);
     error InvalidProof(Proof proof);
-    error InvalidRecipientAddr(address recipientAddr);
+    error InvalidRecipientAddr();
     error InvalidFeeSetting(uint16 fee);
 
     event NewTokenTree(IERC20 token, uint256 merkleTreeDepth, uint256 zeroValue);
@@ -74,6 +74,7 @@ contract Utxo is UtxoStorage, Ownable {
         emit NewTokenTree(token, DEFAULT_TREE_DEPTH, zeroValue);
     }
 
+    //TODO: not completed
     function registerAsRelayer(uint16 fee, string memory url) external {
         relayers[msg.sender] = RelayerInfo({fee: fee, numOfTx: 0, url: url});
         emit NewRelayer(msg.sender, fee, url);
@@ -132,7 +133,7 @@ contract Utxo is UtxoStorage, Ownable {
         }
 
         if (utxoData.publicOutAmt > 0) {
-            if (publicInfo.recipient == address(0)) revert InvalidRecipientAddr(publicInfo.recipient);
+            if (publicInfo.recipient == address(0)) revert InvalidRecipientAddr();
             _transfer(token, publicInfo.recipient, utxoData.publicOutAmt - feeAmt);
         }
 
