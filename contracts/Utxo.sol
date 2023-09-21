@@ -80,7 +80,7 @@ contract Utxo is UtxoStorage {
         TreeData storage tree = treeData[token];
         if (tree.incrementalTreeData.depth == 0) revert TokenTreeNotExists(token);
 
-        /// before core logic
+        // before core logic
         if (utxoData.publicInAmt > 0) {
             _transferFrom(token, msg.sender, utxoData.publicInAmt);
         }
@@ -91,7 +91,7 @@ contract Utxo is UtxoStorage {
         if (utxoData.publicInfoHash != publicInfoHash)
             revert InvalidPublicInfo(utxoData.publicInfoHash, publicInfoHash);
 
-        /// core logic
+        // core logic
         for (uint256 i; i < utxoData.inputNullifiers.length; ++i) {
             if (tree.nullifiers[utxoData.inputNullifiers[i]]) revert InvalidNullifier(utxoData.inputNullifiers[i]);
         }
@@ -119,7 +119,7 @@ contract Utxo is UtxoStorage {
             emit NewCommitment(token, commitment, tree.incrementalTreeData.numberOfLeaves);
         }
 
-        /// after core logic
+        // after core logic
         if (utxoData.publicOutAmt > 0) {
             if (publicInfo.recipient == address(0)) revert InvalidRecipientAddr(publicInfo.recipient);
             _transfer(token, publicInfo.recipient, utxoData.publicOutAmt - publicInfo.fee);
@@ -159,8 +159,8 @@ contract Utxo is UtxoStorage {
     }
 
     function _checkUtxoType(bytes2 utxoType, uint256 nullifierNum, uint256 commitmentNum) internal pure {
-        // the first byte of utxoType should be equal to nullifierNum
-        // the second byte of utxoType should be equal to commitmentNum
+        // The first byte of utxoType should be equal to nullifierNum &&
+        // The second byte of utxoType should be equal to commitmentNum
         if (uint8(utxoType[0]) != nullifierNum || uint8(utxoType[1]) != commitmentNum)
             revert InvalidUtxoType(utxoType, nullifierNum, commitmentNum);
     }
@@ -191,10 +191,10 @@ contract Utxo is UtxoStorage {
         }
     }
 
-    // function before(UtxoData memory utxoData, PublicInfo memory publicInfo) internal virtual {}
+    // function _beforeCreateTx(UtxoData memory utxoData, PublicInfo memory publicInfo) internal virtual {}
 
-    function verify(address verifierAddr, Proof memory proof, bytes2 _type) external {
-        IVerifier verifier = IVerifier(verifierAddr);
-        require(verifier.verifyProof(proof.a, proof.b, proof.c, proof.publicSignals, _type), "Invalid proof");
-    }
+    // function verify(address verifierAddr, Proof memory proof, bytes2 _type) external {
+    //     IVerifier verifier = IVerifier(verifierAddr);
+    //     require(verifier.verifyProof(proof.a, proof.b, proof.c, proof.publicSignals, _type), "Invalid proof");
+    // }
 }
