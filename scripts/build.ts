@@ -19,6 +19,7 @@ const PTAU_PATH = resolve(__dirname, "../ptau/pot16_final.ptau");
 const IS_CLEAR_CIRCOM_BUILD_DIR = false;
 const BASE_DIR = resolve(__dirname, "../build/circuits");
 const UTXO_CONFIG_PATH = resolve(__dirname, "../utxo_config.json");
+const VERIFIER_BASE_DIR = resolve(BASE_DIR, "../verifiers");
 dotenv.config();
 
 const groth16 = snarkjs.groth16;
@@ -40,9 +41,11 @@ async function main() {
   const levels = DEFAULT_TREE_HEIGHT;
   if (IS_CLEAR_CIRCOM_BUILD_DIR) {
     rmSync(BASE_DIR, { recursive: true, force: true });
+    rmSync(VERIFIER_BASE_DIR, { recursive: true, force: true });
   }
   if (!existsSync(BASE_DIR)) {
     mkdirSync(BASE_DIR, { recursive: true });
+    mkdirSync(VERIFIER_BASE_DIR, { recursive: true });
   }
   const buildInfoPath = resolve(BASE_DIR, "build-info.json");
   const utxoConfigList = JSON.parse(
@@ -80,7 +83,7 @@ async function main() {
     copyVerifierToContract(
       `VerifierH${levels}N${spec.nIns}M${spec.mOuts}`,
       verifierPath,
-      resolve(__dirname, "../contracts/test")
+      VERIFIER_BASE_DIR
     );
 
     if (utxoConfig?.inputPath) {
@@ -348,6 +351,7 @@ async function copyVerifierToContract(
     content.replace("Groth16Verifier", name)
   );
 }
+
 
 const cmdLogs: string[] = [];
 function exec(
