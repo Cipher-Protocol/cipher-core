@@ -8,7 +8,7 @@ import {
   Verifier,
   Verifier__factory,
 } from "../../typechain-types";
-import { SNARK_FIELD_SIZE } from "../../config";
+import { DEFAULT_FEE, SNARK_FIELD_SIZE } from "../../config";
 import { keccak256 } from "ethers/lib/utils";
 import { BigNumber, utils } from "ethers";
 import { calcInitRoot, calcZeroValue } from "../../utils/calcZeroVal";
@@ -48,7 +48,7 @@ describe("deploy", function () {
         IncrementalBinaryTree: incrementalBinaryTree.address,
       },
     })) as Utxo__factory;
-    utxo = (await UtxoFactory.deploy(verifier.address)) as Utxo;
+    utxo = (await UtxoFactory.deploy(verifier.address, DEFAULT_FEE)) as Utxo;
     await utxo.deployed();
     Erc20Factory = (await ethers.getContractFactory(
       "ERC20Mock"
@@ -66,7 +66,7 @@ describe("deploy", function () {
       ).mod(SNARK_FIELD_SIZE);
 
       await expect(initTokenTreeTx)
-        .to.emit(utxo, "NewTree")
+        .to.emit(utxo, "NewTokenTree")
         .withArgs(erc20.address, 20, zeroVal.toString());
 
       expect(await utxo.getTreeDepth(erc20.address)).to.equal(20);
