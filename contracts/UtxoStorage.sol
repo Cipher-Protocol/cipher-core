@@ -24,7 +24,13 @@ abstract contract UtxoStorage {
     uint256 internal constant SNARK_SCALAR_FIELD =
         21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
+    uint16 internal constant FEE_BASE = 10000;
+
     IVerifier internal immutable verifier;
+
+    // transfered amount * fee / FEE_BASE = fee amount
+    // i.e. 1000 * 300 / 10000 = 30 (3% fee)
+    uint16 internal fee;
 
     mapping(IERC20 => TreeData) internal treeData;
 

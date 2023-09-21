@@ -8,7 +8,11 @@ import {
   Verifier,
   Verifier__factory,
 } from "../../typechain-types";
-import { DEFAULT_ETH_ADDRESS, SNARK_FIELD_SIZE } from "../../config";
+import {
+  DEFAULT_ETH_ADDRESS,
+  DEFAULT_FEE,
+  SNARK_FIELD_SIZE,
+} from "../../config";
 import { keccak256 } from "ethers/lib/utils";
 import { BigNumber, utils } from "ethers";
 import { calcInitRoot, calcZeroValue } from "../../utils/calcZeroVal";
@@ -49,7 +53,7 @@ describe("deploy", function () {
           IncrementalBinaryTree: incrementalBinaryTree.address,
         },
       })) as Utxo__factory;
-      utxo = (await UtxoFactory.deploy(verifier.address)) as Utxo;
+      utxo = (await UtxoFactory.deploy(verifier.address, DEFAULT_FEE)) as Utxo;
       await utxo.deployed();
 
       expect(await utxo.getTreeDepth(DEFAULT_ETH_ADDRESS)).to.equal(20);
