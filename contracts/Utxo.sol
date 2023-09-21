@@ -3,13 +3,14 @@ pragma solidity ^0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IncrementalBinaryTree, IncrementalTreeData} from "@zk-kit/incremental-merkle-tree.sol/IncrementalBinaryTree.sol";
 import {UtxoStorage, TreeData, RelayerInfo} from "./UtxoStorage.sol";
 import {IVerifier} from "./interfaces/IVerifier.sol";
 
 import "hardhat/console.sol";
 
-contract Utxo is UtxoStorage {
+contract Utxo is UtxoStorage, Ownable {
     using SafeERC20 for IERC20;
     using IncrementalBinaryTree for IncrementalTreeData;
 
@@ -23,8 +24,9 @@ contract Utxo is UtxoStorage {
     error InvalidPublicInfo(uint256 publicInfoHash, uint256 expectedPublicInfoHash);
     error InvalidProof(Proof proof);
     error InvalidRecipientAddr(address recipientAddr);
+    error InvalidFeeSetting(uint16 fee);
 
-    event NewTree(IERC20 token, uint256 merkleTreeDepth, uint256 zeroValue);
+    event NewTokenTree(IERC20 token, uint256 merkleTreeDepth, uint256 zeroValue);
     event NewRelayer(address relayer, uint16 fee, string url);
     event NewNullifier(IERC20 token, uint256 nullifier);
     event NewCommitment(IERC20 token, uint256 commitment, uint256 leafIndex);
@@ -54,11 +56,13 @@ contract Utxo is UtxoStorage {
         uint256[] publicSignals;
     }
 
-    constructor(address verifierAddr) UtxoStorage(verifierAddr) {
+    constructor(address verifierAddr, uint16 _fee) UtxoStorage(verifierAddr) {
+        if (_fee > FEE_BASE) revert InvalidFeeSetting(_fee);
+        fee = _fee;
         IERC20 defaultEthToken = IERC20(DEFAULT_ETH_ADDRESS);
         uint256 zeroValue = uint256(keccak256(abi.encode(defaultEthToken))) % SNARK_SCALAR_FIELD;
         treeData[defaultEthToken].incrementalTreeData.init(DEFAULT_TREE_DEPTH, zeroValue);
-        emit NewTree(defaultEthToken, DEFAULT_TREE_DEPTH, zeroValue);
+        emit NewTokenTree(defaultEthToken, DEFAULT_TREE_DEPTH, zeroValue);
     }
 
     function initTokenTree(IERC20 token) external {
@@ -67,7 +71,7 @@ contract Utxo is UtxoStorage {
 
         uint256 zeroValue = uint256(keccak256(abi.encode(token))) % SNARK_SCALAR_FIELD;
         tree.incrementalTreeData.init(DEFAULT_TREE_DEPTH, zeroValue);
-        emit NewTree(token, DEFAULT_TREE_DEPTH, zeroValue);
+        emit NewTokenTree(token, DEFAULT_TREE_DEPTH, zeroValue);
     }
 
     function registerAsRelayer(uint16 fee, string memory url) external {
@@ -80,7 +84,7 @@ contract Utxo is UtxoStorage {
         TreeData storage tree = treeData[token];
         if (tree.incrementalTreeData.depth == 0) revert TokenTreeNotExists(token);
 
-        /// before core logic
+        // before core logic
         if (utxoData.publicInAmt > 0) {
             _transferFrom(token, msg.sender, utxoData.publicInAmt);
         }
@@ -91,7 +95,7 @@ contract Utxo is UtxoStorage {
         if (utxoData.publicInfoHash != publicInfoHash)
             revert InvalidPublicInfo(utxoData.publicInfoHash, publicInfoHash);
 
-        /// core logic
+        // core logic
         for (uint256 i; i < utxoData.inputNullifiers.length; ++i) {
             if (tree.nullifiers[utxoData.inputNullifiers[i]]) revert InvalidNullifier(utxoData.inputNullifiers[i]);
         }
@@ -119,15 +123,25 @@ contract Utxo is UtxoStorage {
             emit NewCommitment(token, commitment, tree.incrementalTreeData.numberOfLeaves);
         }
 
-        /// after core logic
-        if (utxoData.publicOutAmt > 0) {
-            if (publicInfo.recipient == address(0)) revert InvalidRecipientAddr(publicInfo.recipient);
-            _transfer(token, publicInfo.recipient, utxoData.publicOutAmt - publicInfo.fee);
+        // after core logic
+        uint256 feeAmt;
+        if (publicInfo.fee > 0) {
+            feeAmt = (utxoData.publicOutAmt * publicInfo.fee) / FEE_BASE;
+        } else {
+            feeAmt = (utxoData.publicOutAmt * fee) / FEE_BASE;
         }
 
-        if (publicInfo.fee > 0) {
-            _transfer(token, publicInfo.relayer, publicInfo.fee);
+        if (utxoData.publicOutAmt > 0) {
+            if (publicInfo.recipient == address(0)) revert InvalidRecipientAddr(publicInfo.recipient);
+            _transfer(token, publicInfo.recipient, utxoData.publicOutAmt - feeAmt);
         }
+
+        if (feeAmt > 0) _transfer(token, publicInfo.relayer, feeAmt);
+    }
+
+    function setFee(uint16 newFee) external onlyOwner {
+        if (newFee > FEE_BASE) revert InvalidFeeSetting(newFee);
+        fee = newFee;
     }
 
     function getTreeDepth(IERC20 token) external view returns (uint256) {
@@ -159,8 +173,8 @@ contract Utxo is UtxoStorage {
     }
 
     function _checkUtxoType(bytes2 utxoType, uint256 nullifierNum, uint256 commitmentNum) internal pure {
-        // the first byte of utxoType should be equal to nullifierNum
-        // the second byte of utxoType should be equal to commitmentNum
+        // The first byte of utxoType should be equal to nullifierNum &&
+        // The second byte of utxoType should be equal to commitmentNum
         if (uint8(utxoType[0]) != nullifierNum || uint8(utxoType[1]) != commitmentNum)
             revert InvalidUtxoType(utxoType, nullifierNum, commitmentNum);
     }
@@ -191,10 +205,10 @@ contract Utxo is UtxoStorage {
         }
     }
 
-    // function before(UtxoData memory utxoData, PublicInfo memory publicInfo) internal virtual {}
+    // function _beforeCreateTx(UtxoData memory utxoData, PublicInfo memory publicInfo) internal virtual {}
 
-    function verify(address verifierAddr, Proof memory proof, bytes2 _type) external {
-        IVerifier verifier = IVerifier(verifierAddr);
-        require(verifier.verifyProof(proof.a, proof.b, proof.c, proof.publicSignals, _type), "Invalid proof");
-    }
+    // function verify(address verifierAddr, Proof memory proof, bytes2 _type) external {
+    //     IVerifier verifier = IVerifier(verifierAddr);
+    //     require(verifier.verifyProof(proof.a, proof.b, proof.c, proof.publicSignals, _type), "Invalid proof");
+    // }
 }
