@@ -10,6 +10,12 @@ struct TreeData {
     mapping(uint256 => bool) nullifiers;
 }
 
+struct RelayerInfo {
+    uint16 fee;
+    uint240 numOfTx;
+    string url;
+}
+
 abstract contract UtxoStorage {
     address internal constant DEFAULT_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
@@ -21,6 +27,8 @@ abstract contract UtxoStorage {
     IVerifier internal immutable verifier;
 
     mapping(IERC20 => TreeData) internal treeData;
+
+    mapping(address => RelayerInfo) internal relayers;
 
     constructor(address verifierAddr) {
         verifier = IVerifier(verifierAddr);
