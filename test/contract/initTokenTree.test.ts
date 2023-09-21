@@ -8,7 +8,7 @@ import {
   Verifier,
   Verifier__factory,
 } from "../../typechain-types";
-import { DEFAULT_ETH_ADDRESS, SNARK_FIELD_SIZE } from "../../config";
+import { SNARK_FIELD_SIZE } from "../../config";
 import { keccak256 } from "ethers/lib/utils";
 import { BigNumber, utils } from "ethers";
 import { calcInitRoot, calcZeroValue } from "../../utils/calcZeroVal";
