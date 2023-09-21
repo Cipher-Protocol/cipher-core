@@ -9,16 +9,17 @@
     "build:contract": "hardhat compile && hardhat typechain",
     "test:contract": "hardhat test",
     "test:deploy": "hardhat test test/contract/deploy.test.ts",
+    "test:initTokenTree": "hardhat test test/contract/initTokenTree.test.ts",
     "verify:test:h5n0m2": "sh ./scripts/test/verifyh5n0m2.sh",
     "verify:test:h5n2m2": "sh ./scripts/test/verifyh5n2m2.sh"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
-    "@nomiclabs/hardhat-waffle": "^2.0.6",
     "@openzeppelin/contracts": "^4.9.3",
     "@typescript-eslint/eslint-plugin": "^6.4.0",
     "@typescript-eslint/parser": "^6.4.0",
+    "chai": "^4.3.8",
     "dotenv": "^16.3.1",
     "eslint": "^8.38.0",
     "eslint-config-prettier": "^8.5.0",

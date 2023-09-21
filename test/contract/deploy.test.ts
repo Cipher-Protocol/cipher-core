@@ -1,6 +1,5 @@
 import { expect } from "chai";
-import { resolve } from "path";
-import hre from "hardhat";
+import { ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import {
   IncrementalBinaryTree,
@@ -14,7 +13,6 @@ import { keccak256 } from "ethers/lib/utils";
 import { BigNumber, utils } from "ethers";
 import { calcInitRoot, calcZeroValue } from "../../utils/calcZeroVal";
 
-const ethers = hre.ethers;
 describe("deploy", function () {
   let UtxoFactory: Utxo__factory;
   let utxo: Utxo;

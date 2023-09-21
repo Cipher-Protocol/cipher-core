@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IncrementalBinaryTree, IncrementalTreeData} from "@zk-kit/incremental-merkle-tree.sol/IncrementalBinaryTree.sol";
-import {UtxoStorage, TreeData} from "./UtxoStorage.sol";
+import {UtxoStorage, TreeData, RelayerInfo} from "./UtxoStorage.sol";
 import {IVerifier} from "./interfaces/IVerifier.sol";
 
 import "hardhat/console.sol";
@@ -25,6 +25,7 @@ contract Utxo is UtxoStorage {
     error InvalidRecipientAddr(address recipientAddr);
 
     event NewTree(IERC20 token, uint256 merkleTreeDepth, uint256 zeroValue);
+    event NewRelayer(address relayer, uint16 fee, string url);
     event NewNullifier(IERC20 token, uint256 nullifier);
     event NewCommitment(IERC20 token, uint256 commitment, uint256 leafIndex);
 
@@ -67,6 +68,11 @@ contract Utxo is UtxoStorage {
         uint256 zeroValue = uint256(keccak256(abi.encode(token))) % SNARK_SCALAR_FIELD;
         tree.incrementalTreeData.init(DEFAULT_TREE_DEPTH, zeroValue);
         emit NewTree(token, DEFAULT_TREE_DEPTH, zeroValue);
+    }
+
+    function registerAsRelayer(uint16 fee, string memory url) external {
+        relayers[msg.sender] = RelayerInfo({fee: fee, numOfTx: 0, url: url});
+        emit NewRelayer(msg.sender, fee, url);
     }
 
     function createTx(UtxoData memory utxoData, PublicInfo memory publicInfo) external payable {
@@ -142,6 +148,10 @@ contract Utxo is UtxoStorage {
 
     function getTreeLastSubtrees(IERC20 token, uint256 level) external view returns (uint256[2] memory) {
         return treeData[token].incrementalTreeData.lastSubtrees[level];
+    }
+
+    function getVerifier() external view returns (IVerifier) {
+        return verifier;
     }
 
     function isNullify(IERC20 token, uint256 nullifier) external view returns (bool) {
