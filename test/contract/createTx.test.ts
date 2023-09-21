@@ -9,6 +9,7 @@ import {
   Verifier,
   Verifier__factory,
 } from "../../typechain-types";
+import { DEFAULT_FEE } from "../../config";
 
 const ethers = hre.ethers;
 
@@ -52,7 +53,7 @@ describe("deploy", function () {
         IncrementalBinaryTree: incrementalBinaryTree.address,
       },
     })) as Utxo__factory;
-    utxo = (await UtxoFactory.deploy(verifier.address)) as Utxo;
+    utxo = (await UtxoFactory.deploy(verifier.address, DEFAULT_FEE)) as Utxo;
     await utxo.deployed();
   });
 

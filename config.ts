@@ -21,3 +21,5 @@ export const DEFAULT_ETH_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 export const DEFAULT_PRIVATE_KEY = "0x00";
 
 export const DEFAULT_TREE_HEIGHT = 5;
+
+export const DEFAULT_FEE = 0;
