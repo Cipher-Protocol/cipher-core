@@ -5,7 +5,7 @@
   "license": "MIT",
   "author": "ray880301@gmail.com",
   "scripts": {
-    "build:circuit": "ts-node scripts/build.ts",
+    "build:circuit": "ts-node scripts/build.ts && ts-node scripts/merge_verifier.ts",
     "build:contract": "hardhat compile && hardhat typechain",
     "test:contract": "hardhat test",
     "test:deploy": "hardhat test test/contract/deploy.test.ts",
