@@ -74,7 +74,7 @@ contract Utxo is UtxoStorage, Ownable {
         emit NewTokenTree(token, DEFAULT_TREE_DEPTH, zeroValue);
     }
 
-    //TODO: not completed
+    // TODO: not completed
     function registerAsRelayer(uint16 fee, string memory url) external {
         relayers[msg.sender] = RelayerInfo({fee: fee, numOfTx: 0, url: url});
         emit NewRelayer(msg.sender, fee, url);
@@ -85,7 +85,8 @@ contract Utxo is UtxoStorage, Ownable {
         TreeData storage tree = treeData[token];
         if (tree.incrementalTreeData.depth == 0) revert TokenTreeNotExists(token);
 
-        // before core logic
+        // TODO: move to internal function _beforeCreateTx
+        /* ========== before core logic start ========== */
         if (utxoData.publicInAmt > 0) {
             _transferFrom(token, msg.sender, utxoData.publicInAmt);
         }
@@ -96,7 +97,10 @@ contract Utxo is UtxoStorage, Ownable {
         if (utxoData.publicInfoHash != publicInfoHash)
             revert InvalidPublicInfo(utxoData.publicInfoHash, publicInfoHash);
 
-        // core logic
+        /* ========== before core logic end ========== */
+
+        // TODO: move to internal function _createTx
+        /* ========== core logic start ========== */
         for (uint256 i; i < utxoData.inputNullifiers.length; ++i) {
             if (tree.nullifiers[utxoData.inputNullifiers[i]]) revert InvalidNullifier(utxoData.inputNullifiers[i]);
         }
@@ -123,8 +127,10 @@ contract Utxo is UtxoStorage, Ownable {
             tree.incrementalTreeData.insert(commitment);
             emit NewCommitment(token, commitment, tree.incrementalTreeData.numberOfLeaves);
         }
+        /* ========== core logic end ========== */
 
-        // after core logic
+        // TODO: move to internal function _afterCreateTx
+        /* ========== after core logic start ========== */
         uint256 feeAmt;
         if (publicInfo.fee > 0) {
             feeAmt = (utxoData.publicOutAmt * publicInfo.fee) / FEE_BASE;
@@ -138,6 +144,7 @@ contract Utxo is UtxoStorage, Ownable {
         }
 
         if (feeAmt > 0) _transfer(token, publicInfo.relayer, feeAmt);
+        /* ========== after core logic end ========== */
     }
 
     function setFee(uint16 newFee) external onlyOwner {
