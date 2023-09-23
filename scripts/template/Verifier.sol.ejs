@@ -72,19 +72,7 @@ contract Verifier is VerifierConfig {
             // TODO: add each specs
             function getDelta(utxoType) -> deltax1, deltax2, deltay1, deltay2 {
                 switch utxoType
-                <!-- case hex"0002" {
-                    deltax1 := n0m2_deltax1
-                    deltax2 := n0m2_deltax2
-                    deltay1 := n0m2_deltay1
-                    deltay2 := n0m2_deltay2
-                }
-                case hex"0202" {
-                    deltax1 := n2m2_deltax1
-                    deltax2 := n2m2_deltax2
-                    deltay1 := n2m2_deltay1
-                    deltay2 := n2m2_deltay2
-                } -->
-                <%=DeltaCases%>
+<% for (let i = 0; i < DeltaCases.length; i++) __append(DeltaCases[i]) %>
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -95,15 +83,7 @@ contract Verifier is VerifierConfig {
             // TODO: add each specs
             function getIC0(utxoType) -> IC0x, IC0y {
                 switch utxoType
-                <!-- case hex"0002" {
-                    IC0x := n0m2_IC0x
-                    IC0y := n0m2_IC0y
-                }
-                case hex"0202" {
-                    IC0x := n2m2_IC0x
-                    IC0y := n2m2_IC0y
-                } -->
-                <%=IcCases%>
+<% for (let i = 0; i < IcCases.length; i++) __append(IcCases[i]) %>
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -114,25 +94,7 @@ contract Verifier is VerifierConfig {
             // TODO: add each specs
             function g1_mulAccC_dispatcher(_pVk, pubSignals, utxoType) {
                 switch utxoType
-                <%=MulAccCases%>
-                case hex"0002" {
-                    g1_mulAccC(_pVk, n0m2_IC1x, n0m2_IC1y, calldataload(pubSignals))
-                    g1_mulAccC(_pVk, n0m2_IC2x, n0m2_IC2y, calldataload(add(pubSignals, 32)))
-                    g1_mulAccC(_pVk, n0m2_IC3x, n0m2_IC3y, calldataload(add(pubSignals, 64)))
-                    g1_mulAccC(_pVk, n0m2_IC4x, n0m2_IC4y, calldataload(add(pubSignals, 96)))
-                    g1_mulAccC(_pVk, n0m2_IC5x, n0m2_IC5y, calldataload(add(pubSignals, 128)))
-                    g1_mulAccC(_pVk, n0m2_IC6x, n0m2_IC6y, calldataload(add(pubSignals, 160)))
-                }
-                case hex"0202" {
-                    g1_mulAccC(_pVk, n2m2_IC1x, n2m2_IC1y, calldataload(pubSignals))
-                    g1_mulAccC(_pVk, n2m2_IC2x, n2m2_IC2y, calldataload(add(pubSignals, 32)))
-                    g1_mulAccC(_pVk, n2m2_IC3x, n2m2_IC3y, calldataload(add(pubSignals, 64)))
-                    g1_mulAccC(_pVk, n2m2_IC4x, n2m2_IC4y, calldataload(add(pubSignals, 96)))
-                    g1_mulAccC(_pVk, n2m2_IC5x, n2m2_IC5y, calldataload(add(pubSignals, 128)))
-                    g1_mulAccC(_pVk, n2m2_IC6x, n2m2_IC6y, calldataload(add(pubSignals, 160)))
-                    g1_mulAccC(_pVk, n2m2_IC7x, n2m2_IC7y, calldataload(add(pubSignals, 192)))
-                    g1_mulAccC(_pVk, n2m2_IC8x, n2m2_IC8y, calldataload(add(pubSignals, 224)))
-                }
+<% for (let i = 0; i < MulAccCases.length; i++) __append(MulAccCases[i]) %>
                 default {
                     // this is not allowed
                     mstore(0, 0)
