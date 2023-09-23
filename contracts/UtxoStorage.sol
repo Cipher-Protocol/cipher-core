@@ -16,7 +16,7 @@ struct RelayerInfo {
     string url;
 }
 
-abstract contract UtxoStorage {
+contract UtxoStorage {
     address internal constant DEFAULT_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     uint256 internal constant DEFAULT_TREE_DEPTH = 20;
