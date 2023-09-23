@@ -102,7 +102,7 @@ contract VerifierConfig {\n`
     });
     const hexCode = name2HexCode(name);
     const deltaCase = parseDeltaCases(name, hexCode, delta);
-    const icCase = parseIcCases(name, hexCode, ic);
+    const icCase = parseIcCases(name, hexCode, 1);
     const mulAccCase = parseMulAccCases(name, hexCode, ic);
     ejsData.DeltaCases.push(deltaCase);
     ejsData.IcCases.push(icCase);
@@ -181,7 +181,7 @@ async function readIcFromVerifier(file: string) {
       const endRegex = /\/\/ Memory data/;
 
       const deltaRegex = /uint256 constant deltax(\d+)/;
-      const icRegex = /uint256 constant IC(\d+)/;
+      const icRegex = /uint256 constant IC(\d+)x/;
       const countInfo = {
         delta: 0,
         ic: 0,

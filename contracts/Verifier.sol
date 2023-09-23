@@ -176,556 +176,62 @@ contract Verifier is VerifierConfig {
                 case hex"0001" {
                     IC0x := n0m1_IC0x
                     IC0y := n0m1_IC0y
-                    IC1x := n0m1_IC1x
-                    IC1y := n0m1_IC1y
-                    IC2x := n0m1_IC2x
-                    IC2y := n0m1_IC2y
-                    IC3x := n0m1_IC3x
-                    IC3y := n0m1_IC3y
-                    IC4x := n0m1_IC4x
-                    IC4y := n0m1_IC4y
-                    IC5x := n0m1_IC5x
-                    IC5y := n0m1_IC5y
-                    IC6x := n0m1_IC6x
-                    IC6y := n0m1_IC6y
-                    IC7x := n0m1_IC7x
-                    IC7y := n0m1_IC7y
-                    IC8x := n0m1_IC8x
-                    IC8y := n0m1_IC8y
-                    IC9x := n0m1_IC9x
-                    IC9y := n0m1_IC9y
-                    IC10x := n0m1_IC10x
-                    IC10y := n0m1_IC10y
-                    IC11x := n0m1_IC11x
-                    IC11y := n0m1_IC11y
                 }
                 case hex"0002" {
                     IC0x := n0m2_IC0x
                     IC0y := n0m2_IC0y
-                    IC1x := n0m2_IC1x
-                    IC1y := n0m2_IC1y
-                    IC2x := n0m2_IC2x
-                    IC2y := n0m2_IC2y
-                    IC3x := n0m2_IC3x
-                    IC3y := n0m2_IC3y
-                    IC4x := n0m2_IC4x
-                    IC4y := n0m2_IC4y
-                    IC5x := n0m2_IC5x
-                    IC5y := n0m2_IC5y
-                    IC6x := n0m2_IC6x
-                    IC6y := n0m2_IC6y
-                    IC7x := n0m2_IC7x
-                    IC7y := n0m2_IC7y
-                    IC8x := n0m2_IC8x
-                    IC8y := n0m2_IC8y
-                    IC9x := n0m2_IC9x
-                    IC9y := n0m2_IC9y
-                    IC10x := n0m2_IC10x
-                    IC10y := n0m2_IC10y
-                    IC11x := n0m2_IC11x
-                    IC11y := n0m2_IC11y
-                    IC12x := n0m2_IC12x
-                    IC12y := n0m2_IC12y
-                    IC13x := n0m2_IC13x
-                    IC13y := n0m2_IC13y
                 }
                 case hex"0004" {
                     IC0x := n0m4_IC0x
                     IC0y := n0m4_IC0y
-                    IC1x := n0m4_IC1x
-                    IC1y := n0m4_IC1y
-                    IC2x := n0m4_IC2x
-                    IC2y := n0m4_IC2y
-                    IC3x := n0m4_IC3x
-                    IC3y := n0m4_IC3y
-                    IC4x := n0m4_IC4x
-                    IC4y := n0m4_IC4y
-                    IC5x := n0m4_IC5x
-                    IC5y := n0m4_IC5y
-                    IC6x := n0m4_IC6x
-                    IC6y := n0m4_IC6y
-                    IC7x := n0m4_IC7x
-                    IC7y := n0m4_IC7y
-                    IC8x := n0m4_IC8x
-                    IC8y := n0m4_IC8y
-                    IC9x := n0m4_IC9x
-                    IC9y := n0m4_IC9y
-                    IC10x := n0m4_IC10x
-                    IC10y := n0m4_IC10y
-                    IC11x := n0m4_IC11x
-                    IC11y := n0m4_IC11y
-                    IC12x := n0m4_IC12x
-                    IC12y := n0m4_IC12y
-                    IC13x := n0m4_IC13x
-                    IC13y := n0m4_IC13y
-                    IC14x := n0m4_IC14x
-                    IC14y := n0m4_IC14y
-                    IC15x := n0m4_IC15x
-                    IC15y := n0m4_IC15y
-                    IC16x := n0m4_IC16x
-                    IC16y := n0m4_IC16y
-                    IC17x := n0m4_IC17x
-                    IC17y := n0m4_IC17y
                 }
                 case hex"0100" {
                     IC0x := n1m0_IC0x
                     IC0y := n1m0_IC0y
-                    IC1x := n1m0_IC1x
-                    IC1y := n1m0_IC1y
-                    IC2x := n1m0_IC2x
-                    IC2y := n1m0_IC2y
-                    IC3x := n1m0_IC3x
-                    IC3y := n1m0_IC3y
-                    IC4x := n1m0_IC4x
-                    IC4y := n1m0_IC4y
-                    IC5x := n1m0_IC5x
-                    IC5y := n1m0_IC5y
-                    IC6x := n1m0_IC6x
-                    IC6y := n1m0_IC6y
-                    IC7x := n1m0_IC7x
-                    IC7y := n1m0_IC7y
-                    IC8x := n1m0_IC8x
-                    IC8y := n1m0_IC8y
-                    IC9x := n1m0_IC9x
-                    IC9y := n1m0_IC9y
-                    IC10x := n1m0_IC10x
-                    IC10y := n1m0_IC10y
-                    IC11x := n1m0_IC11x
-                    IC11y := n1m0_IC11y
                 }
                 case hex"0101" {
                     IC0x := n1m1_IC0x
                     IC0y := n1m1_IC0y
-                    IC1x := n1m1_IC1x
-                    IC1y := n1m1_IC1y
-                    IC2x := n1m1_IC2x
-                    IC2y := n1m1_IC2y
-                    IC3x := n1m1_IC3x
-                    IC3y := n1m1_IC3y
-                    IC4x := n1m1_IC4x
-                    IC4y := n1m1_IC4y
-                    IC5x := n1m1_IC5x
-                    IC5y := n1m1_IC5y
-                    IC6x := n1m1_IC6x
-                    IC6y := n1m1_IC6y
-                    IC7x := n1m1_IC7x
-                    IC7y := n1m1_IC7y
-                    IC8x := n1m1_IC8x
-                    IC8y := n1m1_IC8y
-                    IC9x := n1m1_IC9x
-                    IC9y := n1m1_IC9y
-                    IC10x := n1m1_IC10x
-                    IC10y := n1m1_IC10y
-                    IC11x := n1m1_IC11x
-                    IC11y := n1m1_IC11y
-                    IC12x := n1m1_IC12x
-                    IC12y := n1m1_IC12y
-                    IC13x := n1m1_IC13x
-                    IC13y := n1m1_IC13y
                 }
                 case hex"0102" {
                     IC0x := n1m2_IC0x
                     IC0y := n1m2_IC0y
-                    IC1x := n1m2_IC1x
-                    IC1y := n1m2_IC1y
-                    IC2x := n1m2_IC2x
-                    IC2y := n1m2_IC2y
-                    IC3x := n1m2_IC3x
-                    IC3y := n1m2_IC3y
-                    IC4x := n1m2_IC4x
-                    IC4y := n1m2_IC4y
-                    IC5x := n1m2_IC5x
-                    IC5y := n1m2_IC5y
-                    IC6x := n1m2_IC6x
-                    IC6y := n1m2_IC6y
-                    IC7x := n1m2_IC7x
-                    IC7y := n1m2_IC7y
-                    IC8x := n1m2_IC8x
-                    IC8y := n1m2_IC8y
-                    IC9x := n1m2_IC9x
-                    IC9y := n1m2_IC9y
-                    IC10x := n1m2_IC10x
-                    IC10y := n1m2_IC10y
-                    IC11x := n1m2_IC11x
-                    IC11y := n1m2_IC11y
-                    IC12x := n1m2_IC12x
-                    IC12y := n1m2_IC12y
-                    IC13x := n1m2_IC13x
-                    IC13y := n1m2_IC13y
-                    IC14x := n1m2_IC14x
-                    IC14y := n1m2_IC14y
-                    IC15x := n1m2_IC15x
-                    IC15y := n1m2_IC15y
                 }
                 case hex"0104" {
                     IC0x := n1m4_IC0x
                     IC0y := n1m4_IC0y
-                    IC1x := n1m4_IC1x
-                    IC1y := n1m4_IC1y
-                    IC2x := n1m4_IC2x
-                    IC2y := n1m4_IC2y
-                    IC3x := n1m4_IC3x
-                    IC3y := n1m4_IC3y
-                    IC4x := n1m4_IC4x
-                    IC4y := n1m4_IC4y
-                    IC5x := n1m4_IC5x
-                    IC5y := n1m4_IC5y
-                    IC6x := n1m4_IC6x
-                    IC6y := n1m4_IC6y
-                    IC7x := n1m4_IC7x
-                    IC7y := n1m4_IC7y
-                    IC8x := n1m4_IC8x
-                    IC8y := n1m4_IC8y
-                    IC9x := n1m4_IC9x
-                    IC9y := n1m4_IC9y
-                    IC10x := n1m4_IC10x
-                    IC10y := n1m4_IC10y
-                    IC11x := n1m4_IC11x
-                    IC11y := n1m4_IC11y
-                    IC12x := n1m4_IC12x
-                    IC12y := n1m4_IC12y
-                    IC13x := n1m4_IC13x
-                    IC13y := n1m4_IC13y
-                    IC14x := n1m4_IC14x
-                    IC14y := n1m4_IC14y
-                    IC15x := n1m4_IC15x
-                    IC15y := n1m4_IC15y
-                    IC16x := n1m4_IC16x
-                    IC16y := n1m4_IC16y
-                    IC17x := n1m4_IC17x
-                    IC17y := n1m4_IC17y
-                    IC18x := n1m4_IC18x
-                    IC18y := n1m4_IC18y
-                    IC19x := n1m4_IC19x
-                    IC19y := n1m4_IC19y
                 }
                 case hex"0200" {
                     IC0x := n2m0_IC0x
                     IC0y := n2m0_IC0y
-                    IC1x := n2m0_IC1x
-                    IC1y := n2m0_IC1y
-                    IC2x := n2m0_IC2x
-                    IC2y := n2m0_IC2y
-                    IC3x := n2m0_IC3x
-                    IC3y := n2m0_IC3y
-                    IC4x := n2m0_IC4x
-                    IC4y := n2m0_IC4y
-                    IC5x := n2m0_IC5x
-                    IC5y := n2m0_IC5y
-                    IC6x := n2m0_IC6x
-                    IC6y := n2m0_IC6y
-                    IC7x := n2m0_IC7x
-                    IC7y := n2m0_IC7y
-                    IC8x := n2m0_IC8x
-                    IC8y := n2m0_IC8y
-                    IC9x := n2m0_IC9x
-                    IC9y := n2m0_IC9y
-                    IC10x := n2m0_IC10x
-                    IC10y := n2m0_IC10y
-                    IC11x := n2m0_IC11x
-                    IC11y := n2m0_IC11y
-                    IC12x := n2m0_IC12x
-                    IC12y := n2m0_IC12y
-                    IC13x := n2m0_IC13x
-                    IC13y := n2m0_IC13y
                 }
                 case hex"0201" {
                     IC0x := n2m1_IC0x
                     IC0y := n2m1_IC0y
-                    IC1x := n2m1_IC1x
-                    IC1y := n2m1_IC1y
-                    IC2x := n2m1_IC2x
-                    IC2y := n2m1_IC2y
-                    IC3x := n2m1_IC3x
-                    IC3y := n2m1_IC3y
-                    IC4x := n2m1_IC4x
-                    IC4y := n2m1_IC4y
-                    IC5x := n2m1_IC5x
-                    IC5y := n2m1_IC5y
-                    IC6x := n2m1_IC6x
-                    IC6y := n2m1_IC6y
-                    IC7x := n2m1_IC7x
-                    IC7y := n2m1_IC7y
-                    IC8x := n2m1_IC8x
-                    IC8y := n2m1_IC8y
-                    IC9x := n2m1_IC9x
-                    IC9y := n2m1_IC9y
-                    IC10x := n2m1_IC10x
-                    IC10y := n2m1_IC10y
-                    IC11x := n2m1_IC11x
-                    IC11y := n2m1_IC11y
-                    IC12x := n2m1_IC12x
-                    IC12y := n2m1_IC12y
-                    IC13x := n2m1_IC13x
-                    IC13y := n2m1_IC13y
-                    IC14x := n2m1_IC14x
-                    IC14y := n2m1_IC14y
-                    IC15x := n2m1_IC15x
-                    IC15y := n2m1_IC15y
                 }
                 case hex"0202" {
                     IC0x := n2m2_IC0x
                     IC0y := n2m2_IC0y
-                    IC1x := n2m2_IC1x
-                    IC1y := n2m2_IC1y
-                    IC2x := n2m2_IC2x
-                    IC2y := n2m2_IC2y
-                    IC3x := n2m2_IC3x
-                    IC3y := n2m2_IC3y
-                    IC4x := n2m2_IC4x
-                    IC4y := n2m2_IC4y
-                    IC5x := n2m2_IC5x
-                    IC5y := n2m2_IC5y
-                    IC6x := n2m2_IC6x
-                    IC6y := n2m2_IC6y
-                    IC7x := n2m2_IC7x
-                    IC7y := n2m2_IC7y
-                    IC8x := n2m2_IC8x
-                    IC8y := n2m2_IC8y
-                    IC9x := n2m2_IC9x
-                    IC9y := n2m2_IC9y
-                    IC10x := n2m2_IC10x
-                    IC10y := n2m2_IC10y
-                    IC11x := n2m2_IC11x
-                    IC11y := n2m2_IC11y
-                    IC12x := n2m2_IC12x
-                    IC12y := n2m2_IC12y
-                    IC13x := n2m2_IC13x
-                    IC13y := n2m2_IC13y
-                    IC14x := n2m2_IC14x
-                    IC14y := n2m2_IC14y
-                    IC15x := n2m2_IC15x
-                    IC15y := n2m2_IC15y
-                    IC16x := n2m2_IC16x
-                    IC16y := n2m2_IC16y
-                    IC17x := n2m2_IC17x
-                    IC17y := n2m2_IC17y
                 }
                 case hex"0204" {
                     IC0x := n2m4_IC0x
                     IC0y := n2m4_IC0y
-                    IC1x := n2m4_IC1x
-                    IC1y := n2m4_IC1y
-                    IC2x := n2m4_IC2x
-                    IC2y := n2m4_IC2y
-                    IC3x := n2m4_IC3x
-                    IC3y := n2m4_IC3y
-                    IC4x := n2m4_IC4x
-                    IC4y := n2m4_IC4y
-                    IC5x := n2m4_IC5x
-                    IC5y := n2m4_IC5y
-                    IC6x := n2m4_IC6x
-                    IC6y := n2m4_IC6y
-                    IC7x := n2m4_IC7x
-                    IC7y := n2m4_IC7y
-                    IC8x := n2m4_IC8x
-                    IC8y := n2m4_IC8y
-                    IC9x := n2m4_IC9x
-                    IC9y := n2m4_IC9y
-                    IC10x := n2m4_IC10x
-                    IC10y := n2m4_IC10y
-                    IC11x := n2m4_IC11x
-                    IC11y := n2m4_IC11y
-                    IC12x := n2m4_IC12x
-                    IC12y := n2m4_IC12y
-                    IC13x := n2m4_IC13x
-                    IC13y := n2m4_IC13y
-                    IC14x := n2m4_IC14x
-                    IC14y := n2m4_IC14y
-                    IC15x := n2m4_IC15x
-                    IC15y := n2m4_IC15y
-                    IC16x := n2m4_IC16x
-                    IC16y := n2m4_IC16y
-                    IC17x := n2m4_IC17x
-                    IC17y := n2m4_IC17y
-                    IC18x := n2m4_IC18x
-                    IC18y := n2m4_IC18y
-                    IC19x := n2m4_IC19x
-                    IC19y := n2m4_IC19y
-                    IC20x := n2m4_IC20x
-                    IC20y := n2m4_IC20y
-                    IC21x := n2m4_IC21x
-                    IC21y := n2m4_IC21y
                 }
                 case hex"0400" {
                     IC0x := n4m0_IC0x
                     IC0y := n4m0_IC0y
-                    IC1x := n4m0_IC1x
-                    IC1y := n4m0_IC1y
-                    IC2x := n4m0_IC2x
-                    IC2y := n4m0_IC2y
-                    IC3x := n4m0_IC3x
-                    IC3y := n4m0_IC3y
-                    IC4x := n4m0_IC4x
-                    IC4y := n4m0_IC4y
-                    IC5x := n4m0_IC5x
-                    IC5y := n4m0_IC5y
-                    IC6x := n4m0_IC6x
-                    IC6y := n4m0_IC6y
-                    IC7x := n4m0_IC7x
-                    IC7y := n4m0_IC7y
-                    IC8x := n4m0_IC8x
-                    IC8y := n4m0_IC8y
-                    IC9x := n4m0_IC9x
-                    IC9y := n4m0_IC9y
-                    IC10x := n4m0_IC10x
-                    IC10y := n4m0_IC10y
-                    IC11x := n4m0_IC11x
-                    IC11y := n4m0_IC11y
-                    IC12x := n4m0_IC12x
-                    IC12y := n4m0_IC12y
-                    IC13x := n4m0_IC13x
-                    IC13y := n4m0_IC13y
-                    IC14x := n4m0_IC14x
-                    IC14y := n4m0_IC14y
-                    IC15x := n4m0_IC15x
-                    IC15y := n4m0_IC15y
-                    IC16x := n4m0_IC16x
-                    IC16y := n4m0_IC16y
-                    IC17x := n4m0_IC17x
-                    IC17y := n4m0_IC17y
                 }
                 case hex"0401" {
                     IC0x := n4m1_IC0x
                     IC0y := n4m1_IC0y
-                    IC1x := n4m1_IC1x
-                    IC1y := n4m1_IC1y
-                    IC2x := n4m1_IC2x
-                    IC2y := n4m1_IC2y
-                    IC3x := n4m1_IC3x
-                    IC3y := n4m1_IC3y
-                    IC4x := n4m1_IC4x
-                    IC4y := n4m1_IC4y
-                    IC5x := n4m1_IC5x
-                    IC5y := n4m1_IC5y
-                    IC6x := n4m1_IC6x
-                    IC6y := n4m1_IC6y
-                    IC7x := n4m1_IC7x
-                    IC7y := n4m1_IC7y
-                    IC8x := n4m1_IC8x
-                    IC8y := n4m1_IC8y
-                    IC9x := n4m1_IC9x
-                    IC9y := n4m1_IC9y
-                    IC10x := n4m1_IC10x
-                    IC10y := n4m1_IC10y
-                    IC11x := n4m1_IC11x
-                    IC11y := n4m1_IC11y
-                    IC12x := n4m1_IC12x
-                    IC12y := n4m1_IC12y
-                    IC13x := n4m1_IC13x
-                    IC13y := n4m1_IC13y
-                    IC14x := n4m1_IC14x
-                    IC14y := n4m1_IC14y
-                    IC15x := n4m1_IC15x
-                    IC15y := n4m1_IC15y
-                    IC16x := n4m1_IC16x
-                    IC16y := n4m1_IC16y
-                    IC17x := n4m1_IC17x
-                    IC17y := n4m1_IC17y
-                    IC18x := n4m1_IC18x
-                    IC18y := n4m1_IC18y
-                    IC19x := n4m1_IC19x
-                    IC19y := n4m1_IC19y
                 }
                 case hex"0402" {
                     IC0x := n4m2_IC0x
                     IC0y := n4m2_IC0y
-                    IC1x := n4m2_IC1x
-                    IC1y := n4m2_IC1y
-                    IC2x := n4m2_IC2x
-                    IC2y := n4m2_IC2y
-                    IC3x := n4m2_IC3x
-                    IC3y := n4m2_IC3y
-                    IC4x := n4m2_IC4x
-                    IC4y := n4m2_IC4y
-                    IC5x := n4m2_IC5x
-                    IC5y := n4m2_IC5y
-                    IC6x := n4m2_IC6x
-                    IC6y := n4m2_IC6y
-                    IC7x := n4m2_IC7x
-                    IC7y := n4m2_IC7y
-                    IC8x := n4m2_IC8x
-                    IC8y := n4m2_IC8y
-                    IC9x := n4m2_IC9x
-                    IC9y := n4m2_IC9y
-                    IC10x := n4m2_IC10x
-                    IC10y := n4m2_IC10y
-                    IC11x := n4m2_IC11x
-                    IC11y := n4m2_IC11y
-                    IC12x := n4m2_IC12x
-                    IC12y := n4m2_IC12y
-                    IC13x := n4m2_IC13x
-                    IC13y := n4m2_IC13y
-                    IC14x := n4m2_IC14x
-                    IC14y := n4m2_IC14y
-                    IC15x := n4m2_IC15x
-                    IC15y := n4m2_IC15y
-                    IC16x := n4m2_IC16x
-                    IC16y := n4m2_IC16y
-                    IC17x := n4m2_IC17x
-                    IC17y := n4m2_IC17y
-                    IC18x := n4m2_IC18x
-                    IC18y := n4m2_IC18y
-                    IC19x := n4m2_IC19x
-                    IC19y := n4m2_IC19y
-                    IC20x := n4m2_IC20x
-                    IC20y := n4m2_IC20y
-                    IC21x := n4m2_IC21x
-                    IC21y := n4m2_IC21y
                 }
                 case hex"0404" {
                     IC0x := n4m4_IC0x
                     IC0y := n4m4_IC0y
-                    IC1x := n4m4_IC1x
-                    IC1y := n4m4_IC1y
-                    IC2x := n4m4_IC2x
-                    IC2y := n4m4_IC2y
-                    IC3x := n4m4_IC3x
-                    IC3y := n4m4_IC3y
-                    IC4x := n4m4_IC4x
-                    IC4y := n4m4_IC4y
-                    IC5x := n4m4_IC5x
-                    IC5y := n4m4_IC5y
-                    IC6x := n4m4_IC6x
-                    IC6y := n4m4_IC6y
-                    IC7x := n4m4_IC7x
-                    IC7y := n4m4_IC7y
-                    IC8x := n4m4_IC8x
-                    IC8y := n4m4_IC8y
-                    IC9x := n4m4_IC9x
-                    IC9y := n4m4_IC9y
-                    IC10x := n4m4_IC10x
-                    IC10y := n4m4_IC10y
-                    IC11x := n4m4_IC11x
-                    IC11y := n4m4_IC11y
-                    IC12x := n4m4_IC12x
-                    IC12y := n4m4_IC12y
-                    IC13x := n4m4_IC13x
-                    IC13y := n4m4_IC13y
-                    IC14x := n4m4_IC14x
-                    IC14y := n4m4_IC14y
-                    IC15x := n4m4_IC15x
-                    IC15y := n4m4_IC15y
-                    IC16x := n4m4_IC16x
-                    IC16y := n4m4_IC16y
-                    IC17x := n4m4_IC17x
-                    IC17y := n4m4_IC17y
-                    IC18x := n4m4_IC18x
-                    IC18y := n4m4_IC18y
-                    IC19x := n4m4_IC19x
-                    IC19y := n4m4_IC19y
-                    IC20x := n4m4_IC20x
-                    IC20y := n4m4_IC20y
-                    IC21x := n4m4_IC21x
-                    IC21y := n4m4_IC21y
-                    IC22x := n4m4_IC22x
-                    IC22y := n4m4_IC22y
-                    IC23x := n4m4_IC23x
-                    IC23y := n4m4_IC23y
-                    IC24x := n4m4_IC24x
-                    IC24y := n4m4_IC24y
-                    IC25x := n4m4_IC25x
-                    IC25y := n4m4_IC25y
                 }
 
                 default {
@@ -744,12 +250,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n0m1_IC3x, n0m1_IC3y, calldataload(add(pubSignals, 64)))
                     g1_mulAccC(_pVk, n0m1_IC4x, n0m1_IC4y, calldataload(add(pubSignals, 96)))
                     g1_mulAccC(_pVk, n0m1_IC5x, n0m1_IC5y, calldataload(add(pubSignals, 128)))
-                    g1_mulAccC(_pVk, n0m1_IC6x, n0m1_IC6y, calldataload(add(pubSignals, 160)))
-                    g1_mulAccC(_pVk, n0m1_IC7x, n0m1_IC7y, calldataload(add(pubSignals, 192)))
-                    g1_mulAccC(_pVk, n0m1_IC8x, n0m1_IC8y, calldataload(add(pubSignals, 224)))
-                    g1_mulAccC(_pVk, n0m1_IC9x, n0m1_IC9y, calldataload(add(pubSignals, 256)))
-                    g1_mulAccC(_pVk, n0m1_IC10x, n0m1_IC10y, calldataload(add(pubSignals, 288)))
-                    g1_mulAccC(_pVk, n0m1_IC11x, n0m1_IC11y, calldataload(add(pubSignals, 320)))
                 }
                 case hex"0002" {
                     g1_mulAccC(_pVk, n0m2_IC1x, n0m2_IC1y, calldataload(pubSignals))
@@ -758,13 +258,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n0m2_IC4x, n0m2_IC4y, calldataload(add(pubSignals, 96)))
                     g1_mulAccC(_pVk, n0m2_IC5x, n0m2_IC5y, calldataload(add(pubSignals, 128)))
                     g1_mulAccC(_pVk, n0m2_IC6x, n0m2_IC6y, calldataload(add(pubSignals, 160)))
-                    g1_mulAccC(_pVk, n0m2_IC7x, n0m2_IC7y, calldataload(add(pubSignals, 192)))
-                    g1_mulAccC(_pVk, n0m2_IC8x, n0m2_IC8y, calldataload(add(pubSignals, 224)))
-                    g1_mulAccC(_pVk, n0m2_IC9x, n0m2_IC9y, calldataload(add(pubSignals, 256)))
-                    g1_mulAccC(_pVk, n0m2_IC10x, n0m2_IC10y, calldataload(add(pubSignals, 288)))
-                    g1_mulAccC(_pVk, n0m2_IC11x, n0m2_IC11y, calldataload(add(pubSignals, 320)))
-                    g1_mulAccC(_pVk, n0m2_IC12x, n0m2_IC12y, calldataload(add(pubSignals, 352)))
-                    g1_mulAccC(_pVk, n0m2_IC13x, n0m2_IC13y, calldataload(add(pubSignals, 384)))
                 }
                 case hex"0004" {
                     g1_mulAccC(_pVk, n0m4_IC1x, n0m4_IC1y, calldataload(pubSignals))
@@ -775,15 +268,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n0m4_IC6x, n0m4_IC6y, calldataload(add(pubSignals, 160)))
                     g1_mulAccC(_pVk, n0m4_IC7x, n0m4_IC7y, calldataload(add(pubSignals, 192)))
                     g1_mulAccC(_pVk, n0m4_IC8x, n0m4_IC8y, calldataload(add(pubSignals, 224)))
-                    g1_mulAccC(_pVk, n0m4_IC9x, n0m4_IC9y, calldataload(add(pubSignals, 256)))
-                    g1_mulAccC(_pVk, n0m4_IC10x, n0m4_IC10y, calldataload(add(pubSignals, 288)))
-                    g1_mulAccC(_pVk, n0m4_IC11x, n0m4_IC11y, calldataload(add(pubSignals, 320)))
-                    g1_mulAccC(_pVk, n0m4_IC12x, n0m4_IC12y, calldataload(add(pubSignals, 352)))
-                    g1_mulAccC(_pVk, n0m4_IC13x, n0m4_IC13y, calldataload(add(pubSignals, 384)))
-                    g1_mulAccC(_pVk, n0m4_IC14x, n0m4_IC14y, calldataload(add(pubSignals, 416)))
-                    g1_mulAccC(_pVk, n0m4_IC15x, n0m4_IC15y, calldataload(add(pubSignals, 448)))
-                    g1_mulAccC(_pVk, n0m4_IC16x, n0m4_IC16y, calldataload(add(pubSignals, 480)))
-                    g1_mulAccC(_pVk, n0m4_IC17x, n0m4_IC17y, calldataload(add(pubSignals, 512)))
                 }
                 case hex"0100" {
                     g1_mulAccC(_pVk, n1m0_IC1x, n1m0_IC1y, calldataload(pubSignals))
@@ -791,12 +275,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n1m0_IC3x, n1m0_IC3y, calldataload(add(pubSignals, 64)))
                     g1_mulAccC(_pVk, n1m0_IC4x, n1m0_IC4y, calldataload(add(pubSignals, 96)))
                     g1_mulAccC(_pVk, n1m0_IC5x, n1m0_IC5y, calldataload(add(pubSignals, 128)))
-                    g1_mulAccC(_pVk, n1m0_IC6x, n1m0_IC6y, calldataload(add(pubSignals, 160)))
-                    g1_mulAccC(_pVk, n1m0_IC7x, n1m0_IC7y, calldataload(add(pubSignals, 192)))
-                    g1_mulAccC(_pVk, n1m0_IC8x, n1m0_IC8y, calldataload(add(pubSignals, 224)))
-                    g1_mulAccC(_pVk, n1m0_IC9x, n1m0_IC9y, calldataload(add(pubSignals, 256)))
-                    g1_mulAccC(_pVk, n1m0_IC10x, n1m0_IC10y, calldataload(add(pubSignals, 288)))
-                    g1_mulAccC(_pVk, n1m0_IC11x, n1m0_IC11y, calldataload(add(pubSignals, 320)))
                 }
                 case hex"0101" {
                     g1_mulAccC(_pVk, n1m1_IC1x, n1m1_IC1y, calldataload(pubSignals))
@@ -805,13 +283,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n1m1_IC4x, n1m1_IC4y, calldataload(add(pubSignals, 96)))
                     g1_mulAccC(_pVk, n1m1_IC5x, n1m1_IC5y, calldataload(add(pubSignals, 128)))
                     g1_mulAccC(_pVk, n1m1_IC6x, n1m1_IC6y, calldataload(add(pubSignals, 160)))
-                    g1_mulAccC(_pVk, n1m1_IC7x, n1m1_IC7y, calldataload(add(pubSignals, 192)))
-                    g1_mulAccC(_pVk, n1m1_IC8x, n1m1_IC8y, calldataload(add(pubSignals, 224)))
-                    g1_mulAccC(_pVk, n1m1_IC9x, n1m1_IC9y, calldataload(add(pubSignals, 256)))
-                    g1_mulAccC(_pVk, n1m1_IC10x, n1m1_IC10y, calldataload(add(pubSignals, 288)))
-                    g1_mulAccC(_pVk, n1m1_IC11x, n1m1_IC11y, calldataload(add(pubSignals, 320)))
-                    g1_mulAccC(_pVk, n1m1_IC12x, n1m1_IC12y, calldataload(add(pubSignals, 352)))
-                    g1_mulAccC(_pVk, n1m1_IC13x, n1m1_IC13y, calldataload(add(pubSignals, 384)))
                 }
                 case hex"0102" {
                     g1_mulAccC(_pVk, n1m2_IC1x, n1m2_IC1y, calldataload(pubSignals))
@@ -821,14 +292,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n1m2_IC5x, n1m2_IC5y, calldataload(add(pubSignals, 128)))
                     g1_mulAccC(_pVk, n1m2_IC6x, n1m2_IC6y, calldataload(add(pubSignals, 160)))
                     g1_mulAccC(_pVk, n1m2_IC7x, n1m2_IC7y, calldataload(add(pubSignals, 192)))
-                    g1_mulAccC(_pVk, n1m2_IC8x, n1m2_IC8y, calldataload(add(pubSignals, 224)))
-                    g1_mulAccC(_pVk, n1m2_IC9x, n1m2_IC9y, calldataload(add(pubSignals, 256)))
-                    g1_mulAccC(_pVk, n1m2_IC10x, n1m2_IC10y, calldataload(add(pubSignals, 288)))
-                    g1_mulAccC(_pVk, n1m2_IC11x, n1m2_IC11y, calldataload(add(pubSignals, 320)))
-                    g1_mulAccC(_pVk, n1m2_IC12x, n1m2_IC12y, calldataload(add(pubSignals, 352)))
-                    g1_mulAccC(_pVk, n1m2_IC13x, n1m2_IC13y, calldataload(add(pubSignals, 384)))
-                    g1_mulAccC(_pVk, n1m2_IC14x, n1m2_IC14y, calldataload(add(pubSignals, 416)))
-                    g1_mulAccC(_pVk, n1m2_IC15x, n1m2_IC15y, calldataload(add(pubSignals, 448)))
                 }
                 case hex"0104" {
                     g1_mulAccC(_pVk, n1m4_IC1x, n1m4_IC1y, calldataload(pubSignals))
@@ -840,16 +303,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n1m4_IC7x, n1m4_IC7y, calldataload(add(pubSignals, 192)))
                     g1_mulAccC(_pVk, n1m4_IC8x, n1m4_IC8y, calldataload(add(pubSignals, 224)))
                     g1_mulAccC(_pVk, n1m4_IC9x, n1m4_IC9y, calldataload(add(pubSignals, 256)))
-                    g1_mulAccC(_pVk, n1m4_IC10x, n1m4_IC10y, calldataload(add(pubSignals, 288)))
-                    g1_mulAccC(_pVk, n1m4_IC11x, n1m4_IC11y, calldataload(add(pubSignals, 320)))
-                    g1_mulAccC(_pVk, n1m4_IC12x, n1m4_IC12y, calldataload(add(pubSignals, 352)))
-                    g1_mulAccC(_pVk, n1m4_IC13x, n1m4_IC13y, calldataload(add(pubSignals, 384)))
-                    g1_mulAccC(_pVk, n1m4_IC14x, n1m4_IC14y, calldataload(add(pubSignals, 416)))
-                    g1_mulAccC(_pVk, n1m4_IC15x, n1m4_IC15y, calldataload(add(pubSignals, 448)))
-                    g1_mulAccC(_pVk, n1m4_IC16x, n1m4_IC16y, calldataload(add(pubSignals, 480)))
-                    g1_mulAccC(_pVk, n1m4_IC17x, n1m4_IC17y, calldataload(add(pubSignals, 512)))
-                    g1_mulAccC(_pVk, n1m4_IC18x, n1m4_IC18y, calldataload(add(pubSignals, 544)))
-                    g1_mulAccC(_pVk, n1m4_IC19x, n1m4_IC19y, calldataload(add(pubSignals, 576)))
                 }
                 case hex"0200" {
                     g1_mulAccC(_pVk, n2m0_IC1x, n2m0_IC1y, calldataload(pubSignals))
@@ -858,13 +311,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n2m0_IC4x, n2m0_IC4y, calldataload(add(pubSignals, 96)))
                     g1_mulAccC(_pVk, n2m0_IC5x, n2m0_IC5y, calldataload(add(pubSignals, 128)))
                     g1_mulAccC(_pVk, n2m0_IC6x, n2m0_IC6y, calldataload(add(pubSignals, 160)))
-                    g1_mulAccC(_pVk, n2m0_IC7x, n2m0_IC7y, calldataload(add(pubSignals, 192)))
-                    g1_mulAccC(_pVk, n2m0_IC8x, n2m0_IC8y, calldataload(add(pubSignals, 224)))
-                    g1_mulAccC(_pVk, n2m0_IC9x, n2m0_IC9y, calldataload(add(pubSignals, 256)))
-                    g1_mulAccC(_pVk, n2m0_IC10x, n2m0_IC10y, calldataload(add(pubSignals, 288)))
-                    g1_mulAccC(_pVk, n2m0_IC11x, n2m0_IC11y, calldataload(add(pubSignals, 320)))
-                    g1_mulAccC(_pVk, n2m0_IC12x, n2m0_IC12y, calldataload(add(pubSignals, 352)))
-                    g1_mulAccC(_pVk, n2m0_IC13x, n2m0_IC13y, calldataload(add(pubSignals, 384)))
                 }
                 case hex"0201" {
                     g1_mulAccC(_pVk, n2m1_IC1x, n2m1_IC1y, calldataload(pubSignals))
@@ -874,14 +320,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n2m1_IC5x, n2m1_IC5y, calldataload(add(pubSignals, 128)))
                     g1_mulAccC(_pVk, n2m1_IC6x, n2m1_IC6y, calldataload(add(pubSignals, 160)))
                     g1_mulAccC(_pVk, n2m1_IC7x, n2m1_IC7y, calldataload(add(pubSignals, 192)))
-                    g1_mulAccC(_pVk, n2m1_IC8x, n2m1_IC8y, calldataload(add(pubSignals, 224)))
-                    g1_mulAccC(_pVk, n2m1_IC9x, n2m1_IC9y, calldataload(add(pubSignals, 256)))
-                    g1_mulAccC(_pVk, n2m1_IC10x, n2m1_IC10y, calldataload(add(pubSignals, 288)))
-                    g1_mulAccC(_pVk, n2m1_IC11x, n2m1_IC11y, calldataload(add(pubSignals, 320)))
-                    g1_mulAccC(_pVk, n2m1_IC12x, n2m1_IC12y, calldataload(add(pubSignals, 352)))
-                    g1_mulAccC(_pVk, n2m1_IC13x, n2m1_IC13y, calldataload(add(pubSignals, 384)))
-                    g1_mulAccC(_pVk, n2m1_IC14x, n2m1_IC14y, calldataload(add(pubSignals, 416)))
-                    g1_mulAccC(_pVk, n2m1_IC15x, n2m1_IC15y, calldataload(add(pubSignals, 448)))
                 }
                 case hex"0202" {
                     g1_mulAccC(_pVk, n2m2_IC1x, n2m2_IC1y, calldataload(pubSignals))
@@ -892,15 +330,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n2m2_IC6x, n2m2_IC6y, calldataload(add(pubSignals, 160)))
                     g1_mulAccC(_pVk, n2m2_IC7x, n2m2_IC7y, calldataload(add(pubSignals, 192)))
                     g1_mulAccC(_pVk, n2m2_IC8x, n2m2_IC8y, calldataload(add(pubSignals, 224)))
-                    g1_mulAccC(_pVk, n2m2_IC9x, n2m2_IC9y, calldataload(add(pubSignals, 256)))
-                    g1_mulAccC(_pVk, n2m2_IC10x, n2m2_IC10y, calldataload(add(pubSignals, 288)))
-                    g1_mulAccC(_pVk, n2m2_IC11x, n2m2_IC11y, calldataload(add(pubSignals, 320)))
-                    g1_mulAccC(_pVk, n2m2_IC12x, n2m2_IC12y, calldataload(add(pubSignals, 352)))
-                    g1_mulAccC(_pVk, n2m2_IC13x, n2m2_IC13y, calldataload(add(pubSignals, 384)))
-                    g1_mulAccC(_pVk, n2m2_IC14x, n2m2_IC14y, calldataload(add(pubSignals, 416)))
-                    g1_mulAccC(_pVk, n2m2_IC15x, n2m2_IC15y, calldataload(add(pubSignals, 448)))
-                    g1_mulAccC(_pVk, n2m2_IC16x, n2m2_IC16y, calldataload(add(pubSignals, 480)))
-                    g1_mulAccC(_pVk, n2m2_IC17x, n2m2_IC17y, calldataload(add(pubSignals, 512)))
                 }
                 case hex"0204" {
                     g1_mulAccC(_pVk, n2m4_IC1x, n2m4_IC1y, calldataload(pubSignals))
@@ -913,17 +342,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n2m4_IC8x, n2m4_IC8y, calldataload(add(pubSignals, 224)))
                     g1_mulAccC(_pVk, n2m4_IC9x, n2m4_IC9y, calldataload(add(pubSignals, 256)))
                     g1_mulAccC(_pVk, n2m4_IC10x, n2m4_IC10y, calldataload(add(pubSignals, 288)))
-                    g1_mulAccC(_pVk, n2m4_IC11x, n2m4_IC11y, calldataload(add(pubSignals, 320)))
-                    g1_mulAccC(_pVk, n2m4_IC12x, n2m4_IC12y, calldataload(add(pubSignals, 352)))
-                    g1_mulAccC(_pVk, n2m4_IC13x, n2m4_IC13y, calldataload(add(pubSignals, 384)))
-                    g1_mulAccC(_pVk, n2m4_IC14x, n2m4_IC14y, calldataload(add(pubSignals, 416)))
-                    g1_mulAccC(_pVk, n2m4_IC15x, n2m4_IC15y, calldataload(add(pubSignals, 448)))
-                    g1_mulAccC(_pVk, n2m4_IC16x, n2m4_IC16y, calldataload(add(pubSignals, 480)))
-                    g1_mulAccC(_pVk, n2m4_IC17x, n2m4_IC17y, calldataload(add(pubSignals, 512)))
-                    g1_mulAccC(_pVk, n2m4_IC18x, n2m4_IC18y, calldataload(add(pubSignals, 544)))
-                    g1_mulAccC(_pVk, n2m4_IC19x, n2m4_IC19y, calldataload(add(pubSignals, 576)))
-                    g1_mulAccC(_pVk, n2m4_IC20x, n2m4_IC20y, calldataload(add(pubSignals, 608)))
-                    g1_mulAccC(_pVk, n2m4_IC21x, n2m4_IC21y, calldataload(add(pubSignals, 640)))
                 }
                 case hex"0400" {
                     g1_mulAccC(_pVk, n4m0_IC1x, n4m0_IC1y, calldataload(pubSignals))
@@ -934,15 +352,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n4m0_IC6x, n4m0_IC6y, calldataload(add(pubSignals, 160)))
                     g1_mulAccC(_pVk, n4m0_IC7x, n4m0_IC7y, calldataload(add(pubSignals, 192)))
                     g1_mulAccC(_pVk, n4m0_IC8x, n4m0_IC8y, calldataload(add(pubSignals, 224)))
-                    g1_mulAccC(_pVk, n4m0_IC9x, n4m0_IC9y, calldataload(add(pubSignals, 256)))
-                    g1_mulAccC(_pVk, n4m0_IC10x, n4m0_IC10y, calldataload(add(pubSignals, 288)))
-                    g1_mulAccC(_pVk, n4m0_IC11x, n4m0_IC11y, calldataload(add(pubSignals, 320)))
-                    g1_mulAccC(_pVk, n4m0_IC12x, n4m0_IC12y, calldataload(add(pubSignals, 352)))
-                    g1_mulAccC(_pVk, n4m0_IC13x, n4m0_IC13y, calldataload(add(pubSignals, 384)))
-                    g1_mulAccC(_pVk, n4m0_IC14x, n4m0_IC14y, calldataload(add(pubSignals, 416)))
-                    g1_mulAccC(_pVk, n4m0_IC15x, n4m0_IC15y, calldataload(add(pubSignals, 448)))
-                    g1_mulAccC(_pVk, n4m0_IC16x, n4m0_IC16y, calldataload(add(pubSignals, 480)))
-                    g1_mulAccC(_pVk, n4m0_IC17x, n4m0_IC17y, calldataload(add(pubSignals, 512)))
                 }
                 case hex"0401" {
                     g1_mulAccC(_pVk, n4m1_IC1x, n4m1_IC1y, calldataload(pubSignals))
@@ -954,16 +363,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n4m1_IC7x, n4m1_IC7y, calldataload(add(pubSignals, 192)))
                     g1_mulAccC(_pVk, n4m1_IC8x, n4m1_IC8y, calldataload(add(pubSignals, 224)))
                     g1_mulAccC(_pVk, n4m1_IC9x, n4m1_IC9y, calldataload(add(pubSignals, 256)))
-                    g1_mulAccC(_pVk, n4m1_IC10x, n4m1_IC10y, calldataload(add(pubSignals, 288)))
-                    g1_mulAccC(_pVk, n4m1_IC11x, n4m1_IC11y, calldataload(add(pubSignals, 320)))
-                    g1_mulAccC(_pVk, n4m1_IC12x, n4m1_IC12y, calldataload(add(pubSignals, 352)))
-                    g1_mulAccC(_pVk, n4m1_IC13x, n4m1_IC13y, calldataload(add(pubSignals, 384)))
-                    g1_mulAccC(_pVk, n4m1_IC14x, n4m1_IC14y, calldataload(add(pubSignals, 416)))
-                    g1_mulAccC(_pVk, n4m1_IC15x, n4m1_IC15y, calldataload(add(pubSignals, 448)))
-                    g1_mulAccC(_pVk, n4m1_IC16x, n4m1_IC16y, calldataload(add(pubSignals, 480)))
-                    g1_mulAccC(_pVk, n4m1_IC17x, n4m1_IC17y, calldataload(add(pubSignals, 512)))
-                    g1_mulAccC(_pVk, n4m1_IC18x, n4m1_IC18y, calldataload(add(pubSignals, 544)))
-                    g1_mulAccC(_pVk, n4m1_IC19x, n4m1_IC19y, calldataload(add(pubSignals, 576)))
                 }
                 case hex"0402" {
                     g1_mulAccC(_pVk, n4m2_IC1x, n4m2_IC1y, calldataload(pubSignals))
@@ -976,17 +375,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n4m2_IC8x, n4m2_IC8y, calldataload(add(pubSignals, 224)))
                     g1_mulAccC(_pVk, n4m2_IC9x, n4m2_IC9y, calldataload(add(pubSignals, 256)))
                     g1_mulAccC(_pVk, n4m2_IC10x, n4m2_IC10y, calldataload(add(pubSignals, 288)))
-                    g1_mulAccC(_pVk, n4m2_IC11x, n4m2_IC11y, calldataload(add(pubSignals, 320)))
-                    g1_mulAccC(_pVk, n4m2_IC12x, n4m2_IC12y, calldataload(add(pubSignals, 352)))
-                    g1_mulAccC(_pVk, n4m2_IC13x, n4m2_IC13y, calldataload(add(pubSignals, 384)))
-                    g1_mulAccC(_pVk, n4m2_IC14x, n4m2_IC14y, calldataload(add(pubSignals, 416)))
-                    g1_mulAccC(_pVk, n4m2_IC15x, n4m2_IC15y, calldataload(add(pubSignals, 448)))
-                    g1_mulAccC(_pVk, n4m2_IC16x, n4m2_IC16y, calldataload(add(pubSignals, 480)))
-                    g1_mulAccC(_pVk, n4m2_IC17x, n4m2_IC17y, calldataload(add(pubSignals, 512)))
-                    g1_mulAccC(_pVk, n4m2_IC18x, n4m2_IC18y, calldataload(add(pubSignals, 544)))
-                    g1_mulAccC(_pVk, n4m2_IC19x, n4m2_IC19y, calldataload(add(pubSignals, 576)))
-                    g1_mulAccC(_pVk, n4m2_IC20x, n4m2_IC20y, calldataload(add(pubSignals, 608)))
-                    g1_mulAccC(_pVk, n4m2_IC21x, n4m2_IC21y, calldataload(add(pubSignals, 640)))
                 }
                 case hex"0404" {
                     g1_mulAccC(_pVk, n4m4_IC1x, n4m4_IC1y, calldataload(pubSignals))
@@ -1001,19 +389,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n4m4_IC10x, n4m4_IC10y, calldataload(add(pubSignals, 288)))
                     g1_mulAccC(_pVk, n4m4_IC11x, n4m4_IC11y, calldataload(add(pubSignals, 320)))
                     g1_mulAccC(_pVk, n4m4_IC12x, n4m4_IC12y, calldataload(add(pubSignals, 352)))
-                    g1_mulAccC(_pVk, n4m4_IC13x, n4m4_IC13y, calldataload(add(pubSignals, 384)))
-                    g1_mulAccC(_pVk, n4m4_IC14x, n4m4_IC14y, calldataload(add(pubSignals, 416)))
-                    g1_mulAccC(_pVk, n4m4_IC15x, n4m4_IC15y, calldataload(add(pubSignals, 448)))
-                    g1_mulAccC(_pVk, n4m4_IC16x, n4m4_IC16y, calldataload(add(pubSignals, 480)))
-                    g1_mulAccC(_pVk, n4m4_IC17x, n4m4_IC17y, calldataload(add(pubSignals, 512)))
-                    g1_mulAccC(_pVk, n4m4_IC18x, n4m4_IC18y, calldataload(add(pubSignals, 544)))
-                    g1_mulAccC(_pVk, n4m4_IC19x, n4m4_IC19y, calldataload(add(pubSignals, 576)))
-                    g1_mulAccC(_pVk, n4m4_IC20x, n4m4_IC20y, calldataload(add(pubSignals, 608)))
-                    g1_mulAccC(_pVk, n4m4_IC21x, n4m4_IC21y, calldataload(add(pubSignals, 640)))
-                    g1_mulAccC(_pVk, n4m4_IC22x, n4m4_IC22y, calldataload(add(pubSignals, 672)))
-                    g1_mulAccC(_pVk, n4m4_IC23x, n4m4_IC23y, calldataload(add(pubSignals, 704)))
-                    g1_mulAccC(_pVk, n4m4_IC24x, n4m4_IC24y, calldataload(add(pubSignals, 736)))
-                    g1_mulAccC(_pVk, n4m4_IC25x, n4m4_IC25y, calldataload(add(pubSignals, 768)))
                 }
 
                 default {
