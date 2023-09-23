@@ -45,8 +45,11 @@ async function main() {
   }
   if (!existsSync(BASE_DIR)) {
     mkdirSync(BASE_DIR, { recursive: true });
+  }
+  if (!existsSync(VERIFIER_BASE_DIR)) {
     mkdirSync(VERIFIER_BASE_DIR, { recursive: true });
   }
+
   const buildInfoPath = resolve(BASE_DIR, "build-info.json");
   const utxoConfigList = JSON.parse(
     readFileSync(UTXO_CONFIG_PATH, "utf8")
