@@ -66,6 +66,12 @@ contract VerifierConfig {\n`
   }
   appendFileSync(outputVerifierConfigPath, "\n\n");
 
+  const ejsData = {
+    DeltaCases: [] as any[],
+    IcCases: [] as any[],
+    MulAccCases: [] as any[],
+  };
+
   for (const file of files) {
     console.log(`file: ${file}`);
     // VerifierHaNbMc.sol
@@ -89,9 +95,25 @@ contract VerifierConfig {\n`
       appendFileSync(outputVerifierConfigPath, "\n");
     }
 
-    // const main = await parseVerifierMain(name, delta, ic);
-    // writeFileSync(outputVerifierPath, main, "utf-8");
+    console.log({
+      name,
+      delta,
+      ic,
+    });
+    const hexCode = name2HexCode(name);
+    const deltaCase = parseDeltaCases(name, hexCode, delta);
+    const icCase = parseIcCases(name, hexCode, ic);
+    const mulAccCase = parseMulAccCases(name, hexCode, ic);
+    ejsData.DeltaCases.push(deltaCase);
+    ejsData.IcCases.push(icCase);
+    ejsData.MulAccCases.push(mulAccCase);
   }
+
+  console.log({
+    length: ejsData.DeltaCases.length,
+  });
+  const main = await parseVerifierMain(ejsData);
+  writeFileSync(outputVerifierPath, main, "utf-8");
 
   appendFileSync(outputVerifierConfigPath, `}\n`);
 }
@@ -159,7 +181,7 @@ async function readIcFromVerifier(file: string) {
       const endRegex = /\/\/ Memory data/;
 
       const deltaRegex = /uint256 constant deltax(\d+)/;
-      const icRegex = /uint256 constant ic(\d+)/;
+      const icRegex = /uint256 constant IC(\d+)/;
       const countInfo = {
         delta: 0,
         ic: 0,
@@ -215,14 +237,13 @@ function name2HexCode(name: string): string {
 }
 
 function parseDeltaCases(name: string, hexCode: string, delta: number): string {
-  const str = `
-  case hex"0002" {
-    deltax1 := ${name}_deltax1
-    deltax2 := ${name}_deltax2
-    deltay1 := ${name}_deltay1
-    deltay2 := ${name}_deltay2
-  }`;
-  return str;
+  let str = `case hex"${hexCode}" {\n`;
+  str += `deltax1 := ${name}_deltax1\n`;
+  str += `deltax2 := ${name}_deltax2\n`;
+  str += `deltay1 := ${name}_deltay1\n`;
+  str += `deltay2 := ${name}_deltay2\n`;
+  str += "}";
+  return prettier(str, 16);
 }
 function parseIcCases(name: string, hexCode: string, ic: number): string {
   let str = `case hex"${hexCode}" {\n`;
@@ -230,8 +251,8 @@ function parseIcCases(name: string, hexCode: string, ic: number): string {
     str += `IC${index}x := ${name}_IC${index}x\n`;
     str += `IC${index}y := ${name}_IC${index}y\n`;
   }
-  str = `}\n`;
-  return str;
+  str += `}`;
+  return prettier(str, 16);
 }
 function parseMulAccCases(name: string, hexCode: string, ic: number): string {
   let str = `case hex"${hexCode}" {\n`;
@@ -243,22 +264,38 @@ function parseMulAccCases(name: string, hexCode: string, ic: number): string {
       str += `g1_mulAccC(_pVk, ${name}_IC${index}x, ${name}_IC${index}y, calldataload(add(pubSignals, ${offset})))\n`;
     }
   }
-  str = `}\n`;
-  return str;
+  str += `}`;
+  return prettier(str, 16);
 }
 
-async function parseVerifierMain(name: string, delta: number, ic: number) {
+function prettier(str: string, padNum: number): string {
+  const lines = str.split("\n");
+  let result = "";
+  const pad1 = new Array(padNum).fill(" ").join("");
+  const pad2 = new Array(padNum + 4).fill(" ").join("");
+  for (let index = 0; index < lines.length; index++) {
+    const s = lines[index];
+    if (index === 0) {
+      result += `${pad1}${s}\n`;
+    } else if (index === lines.length - 1) {
+      result += `${pad1}${s}\n`;
+    } else {
+      result += `${pad2}${s}\n`;
+    }
+  }
+  return result;
+}
+
+async function parseVerifierMain(ejsData: {
+  DeltaCases: any[];
+  IcCases: any[];
+  MulAccCases: any[];
+}) {
   // eslint-disable-next-line no-async-promise-executor
   return new Promise<string>(async (resolve, reject) => {
     try {
-      const hexCode = name2HexCode(name);
       const templateStr = readFileSync(templatePath, "utf-8");
-      const data = {
-        DeltaCases: parseDeltaCases(name, hexCode, delta),
-        IcCases: parseIcCases(name, hexCode, ic),
-        MulAccCases: parseMulAccCases(name, hexCode, ic),
-      };
-      const result = await ejs.render(templateStr, data, { async: true });
+      const result = await ejs.render(templateStr, ejsData, { async: true });
       resolve(result);
     } catch (error) {
       console.error(error);
