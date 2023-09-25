@@ -69,7 +69,6 @@ contract Verifier is VerifierConfig {
                 }
             }
 
-            // TODO: add each specs
             function getDelta(utxoType) -> deltax1, deltax2, deltay1, deltay2 {
                 switch utxoType
                 case hex"0001" {
@@ -162,6 +161,7 @@ contract Verifier is VerifierConfig {
                     deltay1 := n4m4_deltay1
                     deltay2 := n4m4_deltay2
                 }
+
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -169,7 +169,6 @@ contract Verifier is VerifierConfig {
                 }
             }
 
-            // TODO: add each specs
             function getIC0(utxoType) -> IC0x, IC0y {
                 switch utxoType
                 case hex"0001" {
@@ -232,6 +231,7 @@ contract Verifier is VerifierConfig {
                     IC0x := n4m4_IC0x
                     IC0y := n4m4_IC0y
                 }
+
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -239,7 +239,6 @@ contract Verifier is VerifierConfig {
                 }
             }
 
-            // TODO: add each specs
             function g1_mulAccC_dispatcher(_pVk, pubSignals, utxoType) {
                 switch utxoType
                 case hex"0001" {
@@ -388,6 +387,7 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n4m4_IC11x, n4m4_IC11y, calldataload(add(pubSignals, 320)))
                     g1_mulAccC(_pVk, n4m4_IC12x, n4m4_IC12y, calldataload(add(pubSignals, 352)))
                 }
+
                 default {
                     // this is not allowed
                     mstore(0, 0)
