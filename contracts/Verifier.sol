@@ -162,7 +162,6 @@ contract Verifier is VerifierConfig {
                     deltay1 := n4m4_deltay1
                     deltay2 := n4m4_deltay2
                 }
-
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -233,7 +232,6 @@ contract Verifier is VerifierConfig {
                     IC0x := n4m4_IC0x
                     IC0y := n4m4_IC0y
                 }
-
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -390,7 +388,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n4m4_IC11x, n4m4_IC11y, calldataload(add(pubSignals, 320)))
                     g1_mulAccC(_pVk, n4m4_IC12x, n4m4_IC12y, calldataload(add(pubSignals, 352)))
                 }
-
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -411,7 +408,7 @@ contract Verifier is VerifierConfig {
 
                 // -A
                 mstore(_pPairing, calldataload(pA))
-                mstore(add(_pPairing, 32), mod(sub(q, calldataload(add(pA, 32))), q))
+                mstore(add(_pPairing, 32), mod(sub(q, mod(calldataload(add(pA, 32)), q)), q))
 
                 // B
                 mstore(add(_pPairing, 64), calldataload(pB))

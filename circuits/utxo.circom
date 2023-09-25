@@ -15,7 +15,7 @@ Utxo structure:
 }
 
 commitment = hash(amount, pubKey, salt)
-nullifier = hash(commitment, leafIdx, sign(privKey, commitment, leafIdx))
+nullifier = hash(commitment, leafIdx, hash(privKey, commitment, leafIdx))
 */
 
 // Universal JoinSplit transaction with n inputs and m outputs
