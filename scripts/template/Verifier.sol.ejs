@@ -69,7 +69,6 @@ contract Verifier is VerifierConfig {
                 }
             }
 
-            // TODO: add each specs
             function getDelta(utxoType) -> deltax1, deltax2, deltay1, deltay2 {
                 switch utxoType
 <% for (let i = 0; i < DeltaCases.length; i++) __append(DeltaCases[i]) %>
@@ -80,7 +79,6 @@ contract Verifier is VerifierConfig {
                 }
             }
 
-            // TODO: add each specs
             function getIC0(utxoType) -> IC0x, IC0y {
                 switch utxoType
 <% for (let i = 0; i < IcCases.length; i++) __append(IcCases[i]) %>
@@ -91,7 +89,6 @@ contract Verifier is VerifierConfig {
                 }
             }
 
-            // TODO: add each specs
             function g1_mulAccC_dispatcher(_pVk, pubSignals, utxoType) {
                 switch utxoType
 <% for (let i = 0; i < MulAccCases.length; i++) __append(MulAccCases[i]) %>

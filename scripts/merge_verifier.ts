@@ -18,7 +18,11 @@ const outputVerifierConfigPath = resolve(
 );
 const outputVerifierPath = resolve(__dirname, "../contracts/Verifier.sol");
 const verifierBaseDir = resolve(__dirname, "../build/verifiers");
-const templatePath = resolve(__dirname, "./template/Verifier.sol.ejs");
+const templateConfigPath = resolve(
+  __dirname,
+  "./template/VerifierConfig.sol.ejs"
+);
+const templateMainPath = resolve(__dirname, "./template/Verifier.sol.ejs");
 async function main() {
   rmSync(outputVerifierConfigPath, { force: true });
   rmSync(outputVerifierPath, { force: true });
@@ -40,13 +44,12 @@ async function mergeVerifiers(verifierBaseDir: string) {
     files: files.length,
   });
 
-  appendFileSync(
-    outputVerifierConfigPath,
-    `// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
-  
-contract VerifierConfig {\n`
-  );
+  //   appendFileSync(
+  //     outputVerifierConfigPath,
+  //     `// SPDX-License-Identifier: MIT
+  // pragma solidity ^0.8.20;
+  // contract VerifierConfig {\n`
+  //   );
 
   const firstFile = files[0];
   const test = resolve(verifierBaseDir, firstFile);
@@ -54,17 +57,14 @@ contract VerifierConfig {\n`
   const vkeyLines = await readVkeyFromVerifier(
     resolve(verifierBaseDir, firstFile)
   );
+  let VkeyData = "";
   for (const line of vkeyLines) {
-    appendFileSync(
-      outputVerifierConfigPath,
-      line.replace(
-        "// Verification Key data",
-        "/* ============ Shared Verification Key Data ============ */"
-      )
+    VkeyData += line.replace(
+      "// Verification Key data",
+      "/* ============ Shared Verification Key Data ============ */"
     );
-    appendFileSync(outputVerifierConfigPath, "\n");
+    VkeyData += "\n";
   }
-  appendFileSync(outputVerifierConfigPath, "\n\n");
 
   const ejsData = {
     DeltaCases: [] as any[],
@@ -72,6 +72,7 @@ contract VerifierConfig {\n`
     MulAccCases: [] as any[],
   };
 
+  const ContDataList: string[] = [];
   for (const file of files) {
     console.log(`file: ${file}`);
     // VerifierHaNbMc.sol
@@ -80,20 +81,19 @@ contract VerifierConfig {\n`
       .replace("Verifier", "")
       .toLowerCase()
       .slice(2, 6);
-    appendFileSync(
-      outputVerifierConfigPath,
-      `    /* ============ ${name} ============ */\n`
-    );
+    ContDataList.push(`    /* ============ ${name} ============ */\n`);
     const { lines, delta, ic } = await readIcFromVerifier(
       resolve(verifierBaseDir, file)
     );
     for (const line of lines) {
-      appendFileSync(
-        outputVerifierConfigPath,
-        line.replace("constant ", `constant ${name}_`)
-      );
-      appendFileSync(outputVerifierConfigPath, "\n");
+      ContDataList.push(line.replace("constant ", `constant ${name}_`));
+      ContDataList.push("\n");
     }
+    const configResult = await parseVerifierConfig({
+      VkeyData,
+      ContDataList,
+    });
+    writeFileSync(outputVerifierConfigPath, configResult, "utf-8");
 
     console.log({
       name,
@@ -115,7 +115,7 @@ contract VerifierConfig {\n`
   const main = await parseVerifierMain(ejsData);
   writeFileSync(outputVerifierPath, main, "utf-8");
 
-  appendFileSync(outputVerifierConfigPath, `}\n`);
+  // appendFileSync(outputVerifierConfigPath, `}\n`);
 }
 
 async function readVkeyFromVerifier(file: string) {
@@ -132,7 +132,7 @@ async function readVkeyFromVerifier(file: string) {
       });
       let lineCnt = 0;
       let isReading = false;
-      const startRegex = /\/\/ Scalar field size/;
+      const startRegex = /\/\/ Verification Key data/;
       const endRegex = /uint256 constant deltax1/;
       rlInterface.on("line", (line: string) => {
         lineCnt++;
@@ -227,7 +227,7 @@ function name2HexCode(name: string): string {
   const mNum = Number(specs[2]);
 
   if (isNaN(nNum) || isNaN(mNum)) {
-    throw new Error("Invalid name: " + name);
+    throw new Error(`Invalid name: ${name}, nNum=${nNum}, mNum=${mNum}`);
   }
 
   const hexCode = `${nNum.toString().padStart(2, "0")}${mNum
@@ -286,6 +286,23 @@ function prettier(str: string, padNum: number): string {
   return result;
 }
 
+async function parseVerifierConfig(ejsData: {
+  VkeyData: string;
+  ContDataList: string[];
+}) {
+  // eslint-disable-next-line no-async-promise-executor
+  return new Promise<string>(async (resolve, reject) => {
+    try {
+      const templateStr = readFileSync(templateConfigPath, "utf-8");
+      const result = await ejs.render(templateStr, ejsData, { async: true });
+      resolve(result);
+    } catch (error) {
+      console.error(error);
+      reject(error);
+    }
+  });
+}
+
 async function parseVerifierMain(ejsData: {
   DeltaCases: any[];
   IcCases: any[];
@@ -294,7 +311,7 @@ async function parseVerifierMain(ejsData: {
   // eslint-disable-next-line no-async-promise-executor
   return new Promise<string>(async (resolve, reject) => {
     try {
-      const templateStr = readFileSync(templatePath, "utf-8");
+      const templateStr = readFileSync(templateMainPath, "utf-8");
       const result = await ejs.render(templateStr, ejsData, { async: true });
       resolve(result);
     } catch (error) {
