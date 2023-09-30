@@ -5,12 +5,12 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IncrementalBinaryTree, IncrementalTreeData} from "@zk-kit/incremental-merkle-tree.sol/IncrementalBinaryTree.sol";
-import {UtxoStorage, TreeData, RelayerInfo} from "./UtxoStorage.sol";
+import {CipherStorage, TreeData, RelayerInfo} from "./CipherStorage.sol";
 import {IVerifier} from "./interfaces/IVerifier.sol";
 
 import "hardhat/console.sol";
 
-contract Utxo is UtxoStorage, Ownable {
+contract Cipher is CipherStorage, Ownable {
     using SafeERC20 for IERC20;
     using IncrementalBinaryTree for IncrementalTreeData;
 
@@ -56,7 +56,7 @@ contract Utxo is UtxoStorage, Ownable {
         uint256[] publicSignals;
     }
 
-    constructor(address verifierAddr, uint16 _fee) UtxoStorage(verifierAddr) {
+    constructor(address verifierAddr, uint16 _fee) CipherStorage(verifierAddr) {
         if (_fee > FEE_BASE) revert InvalidFeeSetting(_fee);
         fee = _fee;
         IERC20 defaultEthToken = IERC20(DEFAULT_ETH_ADDRESS);

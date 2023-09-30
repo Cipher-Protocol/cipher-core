@@ -16,7 +16,7 @@ export type NullifierInputArgs = {
   signature: string;
 };
 
-export type UtxoCircuitInputArgs = {
+export type CipherCircuitInputArgs = {
   root: string;
   publicInAmt: string;
   publicOutAmt: string;
