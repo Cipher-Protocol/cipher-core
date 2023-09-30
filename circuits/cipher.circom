@@ -7,19 +7,12 @@ include "./keypair.circom";
 include "./signature.circom";
 
 /*
-Utxo structure:
-{
-    amount,
-    pubkey,
-    salt
-}
-
 commitment = hash(amount, pubKey, salt)
 nullifier = hash(commitment, leafIdx, hash(privKey, commitment, leafIdx))
 */
 
 // Universal JoinSplit transaction with n inputs and m outputs
-template Utxo(levels, nIns, mOuts, zeroLeaf) {
+template Cipher(levels, nIns, mOuts) {
     signal input root; // public
     signal input publicInAmt; // public
     signal input publicOutAmt; // public

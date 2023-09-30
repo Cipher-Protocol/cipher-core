@@ -122,11 +122,11 @@ async function makeMainCircom(spec: {
   const circomSourceCode = `
 pragma circom 2.1.5;
 
-include "../../../../circuits/utxo.circom";
+include "../../../../circuits/cipher.circom";
 
 /// deposit input ${spec.nIns}, output ${spec.mOuts} circuit
 component main {public [root, publicInAmt, publicOutAmt, extDataHash, inputNullifier, outputCommitment]}
-  = Utxo(${spec.levels}, ${spec.nIns}, ${spec.mOuts}, ${spec.zeroLeaf});
+  = Cipher(${spec.levels}, ${spec.nIns}, ${spec.mOuts});
 `;
 
   writeFileSync(mainCircomPath, circomSourceCode);
@@ -354,7 +354,6 @@ async function copyVerifierToContract(
     content.replace("Groth16Verifier", name)
   );
 }
-
 
 const cmdLogs: string[] = [];
 function exec(

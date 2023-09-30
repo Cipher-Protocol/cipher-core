@@ -4,8 +4,8 @@ import hre from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import {
   IncrementalBinaryTree,
-  Utxo,
-  Utxo__factory,
+  Cipher,
+  Cipher__factory,
   Verifier,
   Verifier__factory,
 } from "../../typechain-types";
@@ -22,8 +22,8 @@ interface Transaction {
 }
 
 describe("deploy", function () {
-  let UtxoFactory: Utxo__factory;
-  let utxo: Utxo;
+  let cipherFactory: Cipher__factory;
+  let cipher: Cipher;
   let incrementalBinaryTree: IncrementalBinaryTree;
   let VerifierFactory: Verifier__factory;
   let verifier: Verifier;
@@ -48,13 +48,16 @@ describe("deploy", function () {
     incrementalBinaryTree =
       (await IncrementalBinaryTreeFactory.deploy()) as IncrementalBinaryTree;
     await incrementalBinaryTree.deployed();
-    UtxoFactory = (await ethers.getContractFactory("Utxo", {
+    cipherFactory = (await ethers.getContractFactory("Cipher", {
       libraries: {
         IncrementalBinaryTree: incrementalBinaryTree.address,
       },
-    })) as Utxo__factory;
-    utxo = (await UtxoFactory.deploy(verifier.address, DEFAULT_FEE)) as Utxo;
-    await utxo.deployed();
+    })) as Cipher__factory;
+    cipher = (await cipherFactory.deploy(
+      verifier.address,
+      DEFAULT_FEE
+    )) as Cipher;
+    await cipher.deployed();
   });
 
   describe("Create Tx", function () {

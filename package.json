@@ -1,5 +1,5 @@
 {
-  "name": "utxo-circuit",
+  "name": "cipher-core",
   "version": "0.0.1",
   "description": "",
   "license": "MIT",
@@ -9,9 +9,7 @@
     "build:contract": "hardhat compile && hardhat typechain",
     "test:contract": "hardhat test",
     "test:deploy": "hardhat test test/contract/deploy.test.ts",
-    "test:initTokenTree": "hardhat test test/contract/initTokenTree.test.ts",
-    "verify:test:h5n0m2": "sh ./scripts/test/verifyh5n0m2.sh",
-    "verify:test:h5n2m2": "sh ./scripts/test/verifyh5n2m2.sh"
+    "test:initTokenTree": "hardhat test test/contract/initTokenTree.test.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",

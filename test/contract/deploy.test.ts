@@ -3,8 +3,8 @@ import { ethers } from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import {
   IncrementalBinaryTree,
-  Utxo,
-  Utxo__factory,
+  Cipher,
+  Cipher__factory,
   Verifier,
   Verifier__factory,
 } from "../../typechain-types";
@@ -18,8 +18,8 @@ import { BigNumber, utils } from "ethers";
 import { calcInitRoot, calcZeroValue } from "../../utils/calcZeroVal";
 
 describe("deploy", function () {
-  let UtxoFactory: Utxo__factory;
-  let utxo: Utxo;
+  let cipherFactory: Cipher__factory;
+  let cipher: Cipher;
   let incrementalBinaryTree: IncrementalBinaryTree;
   let VerifierFactory: Verifier__factory;
   let verifier: Verifier;
@@ -48,15 +48,18 @@ describe("deploy", function () {
 
   describe("Deploy", function () {
     it("Success to deploy, ETH token tree is init", async function () {
-      UtxoFactory = (await ethers.getContractFactory("Utxo", {
+      cipherFactory = (await ethers.getContractFactory("Cipher", {
         libraries: {
           IncrementalBinaryTree: incrementalBinaryTree.address,
         },
-      })) as Utxo__factory;
-      utxo = (await UtxoFactory.deploy(verifier.address, DEFAULT_FEE)) as Utxo;
-      await utxo.deployed();
+      })) as Cipher__factory;
+      cipher = (await cipherFactory.deploy(
+        verifier.address,
+        DEFAULT_FEE
+      )) as Cipher;
+      await cipher.deployed();
 
-      expect(await utxo.getTreeDepth(DEFAULT_ETH_ADDRESS)).to.equal(20);
+      expect(await cipher.getTreeDepth(DEFAULT_ETH_ADDRESS)).to.equal(20);
       const zeroVal = BigNumber.from(
         keccak256(
           utils.defaultAbiCoder.encode(["address"], [DEFAULT_ETH_ADDRESS])
@@ -64,15 +67,15 @@ describe("deploy", function () {
       ).mod(SNARK_FIELD_SIZE);
       const zeroVals = calcZeroValue(zeroVal.toString(), 20);
       for (let i = 0; i < zeroVals.length; i++) {
-        expect(await utxo.getTreeZeroes(DEFAULT_ETH_ADDRESS, i)).to.equal(
+        expect(await cipher.getTreeZeroes(DEFAULT_ETH_ADDRESS, i)).to.equal(
           zeroVals[i]
         );
       }
       const calcTreeRoot = calcInitRoot(zeroVal.toString(), 20);
-      expect(await utxo.getTreeRoot(DEFAULT_ETH_ADDRESS)).to.equal(
+      expect(await cipher.getTreeRoot(DEFAULT_ETH_ADDRESS)).to.equal(
         calcTreeRoot
       );
-      expect(await utxo.getTreeLeafNum(DEFAULT_ETH_ADDRESS)).to.equal(0);
+      expect(await cipher.getTreeLeafNum(DEFAULT_ETH_ADDRESS)).to.equal(0);
     });
   });
 });

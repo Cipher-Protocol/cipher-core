@@ -3,8 +3,8 @@ import {
   ERC20,
   ERC20Mock__factory,
   IncrementalBinaryTree,
-  Utxo,
-  Utxo__factory,
+  Cipher,
+  Cipher__factory,
   Verifier,
   Verifier__factory,
 } from "../../typechain-types";
@@ -15,8 +15,8 @@ import { calcInitRoot, calcZeroValue } from "../../utils/calcZeroVal";
 import { expect } from "chai";
 
 describe("deploy", function () {
-  let UtxoFactory: Utxo__factory;
-  let utxo: Utxo;
+  let cipherFactory: Cipher__factory;
+  let cipher: Cipher;
   let incrementalBinaryTree: IncrementalBinaryTree;
   let VerifierFactory: Verifier__factory;
   let verifier: Verifier;
@@ -43,13 +43,16 @@ describe("deploy", function () {
     incrementalBinaryTree =
       (await IncrementalBinaryTreeFactory.deploy()) as IncrementalBinaryTree;
     await incrementalBinaryTree.deployed();
-    UtxoFactory = (await ethers.getContractFactory("Utxo", {
+    cipherFactory = (await ethers.getContractFactory("Cipher", {
       libraries: {
         IncrementalBinaryTree: incrementalBinaryTree.address,
       },
-    })) as Utxo__factory;
-    utxo = (await UtxoFactory.deploy(verifier.address, DEFAULT_FEE)) as Utxo;
-    await utxo.deployed();
+    })) as Cipher__factory;
+    cipher = (await cipherFactory.deploy(
+      verifier.address,
+      DEFAULT_FEE
+    )) as Cipher;
+    await cipher.deployed();
     Erc20Factory = (await ethers.getContractFactory(
       "ERC20Mock"
     )) as ERC20Mock__factory;
@@ -58,7 +61,7 @@ describe("deploy", function () {
 
   describe("Initialize new token tree", function () {
     it("Success to initTokenTree", async function () {
-      const initTokenTreeTx = await utxo.initTokenTree(erc20.address);
+      const initTokenTreeTx = await cipher.initTokenTree(erc20.address);
       await initTokenTreeTx.wait();
 
       const zeroVal = BigNumber.from(
@@ -66,28 +69,28 @@ describe("deploy", function () {
       ).mod(SNARK_FIELD_SIZE);
 
       await expect(initTokenTreeTx)
-        .to.emit(utxo, "NewTokenTree")
+        .to.emit(cipher, "NewTokenTree")
         .withArgs(erc20.address, 20, zeroVal.toString());
 
-      expect(await utxo.getTreeDepth(erc20.address)).to.equal(20);
+      expect(await cipher.getTreeDepth(erc20.address)).to.equal(20);
 
       const zeroVals = calcZeroValue(zeroVal.toString(), 20);
       for (let i = 0; i < zeroVals.length; i++) {
-        expect(await utxo.getTreeZeroes(erc20.address, i)).to.equal(
+        expect(await cipher.getTreeZeroes(erc20.address, i)).to.equal(
           zeroVals[i]
         );
       }
       const calcTreeRoot = calcInitRoot(zeroVal.toString(), 20);
-      expect(await utxo.getTreeRoot(erc20.address)).to.equal(calcTreeRoot);
-      expect(await utxo.getTreeLeafNum(erc20.address)).to.equal(0);
+      expect(await cipher.getTreeRoot(erc20.address)).to.equal(calcTreeRoot);
+      expect(await cipher.getTreeLeafNum(erc20.address)).to.equal(0);
     });
     it("Fail to initTokenTree, the token tree is initialized", async function () {
-      const initTokenTreeTx = await utxo.initTokenTree(erc20.address);
+      const initTokenTreeTx = await cipher.initTokenTree(erc20.address);
       await initTokenTreeTx.wait();
 
       await expect(
-        utxo.initTokenTree(erc20.address)
-      ).to.be.revertedWithCustomError(utxo, "TokenTreeAlreadyInitialized");
+        cipher.initTokenTree(erc20.address)
+      ).to.be.revertedWithCustomError(cipher, "TokenTreeAlreadyInitialized");
     });
   });
 });
