@@ -2,7 +2,7 @@
   "root": "0x00",
   "publicInAmt": "300",
   "publicOutAmt": "0",
-  "extDataHash": "123",
+  "publicInfoHash": "123",
   "inputNullifier": [],
   "inAmount": [],
   "inPrivKey": [],

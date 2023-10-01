@@ -20,7 +20,7 @@ export type CipherCircuitInputArgs = {
   root: string;
   publicInAmt: string;
   publicOutAmt: string;
-  extDataHash: string;
+  publicInfoHash: string;
   inputNullifier: string[];
   inAmount: string[];
   inPrivateKey: string[];

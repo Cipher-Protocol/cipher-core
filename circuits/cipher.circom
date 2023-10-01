@@ -3,7 +3,6 @@ pragma circom 2.1.6;
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/poseidon.circom";
 include "./merkleProof.circom";
-include "./keypair.circom";
 include "./signature.circom";
 
 /*
@@ -21,19 +20,22 @@ template Cipher(levels, nIns, mOuts) {
     // utxo input signals
     signal input inputNullifier[nIns]; // public
     signal input inAmount[nIns];
-    signal input inPrivKey[nIns];
-    signal input inSalt[nIns];
+    // seed = sign(msg) by user's EOA
+    // salt for keeping cipher transferable, seed for a specified user
+    signal input inSaltOrSeed[nIns]; 
+    signal input inRandom[nIns];
     signal input inPathIndices[nIns];
     signal input inPathElements[nIns][levels];
 
     // utxo output signals
     signal input outputCommitment[mOuts]; // public
     signal input outAmount[mOuts];
-    signal input outPubkey[mOuts];
-    signal input outSalt[mOuts];
+    signal input outSaltOrSeed[mOuts];
+    signal input outRandom[mOuts];
 
     // internal calculation signals
-    signal inPubKey[nIns];
+    // UserId = hash(seed)
+    signal inHashedSaltOrUserId[nIns];
     signal inCommitmentHash[nIns];
     signal inSignature[nIns];
     signal inNullifier[nIns];
@@ -57,17 +59,17 @@ template Cipher(levels, nIns, mOuts) {
 
     // verify correctness of utxo inputs
     for (var i = 0; i < nIns; i++) {
-        // calculate public key from input private key
-        inPubKey[i] <== Keypair()(inPrivKey[i]);
+        // calculate hashed salt or UserId from input salt or seed
+        inHashedSaltOrUserId[i] <== Poseidon(1)([inSaltOrSeed[i]]);
 
         // calculate input commitment hash from input signal
-        inCommitmentHash[i] <== Poseidon(3)([inAmount[i], inPubKey[i], inSalt[i]]);
+        inCommitmentHash[i] <== Poseidon(3)([inAmount[i], inHashedSaltOrUserId[i], inRandom[i]]);
         
         // calculate signature from input signal
-        inSignature[i] <== Signature()(inPrivKey[i], inCommitmentHash[i], inPathIndices[i]);
+        // inSignature[i] <== Signature()(inSaltOrSeed[i], inCommitmentHash[i], inPathIndices[i]);
         
         // calculate nullifier from input signal
-        inNullifier[i] <== Poseidon(3)([inCommitmentHash[i], inPathIndices[i], inSignature[i]]);
+        inNullifier[i] <== Poseidon(3)([inCommitmentHash[i], inPathIndices[i], inSaltOrSeed[i]]);
         // check that nullifier matches the public input
         inNullifier[i] === inputNullifier[i];
 
@@ -83,7 +85,7 @@ template Cipher(levels, nIns, mOuts) {
     // verify correctness of utxo outputs
     for (var i = 0; i < mOuts; i++) {
         // calculate output commitment hash
-        outCommitmentHash[i] <== Poseidon(3)([outAmount[i], outPubkey[i], outSalt[i]]);
+        outCommitmentHash[i] <== Poseidon(3)([outAmount[i], outSaltOrSeed[i], outRandom[i]]);
         // check that output commitment hash matches the public input
         outCommitmentHash[i] === outputCommitment[i];
         // Check that amount fits into 248 bits to prevent overflow
