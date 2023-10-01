@@ -16,7 +16,7 @@ template Cipher(levels, nIns, mOuts) {
     signal input root; // public
     signal input publicInAmt; // public
     signal input publicOutAmt; // public
-    signal input extDataHash; // public
+    signal input publicInfoHash; // public
 
     // utxo input signals
     signal input inputNullifier[nIns]; // public
@@ -107,6 +107,6 @@ template Cipher(levels, nIns, mOuts) {
     // verify amount invariant
     sumIns + publicInAmt === sumOuts + publicOutAmt;
 
-    // optional safety constraint to make sure extDataHash cannot be changed
-    signal extDataSquare <== extDataHash * extDataHash;
+    // optional safety constraint to make sure publicInfoHash cannot be changed
+    signal publicInfoSquare <== publicInfoHash * publicInfoHash;
 }
