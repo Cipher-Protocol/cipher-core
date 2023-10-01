@@ -125,7 +125,7 @@ pragma circom 2.1.5;
 include "../../../../circuits/cipher.circom";
 
 /// deposit input ${spec.nIns}, output ${spec.mOuts} circuit
-component main {public [root, publicInAmt, publicOutAmt, extDataHash, inputNullifier, outputCommitment]}
+component main {public [root, publicInAmt, publicOutAmt, publicInfoHash, inputNullifier, outputCommitment]}
   = Cipher(${spec.levels}, ${spec.nIns}, ${spec.mOuts});
 `;
 

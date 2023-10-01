@@ -1,6 +1,6 @@
 [
   { "nIns": 0, "mOuts": 1 },
-  { "nIns": 0, "mOuts": 2, "inputPath": "test/circuit/h5n0m2/input.json" },
+  { "nIns": 0, "mOuts": 2 },
   { "nIns": 0, "mOuts": 4 },
   { "nIns": 1, "mOuts": 0 },
   { "nIns": 1, "mOuts": 1 },
@@ -8,7 +8,7 @@
   { "nIns": 1, "mOuts": 4 },
   { "nIns": 2, "mOuts": 0 },
   { "nIns": 2, "mOuts": 1 },
-  { "nIns": 2, "mOuts": 2, "inputPath": "test/circuit/h5n2m2/input.json" },
+  { "nIns": 2, "mOuts": 2 },
   { "nIns": 2, "mOuts": 4 },
   { "nIns": 4, "mOuts": 0 },
   { "nIns": 4, "mOuts": 1 },
