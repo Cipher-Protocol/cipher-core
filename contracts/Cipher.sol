@@ -36,7 +36,7 @@ contract Cipher is CipherStorage, Ownable {
         address payable recipient;
         address payable relayer;
         uint256 fee;
-        bytes data;
+        bytes data; // NOTE: abi.encode([tokenAddress, ...])
     }
 
     struct UtxoData {
@@ -60,9 +60,14 @@ contract Cipher is CipherStorage, Ownable {
         if (_fee > FEE_BASE) revert InvalidFeeSetting(_fee);
         fee = _fee;
         IERC20 defaultEthToken = IERC20(DEFAULT_ETH_ADDRESS);
+        // NOTE: reference railgun's implementation
         uint256 zeroValue = uint256(keccak256(abi.encode(defaultEthToken))) % SNARK_SCALAR_FIELD;
         treeData[defaultEthToken].incrementalTreeData.init(DEFAULT_TREE_DEPTH, zeroValue);
         emit NewTokenTree(defaultEthToken, DEFAULT_TREE_DEPTH, zeroValue);
+
+        console.log("Utxo contract deployed");
+        console.log("zeroValue", zeroValue);
+        console.log("root", treeData[defaultEthToken].incrementalTreeData.root);
     }
 
     function initTokenTree(IERC20 token) external {
@@ -91,6 +96,7 @@ contract Cipher is CipherStorage, Ownable {
             _transferFrom(token, msg.sender, utxoData.publicInAmt);
         }
 
+        // check utxoType(nAmB), n is the number of INPUT nullifiers, m is the number of OUTPUT commitments
         _checkUtxoType(publicInfo.utxoType, utxoData.inputNullifiers.length, utxoData.outputCommitments.length);
 
         uint256 publicInfoHash = uint256(keccak256(abi.encode(publicInfo))) % SNARK_SCALAR_FIELD;
@@ -106,6 +112,10 @@ contract Cipher is CipherStorage, Ownable {
         }
 
         if (
+            // NOTE: publicSignals: root, publicInAmt, publicOutAmt, extDataHash, inputNullifier, outputCommitment
+            // TODO: rename extDataHash
+            // TODO: circuit public need add: token??
+            // TODO: public data: need to from contract storage, Ex. root
             !verifier.verifyProof(
                 utxoData.proof.a,
                 utxoData.proof.b,
@@ -127,6 +137,7 @@ contract Cipher is CipherStorage, Ownable {
             tree.incrementalTreeData.insert(commitment);
             emit NewCommitment(token, commitment, tree.incrementalTreeData.numberOfLeaves);
         }
+        require(utxoData.proof.publicSignals[0] == tree.incrementalTreeData.root, "Invalid root");
         /* ========== core logic end ========== */
 
         // TODO: move to internal function _afterCreateTx
@@ -144,6 +155,9 @@ contract Cipher is CipherStorage, Ownable {
         }
 
         if (feeAmt > 0) _transfer(token, publicInfo.relayer, feeAmt);
+
+        // TODO: UtxoData.publicSignals.root is equal to tree.incrementalTreeData
+
         /* ========== after core logic end ========== */
     }
 
