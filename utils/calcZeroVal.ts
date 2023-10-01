@@ -1,4 +1,3 @@
-import { DEFAULT_ZERO_LEAF_VALUE } from "../config";
 import { calcPoseidonHash } from "./calcPoseidonHash";
 
 // calculate zero value for merkle tree
@@ -15,7 +14,6 @@ export const calcZeroValue = (
   }
   return zeroValueArr;
 };
-// calcZeroValue(DEFAULT_ZERO_LEAF_VALUE, 5);
 
 export const calcInitRoot = (
   defaultZeroLeafValue: string,

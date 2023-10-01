@@ -11,8 +11,9 @@ import {
 } from "fs";
 import util from "util";
 import * as dotenv from "dotenv";
-import { DEFAULT_TREE_HEIGHT, DEFAULT_ZERO_LEAF_VALUE } from "../config";
+import { DEFAULT_TREE_HEIGHT } from "../config";
 import { prove } from "./prove";
+import { getDefaultLeaf } from "./lib/utxo.helper";
 const _exec = util.promisify(require("child_process").exec);
 
 const PTAU_PATH = resolve(__dirname, "../ptau/pot16_final.ptau");
@@ -23,7 +24,9 @@ const VERIFIER_BASE_DIR = resolve(BASE_DIR, "../verifiers");
 dotenv.config();
 
 const groth16 = snarkjs.groth16;
-
+// TODO: zeroLeaf should from config
+const ethTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+const DEFAULT_ZERO_LEAF_VALUE = getDefaultLeaf(ethTokenAddress).toString();
 interface UtxoConfigInterface {
   nIns: number;
   mOuts: number;

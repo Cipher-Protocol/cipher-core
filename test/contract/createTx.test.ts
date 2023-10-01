@@ -9,9 +9,20 @@ import {
   Verifier,
   Verifier__factory,
 } from "../../typechain-types";
-import { DEFAULT_FEE } from "../../config";
+import { DEFAULT_FEE, DEFAULT_TREE_HEIGHT } from "../../config";
+import { BigNumber, utils } from "ethers";
+
+import { genTxForZeroIn, initTree } from "../../scripts/gen_testcase";
+import { asyncPoseidonHash } from "../../scripts/lib/poseidonHash";
+import { getDefaultLeaf } from "../../scripts/lib/utxo.helper";
+import { IncrementalQuinTree } from "../../scripts/lib/IncrementalQuinTree";
 
 const ethers = hre.ethers;
+const ethTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+const SPEC = {
+  treeHeight: DEFAULT_TREE_HEIGHT,
+  defaultLeafHash: getDefaultLeaf(ethTokenAddress).toString(),
+};
 
 interface Transaction {
   privateIn?: number;
@@ -27,6 +38,12 @@ describe("deploy", function () {
   let incrementalBinaryTree: IncrementalBinaryTree;
   let VerifierFactory: Verifier__factory;
   let verifier: Verifier;
+  let tree!: IncrementalQuinTree;
+
+  before(async function () {
+    await asyncPoseidonHash;
+  });
+
   beforeEach(async function () {
     VerifierFactory = (await ethers.getContractFactory(
       "Verifier"
@@ -58,10 +75,61 @@ describe("deploy", function () {
       DEFAULT_FEE
     )) as Cipher;
     await cipher.deployed();
+
+    /** init tree */
+    tree = initTree(SPEC.treeHeight, SPEC.defaultLeafHash);
   });
 
+
+  /** simple test case
+   * n0m1
+   * n0m2
+   * ....
+   * n0mX
+   * n0m1 -> n1m1 
+   * n0m2 -> n2m0
+   * n0m2 -> n2m1
+   * etc .......
+   */
+
   describe("Create Tx", function () {
-    it("Success to create n0m1 Tx, publicIn 300, privateOut 300, publicOut 0", async function () {});
-    it("Success to create n1m1 Tx, privateIn 300, privateOut 250, publicOut 50", async function () {});
+    it("Success to create h5n0m1 Tx, publicIn 0.1 ETH, 1 privateOut (0.1), publicOut 0", async function () {
+      console.log({
+        SPEC,
+        initialRoot: (tree.root),
+      })
+      const decimals = BigNumber.from(10).pow(18);
+      const {
+        contractCalldata,
+      } = await genTxForZeroIn(tree, [
+        BigInt(BigNumber.from('1').mul(decimals).mod(10).toString()), // 0.1 ETH
+        // BigInt(BigNumber.from('2').mul(decimals).mod(10).toString()), // 0.2 ETH
+      ]);
+      console.log({
+        contractCalldata,
+        nextRoot: (tree.root),
+      })
+      const result = await cipher.createTx(
+        contractCalldata.utxoData,
+        contractCalldata.publicInfo,
+      )
+      await result.wait();
+
+    });
+
+    it("Success to create h5n0m1 Tx, publicIn 0.3 ETH, 2 privateOut(0.1, 0.2), publicOut 0", async function () {
+      const decimals = BigNumber.from(10).pow(18);
+      const {
+        contractCalldata,
+      } = await genTxForZeroIn(tree, [
+        BigInt(BigNumber.from('1').mul(decimals).mod(10).toString()), // 0.1 ETH
+        BigInt(BigNumber.from('2').mul(decimals).mod(10).toString()), // 0.2 ETH
+      ]);
+      const result = await cipher.createTx(
+        contractCalldata.utxoData,
+        contractCalldata.publicInfo,
+      )
+      await result.wait();  
+    });
   });
 });

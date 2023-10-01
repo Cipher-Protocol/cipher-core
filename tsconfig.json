@@ -1,4 +1,5 @@
 {
+  "extension": ["ts"],
   "compilerOptions": {
     "lib": ["esnext"],
     "target": "ES2020",
@@ -9,11 +10,13 @@
     "outDir": "./dist",
     "strict": true,
     "rootDirs": ["./src", "./scripts", "./test"],
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   },
   "include": ["scripts/**/*.ts", "test/**/*.ts"],
   "ts-node": {
     "files": true
   },
-  "files": ["./hardhat.config.ts"]
+  "files": ["./hardhat.config.ts"],
+  "require": "ts-node/register"
 }

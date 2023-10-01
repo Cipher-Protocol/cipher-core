@@ -3,6 +3,20 @@ const snarkjs = require("snarkjs");
 const groth16 = snarkjs.groth16;
 import { resolve } from "path";
 import { readFileSync, writeFileSync } from "fs";
+const DEBUG = false;
+
+export async function proveByName(circuitName: string, inputPath?: string) {
+  const heightName = circuitName.slice(0, 2)
+  const specName = circuitName.slice(2, 6);
+  const circomBaseDir = resolve(__dirname, `../build/circuits/${heightName}/${specName}`);
+  const zkeyPath = resolve(circomBaseDir, `${circuitName}_final.zkey`);
+  return await prove(
+    circuitName,
+    circomBaseDir,
+    zkeyPath,
+    inputPath || resolve(circomBaseDir, "input.json")
+  );
+}
 
 export async function prove(
   circuitName: string,
@@ -20,7 +34,7 @@ export async function prove(
     inputContent,
     wasmPath,
     zkeyPath,
-    console
+    DEBUG ? console : undefined
   );
 
   // const witnessPath = resolve(circomBaseDir, `${circuitName}_witness.wtns`);
@@ -29,6 +43,7 @@ export async function prove(
   // const { proof, publicSignals } = await generateProof(zkeyPath, witnessPath);
 
   const calldataPath = resolve(circomBaseDir, `${circuitName}_calldata.json`);
+
   const { calldata } = await generateSolidityCalldata(
     proof,
     publicSignals,
