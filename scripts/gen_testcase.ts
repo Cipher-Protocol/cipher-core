@@ -10,11 +10,11 @@ import {
   getPublicKey,
   getUtxoType,
 } from "./lib/utxo.helper";
-import { UtxoCoinInfo, UtxoPayableCoin } from "./lib/utxo/coin";
+import { CipherCoinInfo, CipherPayableCoin } from "./lib/utxo/coin";
 import { Cipher } from "../typechain-types";
 import { resolve } from "path";
 import { proveByName } from "./prove";
-import { toDecimalStringObject } from "./lib/helper";
+import { assert, toDecimalStringObject } from "./lib/helper";
 
 const ethTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
@@ -34,10 +34,14 @@ async function main() {
   });
 
   const decimals = BigNumber.from(10).pow(18);
-  const { circuitInput, contractCalldata } = await genTxForZeroIn(tree, [
-    BigInt(BigNumber.from("1").mul(decimals).mod(10).toString()), // 0.1 ETH
-    BigInt(BigNumber.from("2").mul(decimals).mod(10).toString()), // 0.2 ETH
-  ]);
+  const { circuitInput, contractCalldata } = await genTxForZeroIn(tree, 
+    BigInt(BigNumber.from("1").mul(decimals).mod(10).toString()),
+    0n,
+    [],
+    [
+      BigInt(BigNumber.from("1").mul(decimals).mod(10).toString()), // 0.1 ETH
+      BigInt(BigNumber.from("2").mul(decimals).mod(10).toString()), // 0.2 ETH
+    ]);
 
   console.log({
     circuitInput,
@@ -68,7 +72,7 @@ export function initTree(depth: number, zeroLeaf: string): IncrementalQuinTree {
 export function getRandomAmtCoinInfo(privKey: bigint, salt: bigint) {
   const decimal = BigNumber.from(10).pow(18);
   const randomAmt = BigNumber.from(Math.floor(Math.random() * 10)).mul(decimal); // 0 ~ 9 ETH
-  const coinInfo: UtxoCoinInfo = {
+  const coinInfo: CipherCoinInfo = {
     key: {
       privKey,
       pubKey: getPublicKey(privKey),
@@ -80,7 +84,7 @@ export function getRandomAmtCoinInfo(privKey: bigint, salt: bigint) {
 }
 
 export function getCoinInfoFromAmt(amt: bigint, privKey: bigint, salt: bigint) {
-  const coinInfo: UtxoCoinInfo = {
+  const coinInfo: CipherCoinInfo = {
     key: {
       privKey,
       pubKey: getPublicKey(privKey),
@@ -93,33 +97,42 @@ export function getCoinInfoFromAmt(amt: bigint, privKey: bigint, salt: bigint) {
 
 export async function genTxForZeroIn(
   tree: IncrementalQuinTree,
-  outAmts: bigint[]
+  publicInAmt: bigint,
+  publicOutAmt: bigint,
+  privateInCoins: CipherPayableCoin[] = [],
+  privateOutAmts: bigint[],
 ) {
-  const coins: UtxoPayableCoin[] = [];
+  const privateOutCoins: CipherPayableCoin[] = [];
   const previousRoot = tree.root;
+
+  const totalPrivateInAmount = privateInCoins.reduce(
+    (acc, coin) => acc + coin.coinInfo.amount,
+    0n
+  );
+  const totalPrivateOutAmount = privateOutAmts.reduce(
+    (acc, amt) => acc + amt,
+    0n
+  );
+  assert(publicInAmt + totalPrivateInAmount === publicOutAmt + totalPrivateOutAmount, "inAmounts and outAmounts are not balanced")
 
   // TODO: How to get privKey and salt?
   const privKey = 1n;
   const salt = 2n;
 
-  const outputLength = outAmts.length;
+  const outputLength = privateOutAmts.length;
 
   for (let index = 0; index < outputLength; index++) {
-    const coinInfo = getCoinInfoFromAmt(outAmts[index], privKey, salt);
+    const coinInfo = getCoinInfoFromAmt(privateOutAmts[index], privKey, salt);
     const leafId = tree.nextIndex;
-    const payableCoin = new UtxoPayableCoin(coinInfo, tree, leafId);
+    const payableCoin = new CipherPayableCoin(coinInfo, tree, leafId);
     tree.insert(payableCoin.getCommitment());
-    coins.push(payableCoin);
+    privateOutCoins.push(payableCoin);
     console.log({
       coinInfo,
       nextIndex: tree.nextIndex,
       root: tree.root,
     });
   }
-
-  const publicInAmt = coins.reduce((acc, item) => {
-    return acc + item.coinInfo.amount;
-  }, 0n); // deposit amount
 
   const latestRoot = tree.root;
   const publicInfo: Cipher.PublicInfoStruct = {
@@ -136,22 +149,22 @@ export async function genTxForZeroIn(
   const circuitInput = {
     root: latestRoot,
     publicInAmt,
-    publicOutAmt: 0n,
+    publicOutAmt,
     publicInfoHash: BigInt(publicInfoHash),
 
     // 0 Inputs
-    inRandom: [],
-    inSaltOrSeed: [],
-    inputNullifier: [],
-    inAmount: [],
-    inPathIndices: [],
-    inPathElements: [],
+    inRandom: privateInCoins.map((coin) => coin.coinInfo.key.salt),
+    inSaltOrSeed: privateInCoins.map((coin) => coin.coinInfo.key.pubKey),
+    inputNullifier: privateInCoins.map((coin) => coin.getNullifier()),
+    inAmount: privateInCoins.map((coin) => coin.coinInfo.amount),
+    inPathIndices: privateInCoins.map((coin) => coin.getPathIndices()),
+    inPathElements: privateInCoins.map((coin) => coin.getPathElements()),
 
     // outNumber outputs
-    outputCommitment: coins.map((coin) => coin.getCommitment()),
-    outAmount: coins.map((coin) => coin.coinInfo.amount),
-    outSaltOrSeed: coins.map((coin) => coin.coinInfo.key.pubKey),
-    outRandom: coins.map((coin) => coin.coinInfo.key.salt),
+    outputCommitment: privateOutCoins.map((coin) => coin.getCommitment()),
+    outAmount: privateOutCoins.map((coin) => coin.coinInfo.amount),
+    outSaltOrSeed: privateOutCoins.map((coin) => coin.coinInfo.key.pubKey),
+    outRandom: privateOutCoins.map((coin) => coin.coinInfo.key.salt),
   };
 
   /** Prove */
@@ -188,11 +201,12 @@ export async function genTxForZeroIn(
     publicOutAmt: "0",
     publicInfoHash,
     inputNullifiers: [], // no input
-    outputCommitments: coins.map((coin) => coin.getCommitment().toString()),
+    outputCommitments: privateOutCoins.map((coin) => coin.getCommitment().toString()),
   };
 
   return {
     tree,
+    privateOutCoins,
     circuitInput,
     contractCalldata: {
       utxoData,

@@ -3,24 +3,24 @@ import { assert } from "../helper";
 import { generateCommitment, generateNullifier, generateSignature, indicesToPathIndices } from "../utxo.helper";
 import { CircuitUtxoTxInput, CircuitUtxoTxOutput } from "../../types/utxo-circuit.type";
 
-export interface UtxoCoinKey {
+export interface CipherCoinKey {
   privKey?: bigint;
   pubKey: bigint;
   salt: bigint;
 }
 
-export interface UtxoCoinInfo {
-  key: UtxoCoinKey;
+export interface CipherCoinInfo {
+  key: CipherCoinKey;
   amount: bigint;
 }
 
-export class UtxoBaseCoin {
-  coinInfo!: UtxoCoinInfo;
+export class CipherBaseCoin {
+  coinInfo!: CipherCoinInfo;
 
   constructor({
     key,
     amount,
-  }: UtxoCoinInfo) {
+  }: CipherCoinInfo) {
     this.coinInfo = {
       key,
       amount,
@@ -41,11 +41,11 @@ export class UtxoBaseCoin {
   }
 }
 
-export class UtxoPayableCoin extends UtxoBaseCoin {
+export class CipherPayableCoin extends CipherBaseCoin {
   readonly tree!: IncrementalQuinTree;
   readonly leafId!: number;
 
-  constructor(coinInfo: UtxoCoinInfo, tree: IncrementalQuinTree, leafId: number) {
+  constructor(coinInfo: CipherCoinInfo, tree: IncrementalQuinTree, leafId: number) {
     super(coinInfo);
     this.tree = tree;
 
@@ -57,6 +57,12 @@ export class UtxoPayableCoin extends UtxoBaseCoin {
   getPathIndices() {
     const { indices, } = this.tree.genMerklePath(Number(this.leafId));
     return indicesToPathIndices(indices);
+  }
+
+  getPathElements() {
+    const { pathElements, } = this.tree.genMerklePath(Number(this.leafId));
+    assert(pathElements.every(v => v.length === 1), "pathElements each length should be 1");
+    return pathElements.map(v => v[0]);
   }
 
   getNullifier() {
