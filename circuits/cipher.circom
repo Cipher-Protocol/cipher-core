@@ -6,8 +6,8 @@ include "./merkleProof.circom";
 include "./signature.circom";
 
 /*
-commitment = hash(amount, pubKey, salt)
-nullifier = hash(commitment, leafIdx, hash(privKey, commitment, leafIdx))
+commitment = hash(amount, hashedSaltOrUserId, random)
+nullifier = hash(commitment, leafIdx, saltOrSeed)
 */
 
 // Universal JoinSplit transaction with n inputs and m outputs
@@ -30,7 +30,7 @@ template Cipher(levels, nIns, mOuts) {
     // utxo output signals
     signal input outputCommitment[mOuts]; // public
     signal input outAmount[mOuts];
-    signal input outSaltOrSeed[mOuts];
+    signal input outHashedSaltOrUserId[mOuts]; // outPubKey
     signal input outRandom[mOuts];
 
     // internal calculation signals
@@ -65,6 +65,7 @@ template Cipher(levels, nIns, mOuts) {
         // calculate input commitment hash from input signal
         inCommitmentHash[i] <== Poseidon(3)([inAmount[i], inHashedSaltOrUserId[i], inRandom[i]]);
         
+        //TODO: check why need this?
         // calculate signature from input signal
         // inSignature[i] <== Signature()(inSaltOrSeed[i], inCommitmentHash[i], inPathIndices[i]);
         
@@ -85,7 +86,7 @@ template Cipher(levels, nIns, mOuts) {
     // verify correctness of utxo outputs
     for (var i = 0; i < mOuts; i++) {
         // calculate output commitment hash
-        outCommitmentHash[i] <== Poseidon(3)([outAmount[i], outSaltOrSeed[i], outRandom[i]]);
+        outCommitmentHash[i] <== Poseidon(3)([outAmount[i], outHashedSaltOrUserId[i], outRandom[i]]);
         // check that output commitment hash matches the public input
         outCommitmentHash[i] === outputCommitment[i];
         // Check that amount fits into 248 bits to prevent overflow
