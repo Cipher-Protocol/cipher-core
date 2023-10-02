@@ -86,6 +86,21 @@ contract Cipher is CipherStorage, Ownable {
         emit NewRelayer(msg.sender, fee, url);
     }
 
+    // TODO: not completed
+    function _isHistoryRoot(TreeData storage tree, uint256 root) internal view returns (bool) {
+        uint256 start = VALID_HISTORY_ROOTS_SIZE - tree.historyRootsIdx; // 32 - 27 = 5
+        uint256 end = start + VALID_HISTORY_ROOTS_SIZE; // 5 + 32 = 37
+        // 5, 6, 7, ...36
+        for (start; start < end; ++start) {
+            // 27, 26, 25, ... 29, 28
+            uint256 rootIdx = VALID_HISTORY_ROOTS_SIZE - (start % VALID_HISTORY_ROOTS_SIZE); // 32 - (5 % 32) = 27
+            if (root == tree.historyRoots[rootIdx]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function createTx(UtxoData memory utxoData, PublicInfo memory publicInfo) external payable {
         IERC20 token = IERC20(_parseData(publicInfo.data));
         TreeData storage tree = treeData[token];
@@ -95,13 +110,19 @@ contract Cipher is CipherStorage, Ownable {
         /* ========== before core logic start ========== */
         // check root is valid
         if (utxoData.root != tree.incrementalTreeData.root) {
-            //TODO: check is in history roots from historyRootsIdx back
-            // bool isHistoryRoot = false;
-            // for (uint256 i; i < VALID_HISTORY_ROOTS_SIZE; ++i) {
-            //     // i = 0, 1, 2, ...30, 31
-            //     // rootIdx = historyRootsIdx, historyRootsIdx - 1, historyRootsIdx - 2, ...historyRootsIdx + 2, historyRootsIdx + 1
-            // }
-            // if (!isHistoryRoot) revert InvalidRoot(utxoData.root);
+            bool isHistoryRoot = false;
+            uint256 start = VALID_HISTORY_ROOTS_SIZE - tree.historyRootsIdx; // 32 - 27 = 5
+            uint256 end = start + VALID_HISTORY_ROOTS_SIZE; // 5 + 32 = 37
+            // 5, 6, 7, ...36
+            for (start; start < end; ++start) {
+                // 27, 26, 25, ... 29, 28
+                uint256 rootIdx = VALID_HISTORY_ROOTS_SIZE - (start % VALID_HISTORY_ROOTS_SIZE); // 32 - (5 % 32) = 27
+                if (utxoData.root == tree.historyRoots[rootIdx]) {
+                    isHistoryRoot = true;
+                    break;
+                }
+            }
+            if (!isHistoryRoot) revert InvalidRoot(utxoData.root);
         }
 
         _handleTransferFrom(token, msg.sender, utxoData.publicInAmt);
