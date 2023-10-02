@@ -107,60 +107,6 @@ contract Verifier is VerifierConfig {
                     deltay1 := n1m2_deltay1
                     deltay2 := n1m2_deltay2
                 }
-                case hex"0104" {
-                    deltax1 := n1m4_deltax1
-                    deltax2 := n1m4_deltax2
-                    deltay1 := n1m4_deltay1
-                    deltay2 := n1m4_deltay2
-                }
-                case hex"0200" {
-                    deltax1 := n2m0_deltax1
-                    deltax2 := n2m0_deltax2
-                    deltay1 := n2m0_deltay1
-                    deltay2 := n2m0_deltay2
-                }
-                case hex"0201" {
-                    deltax1 := n2m1_deltax1
-                    deltax2 := n2m1_deltax2
-                    deltay1 := n2m1_deltay1
-                    deltay2 := n2m1_deltay2
-                }
-                case hex"0202" {
-                    deltax1 := n2m2_deltax1
-                    deltax2 := n2m2_deltax2
-                    deltay1 := n2m2_deltay1
-                    deltay2 := n2m2_deltay2
-                }
-                case hex"0204" {
-                    deltax1 := n2m4_deltax1
-                    deltax2 := n2m4_deltax2
-                    deltay1 := n2m4_deltay1
-                    deltay2 := n2m4_deltay2
-                }
-                case hex"0400" {
-                    deltax1 := n4m0_deltax1
-                    deltax2 := n4m0_deltax2
-                    deltay1 := n4m0_deltay1
-                    deltay2 := n4m0_deltay2
-                }
-                case hex"0401" {
-                    deltax1 := n4m1_deltax1
-                    deltax2 := n4m1_deltax2
-                    deltay1 := n4m1_deltay1
-                    deltay2 := n4m1_deltay2
-                }
-                case hex"0402" {
-                    deltax1 := n4m2_deltax1
-                    deltax2 := n4m2_deltax2
-                    deltay1 := n4m2_deltay1
-                    deltay2 := n4m2_deltay2
-                }
-                case hex"0404" {
-                    deltax1 := n4m4_deltax1
-                    deltax2 := n4m4_deltax2
-                    deltay1 := n4m4_deltay1
-                    deltay2 := n4m4_deltay2
-                }
 
                 default {
                     // this is not allowed
@@ -194,42 +140,6 @@ contract Verifier is VerifierConfig {
                 case hex"0102" {
                     IC0x := n1m2_IC0x
                     IC0y := n1m2_IC0y
-                }
-                case hex"0104" {
-                    IC0x := n1m4_IC0x
-                    IC0y := n1m4_IC0y
-                }
-                case hex"0200" {
-                    IC0x := n2m0_IC0x
-                    IC0y := n2m0_IC0y
-                }
-                case hex"0201" {
-                    IC0x := n2m1_IC0x
-                    IC0y := n2m1_IC0y
-                }
-                case hex"0202" {
-                    IC0x := n2m2_IC0x
-                    IC0y := n2m2_IC0y
-                }
-                case hex"0204" {
-                    IC0x := n2m4_IC0x
-                    IC0y := n2m4_IC0y
-                }
-                case hex"0400" {
-                    IC0x := n4m0_IC0x
-                    IC0y := n4m0_IC0y
-                }
-                case hex"0401" {
-                    IC0x := n4m1_IC0x
-                    IC0y := n4m1_IC0y
-                }
-                case hex"0402" {
-                    IC0x := n4m2_IC0x
-                    IC0y := n4m2_IC0y
-                }
-                case hex"0404" {
-                    IC0x := n4m4_IC0x
-                    IC0y := n4m4_IC0y
                 }
 
                 default {
@@ -289,103 +199,6 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n1m2_IC5x, n1m2_IC5y, calldataload(add(pubSignals, 128)))
                     g1_mulAccC(_pVk, n1m2_IC6x, n1m2_IC6y, calldataload(add(pubSignals, 160)))
                     g1_mulAccC(_pVk, n1m2_IC7x, n1m2_IC7y, calldataload(add(pubSignals, 192)))
-                }
-                case hex"0104" {
-                    g1_mulAccC(_pVk, n1m4_IC1x, n1m4_IC1y, calldataload(pubSignals))
-                    g1_mulAccC(_pVk, n1m4_IC2x, n1m4_IC2y, calldataload(add(pubSignals, 32)))
-                    g1_mulAccC(_pVk, n1m4_IC3x, n1m4_IC3y, calldataload(add(pubSignals, 64)))
-                    g1_mulAccC(_pVk, n1m4_IC4x, n1m4_IC4y, calldataload(add(pubSignals, 96)))
-                    g1_mulAccC(_pVk, n1m4_IC5x, n1m4_IC5y, calldataload(add(pubSignals, 128)))
-                    g1_mulAccC(_pVk, n1m4_IC6x, n1m4_IC6y, calldataload(add(pubSignals, 160)))
-                    g1_mulAccC(_pVk, n1m4_IC7x, n1m4_IC7y, calldataload(add(pubSignals, 192)))
-                    g1_mulAccC(_pVk, n1m4_IC8x, n1m4_IC8y, calldataload(add(pubSignals, 224)))
-                    g1_mulAccC(_pVk, n1m4_IC9x, n1m4_IC9y, calldataload(add(pubSignals, 256)))
-                }
-                case hex"0200" {
-                    g1_mulAccC(_pVk, n2m0_IC1x, n2m0_IC1y, calldataload(pubSignals))
-                    g1_mulAccC(_pVk, n2m0_IC2x, n2m0_IC2y, calldataload(add(pubSignals, 32)))
-                    g1_mulAccC(_pVk, n2m0_IC3x, n2m0_IC3y, calldataload(add(pubSignals, 64)))
-                    g1_mulAccC(_pVk, n2m0_IC4x, n2m0_IC4y, calldataload(add(pubSignals, 96)))
-                    g1_mulAccC(_pVk, n2m0_IC5x, n2m0_IC5y, calldataload(add(pubSignals, 128)))
-                    g1_mulAccC(_pVk, n2m0_IC6x, n2m0_IC6y, calldataload(add(pubSignals, 160)))
-                }
-                case hex"0201" {
-                    g1_mulAccC(_pVk, n2m1_IC1x, n2m1_IC1y, calldataload(pubSignals))
-                    g1_mulAccC(_pVk, n2m1_IC2x, n2m1_IC2y, calldataload(add(pubSignals, 32)))
-                    g1_mulAccC(_pVk, n2m1_IC3x, n2m1_IC3y, calldataload(add(pubSignals, 64)))
-                    g1_mulAccC(_pVk, n2m1_IC4x, n2m1_IC4y, calldataload(add(pubSignals, 96)))
-                    g1_mulAccC(_pVk, n2m1_IC5x, n2m1_IC5y, calldataload(add(pubSignals, 128)))
-                    g1_mulAccC(_pVk, n2m1_IC6x, n2m1_IC6y, calldataload(add(pubSignals, 160)))
-                    g1_mulAccC(_pVk, n2m1_IC7x, n2m1_IC7y, calldataload(add(pubSignals, 192)))
-                }
-                case hex"0202" {
-                    g1_mulAccC(_pVk, n2m2_IC1x, n2m2_IC1y, calldataload(pubSignals))
-                    g1_mulAccC(_pVk, n2m2_IC2x, n2m2_IC2y, calldataload(add(pubSignals, 32)))
-                    g1_mulAccC(_pVk, n2m2_IC3x, n2m2_IC3y, calldataload(add(pubSignals, 64)))
-                    g1_mulAccC(_pVk, n2m2_IC4x, n2m2_IC4y, calldataload(add(pubSignals, 96)))
-                    g1_mulAccC(_pVk, n2m2_IC5x, n2m2_IC5y, calldataload(add(pubSignals, 128)))
-                    g1_mulAccC(_pVk, n2m2_IC6x, n2m2_IC6y, calldataload(add(pubSignals, 160)))
-                    g1_mulAccC(_pVk, n2m2_IC7x, n2m2_IC7y, calldataload(add(pubSignals, 192)))
-                    g1_mulAccC(_pVk, n2m2_IC8x, n2m2_IC8y, calldataload(add(pubSignals, 224)))
-                }
-                case hex"0204" {
-                    g1_mulAccC(_pVk, n2m4_IC1x, n2m4_IC1y, calldataload(pubSignals))
-                    g1_mulAccC(_pVk, n2m4_IC2x, n2m4_IC2y, calldataload(add(pubSignals, 32)))
-                    g1_mulAccC(_pVk, n2m4_IC3x, n2m4_IC3y, calldataload(add(pubSignals, 64)))
-                    g1_mulAccC(_pVk, n2m4_IC4x, n2m4_IC4y, calldataload(add(pubSignals, 96)))
-                    g1_mulAccC(_pVk, n2m4_IC5x, n2m4_IC5y, calldataload(add(pubSignals, 128)))
-                    g1_mulAccC(_pVk, n2m4_IC6x, n2m4_IC6y, calldataload(add(pubSignals, 160)))
-                    g1_mulAccC(_pVk, n2m4_IC7x, n2m4_IC7y, calldataload(add(pubSignals, 192)))
-                    g1_mulAccC(_pVk, n2m4_IC8x, n2m4_IC8y, calldataload(add(pubSignals, 224)))
-                    g1_mulAccC(_pVk, n2m4_IC9x, n2m4_IC9y, calldataload(add(pubSignals, 256)))
-                    g1_mulAccC(_pVk, n2m4_IC10x, n2m4_IC10y, calldataload(add(pubSignals, 288)))
-                }
-                case hex"0400" {
-                    g1_mulAccC(_pVk, n4m0_IC1x, n4m0_IC1y, calldataload(pubSignals))
-                    g1_mulAccC(_pVk, n4m0_IC2x, n4m0_IC2y, calldataload(add(pubSignals, 32)))
-                    g1_mulAccC(_pVk, n4m0_IC3x, n4m0_IC3y, calldataload(add(pubSignals, 64)))
-                    g1_mulAccC(_pVk, n4m0_IC4x, n4m0_IC4y, calldataload(add(pubSignals, 96)))
-                    g1_mulAccC(_pVk, n4m0_IC5x, n4m0_IC5y, calldataload(add(pubSignals, 128)))
-                    g1_mulAccC(_pVk, n4m0_IC6x, n4m0_IC6y, calldataload(add(pubSignals, 160)))
-                    g1_mulAccC(_pVk, n4m0_IC7x, n4m0_IC7y, calldataload(add(pubSignals, 192)))
-                    g1_mulAccC(_pVk, n4m0_IC8x, n4m0_IC8y, calldataload(add(pubSignals, 224)))
-                }
-                case hex"0401" {
-                    g1_mulAccC(_pVk, n4m1_IC1x, n4m1_IC1y, calldataload(pubSignals))
-                    g1_mulAccC(_pVk, n4m1_IC2x, n4m1_IC2y, calldataload(add(pubSignals, 32)))
-                    g1_mulAccC(_pVk, n4m1_IC3x, n4m1_IC3y, calldataload(add(pubSignals, 64)))
-                    g1_mulAccC(_pVk, n4m1_IC4x, n4m1_IC4y, calldataload(add(pubSignals, 96)))
-                    g1_mulAccC(_pVk, n4m1_IC5x, n4m1_IC5y, calldataload(add(pubSignals, 128)))
-                    g1_mulAccC(_pVk, n4m1_IC6x, n4m1_IC6y, calldataload(add(pubSignals, 160)))
-                    g1_mulAccC(_pVk, n4m1_IC7x, n4m1_IC7y, calldataload(add(pubSignals, 192)))
-                    g1_mulAccC(_pVk, n4m1_IC8x, n4m1_IC8y, calldataload(add(pubSignals, 224)))
-                    g1_mulAccC(_pVk, n4m1_IC9x, n4m1_IC9y, calldataload(add(pubSignals, 256)))
-                }
-                case hex"0402" {
-                    g1_mulAccC(_pVk, n4m2_IC1x, n4m2_IC1y, calldataload(pubSignals))
-                    g1_mulAccC(_pVk, n4m2_IC2x, n4m2_IC2y, calldataload(add(pubSignals, 32)))
-                    g1_mulAccC(_pVk, n4m2_IC3x, n4m2_IC3y, calldataload(add(pubSignals, 64)))
-                    g1_mulAccC(_pVk, n4m2_IC4x, n4m2_IC4y, calldataload(add(pubSignals, 96)))
-                    g1_mulAccC(_pVk, n4m2_IC5x, n4m2_IC5y, calldataload(add(pubSignals, 128)))
-                    g1_mulAccC(_pVk, n4m2_IC6x, n4m2_IC6y, calldataload(add(pubSignals, 160)))
-                    g1_mulAccC(_pVk, n4m2_IC7x, n4m2_IC7y, calldataload(add(pubSignals, 192)))
-                    g1_mulAccC(_pVk, n4m2_IC8x, n4m2_IC8y, calldataload(add(pubSignals, 224)))
-                    g1_mulAccC(_pVk, n4m2_IC9x, n4m2_IC9y, calldataload(add(pubSignals, 256)))
-                    g1_mulAccC(_pVk, n4m2_IC10x, n4m2_IC10y, calldataload(add(pubSignals, 288)))
-                }
-                case hex"0404" {
-                    g1_mulAccC(_pVk, n4m4_IC1x, n4m4_IC1y, calldataload(pubSignals))
-                    g1_mulAccC(_pVk, n4m4_IC2x, n4m4_IC2y, calldataload(add(pubSignals, 32)))
-                    g1_mulAccC(_pVk, n4m4_IC3x, n4m4_IC3y, calldataload(add(pubSignals, 64)))
-                    g1_mulAccC(_pVk, n4m4_IC4x, n4m4_IC4y, calldataload(add(pubSignals, 96)))
-                    g1_mulAccC(_pVk, n4m4_IC5x, n4m4_IC5y, calldataload(add(pubSignals, 128)))
-                    g1_mulAccC(_pVk, n4m4_IC6x, n4m4_IC6y, calldataload(add(pubSignals, 160)))
-                    g1_mulAccC(_pVk, n4m4_IC7x, n4m4_IC7y, calldataload(add(pubSignals, 192)))
-                    g1_mulAccC(_pVk, n4m4_IC8x, n4m4_IC8y, calldataload(add(pubSignals, 224)))
-                    g1_mulAccC(_pVk, n4m4_IC9x, n4m4_IC9y, calldataload(add(pubSignals, 256)))
-                    g1_mulAccC(_pVk, n4m4_IC10x, n4m4_IC10y, calldataload(add(pubSignals, 288)))
-                    g1_mulAccC(_pVk, n4m4_IC11x, n4m4_IC11y, calldataload(add(pubSignals, 320)))
-                    g1_mulAccC(_pVk, n4m4_IC12x, n4m4_IC12y, calldataload(add(pubSignals, 352)))
                 }
 
                 default {

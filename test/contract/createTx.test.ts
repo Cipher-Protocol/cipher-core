@@ -11,10 +11,11 @@ import {
 import { DEFAULT_FEE, DEFAULT_TREE_HEIGHT } from "../../config";
 import { BigNumber, utils } from "ethers";
 
-import { genTxForZeroIn, initTree } from "../../scripts/gen_testcase";
+import { generateCipherTx, initTree } from "../../scripts/gen_testcase";
 import { asyncPoseidonHash } from "../../scripts/lib/poseidonHash";
 import { getDefaultLeaf } from "../../scripts/lib/utxo.helper";
 import { IncrementalQuinTree } from "../../scripts/lib/IncrementalQuinTree";
+import { CipherPayableCoin } from "../../scripts/lib/utxo/coin";
 
 const ethers = hre.ethers;
 const ethTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -91,41 +92,145 @@ describe("deploy", function () {
    */
 
   describe("Simple Create Tx", function () {
-    const cases = [
+    const singleTxCases = [
       {
+        name: "n0m1",
         publicIn: "1",
-        privateOut: ["1"],
+        privateOuts: ["1"],
       },
       {
+        name: "n0m2",
         publicIn: "1",
-        privateOut: ["0.5", "0.5"],
+        privateOuts: ["0.5", "0.5"],
       },
       {
+        name: "n0m4",
         publicIn: "2",
-        privateOut: ["0.5", "0.5","0.5", "0.5"],
+        privateOuts: ["0.5", "0.5","0.5", "0.5"],
       },
     ];
-
-    cases.forEach((testCase, i) => {
-      it(`Success to create h5n0m1 Tx, publicIn ${testCase.publicIn} ETH, privateOut ${testCase.privateOut.join(", ")}, publicOut 0`, async function () {
-        const { contractCalldata } = await genTxForZeroIn(tree, 
+    singleTxCases.forEach((testCase, i) => {
+      it(`Success to create h5n0m${testCase.privateOuts.length} Tx, publicIn ${testCase.publicIn} ETH, privateOut ${testCase.privateOuts.join(", ")}, publicOut 0`, async function () {
+        const { contractCalldata } = await generateCipherTx(tree, 
           utils.parseEther(testCase.publicIn).toBigInt(),
           0n,
           [],
-          testCase.privateOut.map(v => utils.parseEther(v).toBigInt()),  
+          testCase.privateOuts.map(v => utils.parseEther(v).toBigInt()),  
         );
         const beforeEthBalance = await ethers.provider.getBalance(cipher.address);
-        const result = await cipher.createTx(
+        const tx = await cipher.createTx(
           contractCalldata.utxoData,
           contractCalldata.publicInfo,
           { value: utils.parseEther(testCase.publicIn) }
         );
-        await result.wait();
+        const receipt = await tx.wait(); // expect no error ?
+        expect(tx).to.not.be.null;
+        // TODO: check event log
+        // await expect(tx)
+        //   .to.emit(cipher, "")
+        //   .withArgs(addr, underlyingContractAddress, maturity);
+
         const afterEthBalance = await ethers.provider.getBalance(cipher.address);
         expect(afterEthBalance).to.equal(
           beforeEthBalance.add(utils.parseEther(testCase.publicIn))
         );
       })
     });
+
+    const multipleTxCases = [
+      {
+        txs: [
+          {
+            name: "n0m1",
+            publicIn: "1",
+            publicOut: "0",
+            privateIns: [],
+            privateOuts: ["1"],
+          },
+          {
+            name: "n1m0",
+            publicIn: "0",
+            publicOut: "1",
+            privateIns: ["1"],
+            privateOuts: [],
+          },
+        ]
+      },
+      {
+        txs: [
+          {
+            name: "n0m1",
+            publicIn: "1",
+            publicOut: "0",
+            privateIns: [],
+            privateOuts: ["1"],
+          },
+          {
+            name: "n1m1",
+            publicIn: "0",
+            publicOut: "0.1",
+            privateIns: ["1"],
+            privateOuts: ["0.9"],
+          },
+        ]
+      },
+      {
+        txs: [
+          {
+            name: "n0m1",
+            publicIn: "1",
+            publicOut: "0",
+            privateIns: [],
+            privateOuts: ["1"],
+          },
+          {
+            name: "n1m2",
+            publicIn: "0",
+            publicOut: "0.1",
+            privateIns: ["1"],
+            privateOuts: ["0.4", "0.5"],
+          },
+        ]
+      },
+    ];
+    multipleTxCases.forEach((testCase, i) => {
+      it(`multiple Txs`, async function () {
+        const txs = testCase.txs;
+        let previousOutCoins: CipherPayableCoin[] = [];
+        for(let i = 0; i < txs.length; i++) {
+
+          const privateInputLength = txs[i].privateIns.length;
+          const privateOutputLength = txs[i].privateOuts.length;
+          const name = `createTx with n${privateInputLength}m${privateOutputLength}`
+          console.log(name);
+          const tx = txs[i];
+          const { contractCalldata, privateOutCoins } = await generateCipherTx(
+            tree, 
+            utils.parseEther(tx.publicIn).toBigInt(),
+            utils.parseEther(tx.publicOut).toBigInt(),
+            previousOutCoins,
+            tx.privateOuts.map(v => utils.parseEther(v).toBigInt()),  
+          );
+          previousOutCoins = privateOutCoins;
+
+          const beforeEthBalance = await ethers.provider.getBalance(cipher.address);
+          console.log(`${name}: txIndex=${i}, beforeEthBalance`, beforeEthBalance.toString());
+          const result = await cipher.createTx(
+            contractCalldata.utxoData,
+            contractCalldata.publicInfo,
+            { value: utils.parseEther(tx.publicIn) }
+          );
+          await result.wait();
+          // TODO: check event log
+          const afterEthBalance = await ethers.provider.getBalance(cipher.address);
+          console.log(`${name}: txIndex=${i}, afterEthBalance`, afterEthBalance.toString());
+        }
+      })
+    });
+
+    
   });
 });
+
+// All spec
+// other token
