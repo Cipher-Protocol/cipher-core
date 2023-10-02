@@ -1,5 +1,4 @@
 import { expect } from "chai";
-import { resolve } from "path";
 import hre from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import {
@@ -97,10 +96,13 @@ describe("deploy", function () {
         SPEC,
         initialRoot: tree.root,
       });
-      const decimals = BigNumber.from(10).pow(18);
-      const { contractCalldata } = await genTxForZeroIn(tree, [
-        BigInt(BigNumber.from("1").mul(decimals).mod(10).toString()), // 0.1 ETH
-        // BigInt(BigNumber.from('2').mul(decimals).mod(10).toString()), // 0.2 ETH
+      const ethDecimals = 18;
+      const { contractCalldata } = await genTxForZeroIn(tree, 
+        utils.parseEther("1").toBigInt(),
+        0n,
+        [],
+        [
+        utils.parseEther("1").toBigInt(), // 1 ETH
       ]);
       console.log({
         contractCalldata,
@@ -111,13 +113,13 @@ describe("deploy", function () {
       const result = await cipher.createTx(
         contractCalldata.utxoData,
         contractCalldata.publicInfo,
-        { value: utils.parseEther("0.1") }
+        { value: utils.parseEther("1") }
       );
       await result.wait();
       const afterEthBalance = await ethers.provider.getBalance(cipher.address);
       console.log("afterEthBalance", afterEthBalance.toString());
       expect(afterEthBalance).to.equal(
-        beforeEthBalance.add(utils.parseEther("0.1"))
+        beforeEthBalance.add(utils.parseEther("1"))
       );
     });
 
