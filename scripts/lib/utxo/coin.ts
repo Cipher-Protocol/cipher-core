@@ -5,8 +5,8 @@ import { CircuitUtxoTxInput, CircuitUtxoTxOutput } from "../../types/utxo-circui
 
 export interface CipherCoinKey {
   privKey?: bigint;
-  pubKey: bigint;
-  salt: bigint;
+  inSaltOrSeed: bigint;
+  inRandom: bigint;
 }
 
 export interface CipherCoinInfo {
@@ -28,15 +28,15 @@ export class CipherBaseCoin {
   }
 
   getCommitment() {
-    return generateCommitment(this.coinInfo.amount, this.coinInfo.key.pubKey, this.coinInfo.key.salt);
+    return generateCommitment(this.coinInfo.amount, this.coinInfo.key.inSaltOrSeed, this.coinInfo.key.inRandom);
   }
 
   toUtxoTxOutput(): CircuitUtxoTxOutput {
     return {
       outputCommitment: this.getCommitment(),
       outAmount: this.coinInfo.amount,
-      outPubkey: this.coinInfo.key.pubKey,
-      outSalt: this.coinInfo.key.salt,
+      outPubkey: this.coinInfo.key.inSaltOrSeed,
+      outSalt: this.coinInfo.key.inRandom,
     }
   }
 }
@@ -70,8 +70,8 @@ export class CipherPayableCoin extends CipherBaseCoin {
     const { indices, } = this.tree.genMerklePath(this.leafId);
     const pathIndices = indicesToPathIndices(indices);
     const commitment = this.getCommitment();
-    const signature = generateSignature(this.tree, pathIndices, commitment, this.coinInfo.key.privKey)
-    return generateNullifier(commitment, pathIndices, signature);
+    // const signature = generateSignature(this.tree, pathIndices, commitment, this.coinInfo.key.privKey)
+    return generateNullifier(commitment, pathIndices, this.coinInfo.key.inSaltOrSeed);
   }
 
   toUtxoTxInput(): CircuitUtxoTxInput {
@@ -85,7 +85,7 @@ export class CipherPayableCoin extends CipherBaseCoin {
         inputNullifier,
         inAmount: this.coinInfo.amount,
         inPrivKey: this.coinInfo.key.privKey,
-        inSalt: this.coinInfo.key.salt,
+        inSalt: this.coinInfo.key.inRandom,
         inPathIndices,
         inPathElements,
       }

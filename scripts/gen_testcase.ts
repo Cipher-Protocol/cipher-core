@@ -29,7 +29,7 @@ async function main() {
   const tree = initTree(SPEC.treeHeight, SPEC.defaultLeafHash);
 
   const decimals = BigNumber.from(10).pow(18);
-  const { circuitInput, contractCalldata } = await genTxForZeroIn(tree, 
+  const { circuitInput, contractCalldata } = await generateCipherTx(tree, 
     BigInt(BigNumber.from("1").mul(decimals).mod(10).toString()),
     0n,
     [],
@@ -70,8 +70,8 @@ export function getRandomAmtCoinInfo(privKey: bigint, salt: bigint) {
   const coinInfo: CipherCoinInfo = {
     key: {
       privKey,
-      pubKey: getPublicKey(privKey),
-      salt,
+      inSaltOrSeed: getPublicKey(privKey),
+      inRandom: salt,
     },
     amount: BigInt(randomAmt.toString()),
   };
@@ -82,15 +82,15 @@ export function getCoinInfoFromAmt(amt: bigint, privKey: bigint, salt: bigint) {
   const coinInfo: CipherCoinInfo = {
     key: {
       privKey,
-      pubKey: getPublicKey(privKey),
-      salt,
+      inSaltOrSeed: getPublicKey(privKey),
+      inRandom: salt,
     },
     amount: amt,
   };
   return coinInfo;
 }
 
-export async function genTxForZeroIn(
+export async function generateCipherTx(
   tree: IncrementalQuinTree,
   publicInAmt: bigint,
   publicOutAmt: bigint,
@@ -114,9 +114,10 @@ export async function genTxForZeroIn(
   const privKey = 1n;
   const salt = 2n;
 
-  const outputLength = privateOutAmts.length;
+  const privateInputLength = privateInCoins.length;
+  const privateOutputLength = privateOutAmts.length;
 
-  for (let index = 0; index < outputLength; index++) {
+  for (let index = 0; index < privateOutputLength; index++) {
     const coinInfo = getCoinInfoFromAmt(privateOutAmts[index], privKey, salt);
     const leafId = tree.nextIndex;
     const payableCoin = new CipherPayableCoin(coinInfo, tree, leafId);
@@ -126,7 +127,7 @@ export async function genTxForZeroIn(
 
   const latestRoot = tree.root;
   const publicInfo: Cipher.PublicInfoStruct = {
-    utxoType: getUtxoType(0, outputLength),
+    utxoType: getUtxoType(privateInputLength, privateOutputLength),
     recipient: "0x0000000000000000000000000000000000000000", // no out
     relayer: "0x0000000000000000000000000000000000000000", // no fee
     fee: "0",
@@ -143,8 +144,8 @@ export async function genTxForZeroIn(
     publicInfoHash: BigInt(publicInfoHash),
 
     // 0 Inputs
-    inRandom: privateInCoins.map((coin) => coin.coinInfo.key.salt),
-    inSaltOrSeed: privateInCoins.map((coin) => coin.coinInfo.key.pubKey),
+    inRandom: privateInCoins.map((coin) => coin.coinInfo.key.inRandom),
+    inSaltOrSeed: privateInCoins.map((coin) => coin.coinInfo.key.inSaltOrSeed),
     inputNullifier: privateInCoins.map((coin) => coin.getNullifier()),
     inAmount: privateInCoins.map((coin) => coin.coinInfo.amount),
     inPathIndices: privateInCoins.map((coin) => coin.getPathIndices()),
@@ -153,12 +154,12 @@ export async function genTxForZeroIn(
     // outNumber outputs
     outputCommitment: privateOutCoins.map((coin) => coin.getCommitment()),
     outAmount: privateOutCoins.map((coin) => coin.coinInfo.amount),
-    outSaltOrSeed: privateOutCoins.map((coin) => coin.coinInfo.key.pubKey),
-    outRandom: privateOutCoins.map((coin) => coin.coinInfo.key.salt),
+    outSaltOrSeed: privateOutCoins.map((coin) => coin.coinInfo.key.inSaltOrSeed),
+    outRandom: privateOutCoins.map((coin) => coin.coinInfo.key.inRandom),
   };
 
   /** Prove */
-  const circuitName = `h${tree.depth}n0m${outputLength}`;
+  const circuitName = `h${tree.depth}n${privateInputLength}m${privateOutputLength}`;
   const heightName = circuitName.slice(0, 2);
   const specName = circuitName.slice(2, 6);
   const circomBaseDir = resolve(
@@ -185,7 +186,7 @@ export async function genTxForZeroIn(
     publicInAmt: publicInAmt.toString(),
     publicOutAmt: "0",
     publicInfoHash,
-    inputNullifiers: [], // no input
+    inputNullifiers: privateInCoins.map((coin) => coin.getNullifier().toString()),
     outputCommitments: privateOutCoins.map((coin) => coin.getCommitment().toString()),
   };
 
