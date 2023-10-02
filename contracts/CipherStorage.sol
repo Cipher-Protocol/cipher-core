@@ -7,6 +7,11 @@ import {IVerifier} from "./interfaces/IVerifier.sol";
 
 struct TreeData {
     IncrementalTreeData incrementalTreeData;
+    /// @notice The index of the latest root in history roots
+    uint8 historyRootsIdx;
+    /// @notice History roots (The 32 valid roots before the latest root)
+    /// @notice To avoid others updating the root when user calculating the proof in client side
+    uint256[32] historyRoots;
     mapping(uint256 => bool) nullifiers;
 }
 
@@ -25,6 +30,8 @@ contract CipherStorage {
         21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
     uint16 internal constant FEE_BASE = 10000;
+
+    uint8 internal constant VALID_HISTORY_ROOTS_SIZE = 32;
 
     IVerifier internal immutable verifier;
 
