@@ -90,50 +90,42 @@ describe("deploy", function () {
    * etc .......
    */
 
-  describe("Create Tx", function () {
-    it("Success to create h5n0m1 Tx, publicIn 0.1 ETH, 1 privateOut (0.1), publicOut 0", async function () {
-      console.log({
-        SPEC,
-        initialRoot: tree.root,
-      });
-      const ethDecimals = 18;
-      const { contractCalldata } = await genTxForZeroIn(tree, 
-        utils.parseEther("1").toBigInt(),
-        0n,
-        [],
-        [
-        utils.parseEther("1").toBigInt(), // 1 ETH
-      ]);
-      console.log({
-        contractCalldata,
-        nextRoot: tree.root,
-      });
-      const beforeEthBalance = await ethers.provider.getBalance(cipher.address);
-      console.log("beforeEthBalance", beforeEthBalance.toString());
-      const result = await cipher.createTx(
-        contractCalldata.utxoData,
-        contractCalldata.publicInfo,
-        { value: utils.parseEther("1") }
-      );
-      await result.wait();
-      const afterEthBalance = await ethers.provider.getBalance(cipher.address);
-      console.log("afterEthBalance", afterEthBalance.toString());
-      expect(afterEthBalance).to.equal(
-        beforeEthBalance.add(utils.parseEther("1"))
-      );
-    });
+  describe("Simple Create Tx", function () {
+    const cases = [
+      {
+        publicIn: "1",
+        privateOut: ["1"],
+      },
+      {
+        publicIn: "1",
+        privateOut: ["0.5", "0.5"],
+      },
+      {
+        publicIn: "2",
+        privateOut: ["0.5", "0.5","0.5", "0.5"],
+      },
+    ];
 
-    // it("Success to create h5n0m1 Tx, publicIn 0.3 ETH, 2 privateOut(0.1, 0.2), publicOut 0", async function () {
-    //   const decimals = BigNumber.from(10).pow(18);
-    //   const { contractCalldata } = await genTxForZeroIn(tree, [
-    //     BigInt(BigNumber.from("1").mul(decimals).mod(10).toString()), // 0.1 ETH
-    //     BigInt(BigNumber.from("2").mul(decimals).mod(10).toString()), // 0.2 ETH
-    //   ]);
-    //   const result = await cipher.createTx(
-    //     contractCalldata.utxoData,
-    //     contractCalldata.publicInfo
-    //   );
-    //   await result.wait();
-    // });
+    cases.forEach((testCase, i) => {
+      it(`Success to create h5n0m1 Tx, publicIn ${testCase.publicIn} ETH, privateOut ${testCase.privateOut.join(", ")}, publicOut 0`, async function () {
+        const { contractCalldata } = await genTxForZeroIn(tree, 
+          utils.parseEther(testCase.publicIn).toBigInt(),
+          0n,
+          [],
+          testCase.privateOut.map(v => utils.parseEther(v).toBigInt()),  
+        );
+        const beforeEthBalance = await ethers.provider.getBalance(cipher.address);
+        const result = await cipher.createTx(
+          contractCalldata.utxoData,
+          contractCalldata.publicInfo,
+          { value: utils.parseEther(testCase.publicIn) }
+        );
+        await result.wait();
+        const afterEthBalance = await ethers.provider.getBalance(cipher.address);
+        expect(afterEthBalance).to.equal(
+          beforeEthBalance.add(utils.parseEther(testCase.publicIn))
+        );
+      })
+    });
   });
 });

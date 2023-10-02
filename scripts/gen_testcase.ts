@@ -27,11 +27,6 @@ async function main() {
   await asyncPoseidonHash;
 
   const tree = initTree(SPEC.treeHeight, SPEC.defaultLeafHash);
-  console.log({
-    root: tree.root,
-    SPEC,
-    utxoConfig,
-  });
 
   const decimals = BigNumber.from(10).pow(18);
   const { circuitInput, contractCalldata } = await genTxForZeroIn(tree, 
@@ -127,11 +122,6 @@ export async function genTxForZeroIn(
     const payableCoin = new CipherPayableCoin(coinInfo, tree, leafId);
     tree.insert(payableCoin.getCommitment());
     privateOutCoins.push(payableCoin);
-    console.log({
-      coinInfo,
-      nextIndex: tree.nextIndex,
-      root: tree.root,
-    });
   }
 
   const latestRoot = tree.root;
@@ -180,11 +170,6 @@ export async function genTxForZeroIn(
     inputPath,
     JSON.stringify(toDecimalStringObject(circuitInput), null, 2)
   );
-  console.log({
-    message: "input.json generated",
-    circuitName,
-    inputPath,
-  });
   const { calldata } = await proveByName(circuitName, inputPath);
 
   /** Contract calldata */
