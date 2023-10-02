@@ -64,26 +64,38 @@ export function initTree(depth: number, zeroLeaf: string): IncrementalQuinTree {
   return tree;
 }
 
-export function getRandomAmtCoinInfo(privKey: bigint, salt: bigint) {
+export function getRandomAmtCoinInfo(privKey: bigint, {
+  inRandom,
+  inSaltOrSeed,
+}: {
+  inRandom: bigint;
+  inSaltOrSeed: bigint;
+}) {
   const decimal = BigNumber.from(10).pow(18);
   const randomAmt = BigNumber.from(Math.floor(Math.random() * 10)).mul(decimal); // 0 ~ 9 ETH
   const coinInfo: CipherCoinInfo = {
     key: {
-      privKey,
-      inSaltOrSeed: getPublicKey(privKey),
-      inRandom: salt,
+      inSaltOrSeed: inSaltOrSeed,
+      hashedSaltOrUserId: PoseidonHash([inSaltOrSeed]),
+      inRandom,
     },
     amount: BigInt(randomAmt.toString()),
   };
   return coinInfo;
 }
 
-export function getCoinInfoFromAmt(amt: bigint, privKey: bigint, salt: bigint) {
+export function getCoinInfoFromAmt(amt: bigint, {
+  inRandom,
+  inSaltOrSeed,
+}: {
+  inRandom: bigint;
+  inSaltOrSeed: bigint;
+}) {
   const coinInfo: CipherCoinInfo = {
     key: {
-      privKey,
-      inSaltOrSeed: getPublicKey(privKey),
-      inRandom: salt,
+      inSaltOrSeed,
+      hashedSaltOrUserId: PoseidonHash([inSaltOrSeed]),
+      inRandom,
     },
     amount: amt,
   };
@@ -110,15 +122,14 @@ export async function generateCipherTx(
   );
   assert(publicInAmt + totalPrivateInAmount === publicOutAmt + totalPrivateOutAmount, "inAmounts and outAmounts are not balanced")
 
-  // TODO: How to get privKey and salt?
-  const privKey = 1n;
-  const salt = 2n;
-
   const privateInputLength = privateInCoins.length;
   const privateOutputLength = privateOutAmts.length;
 
   for (let index = 0; index < privateOutputLength; index++) {
-    const coinInfo = getCoinInfoFromAmt(privateOutAmts[index], privKey, salt);
+    const coinInfo = getCoinInfoFromAmt(privateOutAmts[index], {
+      inRandom: 1n, // TODO: How to get inRandom?
+      inSaltOrSeed: 2n, // TODO: get from user sign or random
+    });
     const leafId = tree.nextIndex;
     const payableCoin = new CipherPayableCoin(coinInfo, tree, leafId);
     tree.insert(payableCoin.getCommitment());
@@ -143,18 +154,18 @@ export async function generateCipherTx(
     publicOutAmt,
     publicInfoHash: BigInt(publicInfoHash),
 
-    // 0 Inputs
-    inRandom: privateInCoins.map((coin) => coin.coinInfo.key.inRandom),
-    inSaltOrSeed: privateInCoins.map((coin) => coin.coinInfo.key.inSaltOrSeed),
+    // Coin Inputs
     inputNullifier: privateInCoins.map((coin) => coin.getNullifier()),
     inAmount: privateInCoins.map((coin) => coin.coinInfo.amount),
+    inSaltOrSeed: privateInCoins.map((coin) => coin.coinInfo.key.inSaltOrSeed),
+    inRandom: privateInCoins.map((coin) => coin.coinInfo.key.inRandom),
     inPathIndices: privateInCoins.map((coin) => coin.getPathIndices()),
     inPathElements: privateInCoins.map((coin) => coin.getPathElements()),
 
-    // outNumber outputs
+    // Coin Outputs
     outputCommitment: privateOutCoins.map((coin) => coin.getCommitment()),
     outAmount: privateOutCoins.map((coin) => coin.coinInfo.amount),
-    outSaltOrSeed: privateOutCoins.map((coin) => coin.coinInfo.key.inSaltOrSeed),
+    outHashedSaltOrUserId: privateOutCoins.map((coin) => coin.coinInfo.key.hashedSaltOrUserId),
     outRandom: privateOutCoins.map((coin) => coin.coinInfo.key.inRandom),
   };
 
@@ -174,7 +185,6 @@ export async function generateCipherTx(
   const { calldata } = await proveByName(circuitName, inputPath);
 
   /** Contract calldata */
-
   const utxoData: Cipher.UtxoDataStruct = {
     proof: {
       a: calldata[0],
@@ -192,6 +202,8 @@ export async function generateCipherTx(
 
   return {
     tree,
+    privateInputLength,
+    privateOutputLength,
     privateOutCoins,
     circuitInput,
     contractCalldata: {
