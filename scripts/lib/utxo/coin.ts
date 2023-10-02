@@ -2,10 +2,11 @@ import { IncrementalQuinTree } from "../IncrementalQuinTree";
 import { assert } from "../helper";
 import { generateCommitment, generateNullifier, generateSignature, indicesToPathIndices } from "../utxo.helper";
 import { CircuitUtxoTxInput, CircuitUtxoTxOutput } from "../../types/utxo-circuit.type";
+import { PoseidonHash } from "../poseidonHash";
 
 export interface CipherCoinKey {
-  privKey?: bigint;
-  inSaltOrSeed: bigint;
+  inSaltOrSeed?: bigint;
+  hashedSaltOrUserId: bigint;
   inRandom: bigint;
 }
 
@@ -25,20 +26,16 @@ export class CipherBaseCoin {
       key,
       amount,
     };
+    if(this.coinInfo.key.inSaltOrSeed) {
+      const hashedSaltOrUserId = PoseidonHash([this.coinInfo.key.inSaltOrSeed]);
+      assert(hashedSaltOrUserId === this.coinInfo.key.hashedSaltOrUserId, "hashedSaltOrUserId should be equal")
+    }
   }
 
   getCommitment() {
-    return generateCommitment(this.coinInfo.amount, this.coinInfo.key.inSaltOrSeed, this.coinInfo.key.inRandom);
+    return generateCommitment(this.coinInfo.amount, this.coinInfo.key.hashedSaltOrUserId, this.coinInfo.key.inRandom);
   }
 
-  toUtxoTxOutput(): CircuitUtxoTxOutput {
-    return {
-      outputCommitment: this.getCommitment(),
-      outAmount: this.coinInfo.amount,
-      outPubkey: this.coinInfo.key.inSaltOrSeed,
-      outSalt: this.coinInfo.key.inRandom,
-    }
-  }
 }
 
 export class CipherPayableCoin extends CipherBaseCoin {
@@ -51,7 +48,7 @@ export class CipherPayableCoin extends CipherBaseCoin {
 
     // TODO: get leafId from tree by commitmentHash
     this.leafId = leafId;
-    assert(this.coinInfo.key.privKey, "privKey should not be null");
+    assert(this.coinInfo.key.inSaltOrSeed, "privKey should not be null");
   }
 
   getPathIndices() {
@@ -66,28 +63,10 @@ export class CipherPayableCoin extends CipherBaseCoin {
   }
 
   getNullifier() {
-    assert(this.coinInfo.key.privKey, "privKey should not be null");
+    assert(this.coinInfo.key.inSaltOrSeed, "inSaltOrSeed should not be null");
     const { indices, } = this.tree.genMerklePath(this.leafId);
     const pathIndices = indicesToPathIndices(indices);
     const commitment = this.getCommitment();
-    // const signature = generateSignature(this.tree, pathIndices, commitment, this.coinInfo.key.privKey)
     return generateNullifier(commitment, pathIndices, this.coinInfo.key.inSaltOrSeed);
-  }
-
-  toUtxoTxInput(): CircuitUtxoTxInput {
-    assert(this.coinInfo.key.privKey, "privKey should not be null");
-    const inputNullifier = this.getNullifier();
-    const { indices, pathElements } = this.tree.genMerklePath(this.leafId);
-    const inPathIndices = indicesToPathIndices(indices);
-    assert(pathElements.every(v => v.length === 1), "pathElements each length should be 1");
-    const inPathElements = pathElements.map(v => v[0]);
-      return {
-        inputNullifier,
-        inAmount: this.coinInfo.amount,
-        inPrivKey: this.coinInfo.key.privKey,
-        inSalt: this.coinInfo.key.inRandom,
-        inPathIndices,
-        inPathElements,
-      }
   }
 }

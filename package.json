@@ -8,6 +8,7 @@
     "build:circuit": "ts-node scripts/build.ts && ts-node scripts/merge_verifier.ts",
     "build:contract": "hardhat compile && hardhat typechain",
     "test:contract": "hardhat test",
+    "test:contract:tx": "hardhat test test/contract/createTx.test.ts",
     "test:deploy": "hardhat test test/contract/deploy.test.ts",
     "test:initTokenTree": "hardhat test test/contract/initTokenTree.test.ts"
   },
