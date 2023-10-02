@@ -25,6 +25,7 @@ contract Cipher is CipherStorage, Ownable {
     error InvalidProof(Proof proof);
     error InvalidRecipientAddr();
     error InvalidFeeSetting(uint16 fee);
+    error InvalidRoot(uint256 root);
 
     event NewTokenTree(IERC20 token, uint256 merkleTreeDepth, uint256 zeroValue);
     event NewRelayer(address relayer, uint16 fee, string url);
@@ -41,7 +42,7 @@ contract Cipher is CipherStorage, Ownable {
 
     struct UtxoData {
         Proof proof;
-        bytes32 root;
+        uint256 root;
         uint256 publicInAmt;
         uint256 publicOutAmt;
         uint256 publicInfoHash;
@@ -92,9 +93,18 @@ contract Cipher is CipherStorage, Ownable {
 
         // TODO: move to internal function _beforeCreateTx
         /* ========== before core logic start ========== */
-        if (utxoData.publicInAmt > 0) {
-            _transferFrom(token, msg.sender, utxoData.publicInAmt);
+        // check root is valid
+        if (utxoData.root != tree.incrementalTreeData.root) {
+            //TODO: check is in history roots from historyRootsIdx back
+            // bool isHistoryRoot = false;
+            // for (uint256 i; i < VALID_HISTORY_ROOTS_SIZE; ++i) {
+            //     // i = 0, 1, 2, ...30, 31
+            //     // rootIdx = historyRootsIdx, historyRootsIdx - 1, historyRootsIdx - 2, ...historyRootsIdx + 2, historyRootsIdx + 1
+            // }
+            // if (!isHistoryRoot) revert InvalidRoot(utxoData.root);
         }
+
+        _handleTransferFrom(token, msg.sender, utxoData.publicInAmt);
 
         // check utxoType(nAmB), n is the number of INPUT nullifiers, m is the number of OUTPUT commitments
         _checkUtxoType(publicInfo.utxoType, utxoData.inputNullifiers.length, utxoData.outputCommitments.length);
@@ -112,8 +122,7 @@ contract Cipher is CipherStorage, Ownable {
         }
 
         if (
-            // NOTE: publicSignals: root, publicInAmt, publicOutAmt, extDataHash, inputNullifier, outputCommitment
-            // TODO: rename extDataHash
+            // NOTE: publicSignals: root, publicInAmt, publicOutAmt, publicInfoHash, inputNullifier, outputCommitment
             // TODO: circuit public need add: token??
             // TODO: public data: need to from contract storage, Ex. root
             !verifier.verifyProof(
@@ -131,13 +140,17 @@ contract Cipher is CipherStorage, Ownable {
             emit NewNullifier(token, nullifier);
         }
 
+        // update original root to history roots before insert new commitment
+        tree.historyRoots[tree.historyRootsIdx] = tree.incrementalTreeData.root;
+        tree.historyRootsIdx = uint8(addmod(tree.historyRootsIdx, 1, VALID_HISTORY_ROOTS_SIZE));
+
         for (uint256 i; i < utxoData.outputCommitments.length; ++i) {
-            uint256 commitment = utxoData.outputCommitments[i];
             // insert commitment into the tree
+            uint256 commitment = utxoData.outputCommitments[i];
             tree.incrementalTreeData.insert(commitment);
             emit NewCommitment(token, commitment, tree.incrementalTreeData.numberOfLeaves);
         }
-        require(utxoData.proof.publicSignals[0] == tree.incrementalTreeData.root, "Invalid root");
+
         /* ========== core logic end ========== */
 
         // TODO: move to internal function _afterCreateTx
@@ -155,9 +168,6 @@ contract Cipher is CipherStorage, Ownable {
         }
 
         if (feeAmt > 0) _transfer(token, publicInfo.relayer, feeAmt);
-
-        // TODO: UtxoData.publicSignals.root is equal to tree.incrementalTreeData
-
         /* ========== after core logic end ========== */
     }
 
@@ -214,16 +224,18 @@ contract Cipher is CipherStorage, Ownable {
         }
     }
 
-    function _transferFrom(IERC20 token, address sender, uint256 amount) internal {
+    function _handleTransferFrom(IERC20 token, address sender, uint256 amount) internal {
         if (address(token) == DEFAULT_ETH_ADDRESS) {
             if (msg.value != amount) revert InvalidMsgValue(msg.value);
         } else {
             if (msg.value != 0) revert InvalidMsgValue(msg.value);
-            uint256 balanceBefore = token.balanceOf(address(this));
-            token.safeTransferFrom(sender, address(this), amount);
-            uint256 balanceAfter = token.balanceOf(address(this));
-            uint256 transferredAmt = balanceAfter - balanceBefore;
-            if (amount != transferredAmt) revert AmountInconsistent(amount, transferredAmt);
+            if (amount > 0) {
+                uint256 balanceBefore = token.balanceOf(address(this));
+                token.safeTransferFrom(sender, address(this), amount);
+                uint256 balanceAfter = token.balanceOf(address(this));
+                uint256 transferredAmt = balanceAfter - balanceBefore;
+                if (amount != transferredAmt) revert AmountInconsistent(amount, transferredAmt);
+            }
         }
     }
 

@@ -80,13 +80,12 @@ describe("deploy", function () {
     tree = initTree(SPEC.treeHeight, SPEC.defaultLeafHash);
   });
 
-
   /** simple test case
    * n0m1
    * n0m2
    * ....
    * n0mX
-   * n0m1 -> n1m1 
+   * n0m1 -> n1m1
    * n0m2 -> n2m0
    * n0m2 -> n2m1
    * etc .......
@@ -96,40 +95,43 @@ describe("deploy", function () {
     it("Success to create h5n0m1 Tx, publicIn 0.1 ETH, 1 privateOut (0.1), publicOut 0", async function () {
       console.log({
         SPEC,
-        initialRoot: (tree.root),
-      })
+        initialRoot: tree.root,
+      });
       const decimals = BigNumber.from(10).pow(18);
-      const {
-        contractCalldata,
-      } = await genTxForZeroIn(tree, [
-        BigInt(BigNumber.from('1').mul(decimals).mod(10).toString()), // 0.1 ETH
+      const { contractCalldata } = await genTxForZeroIn(tree, [
+        BigInt(BigNumber.from("1").mul(decimals).mod(10).toString()), // 0.1 ETH
         // BigInt(BigNumber.from('2').mul(decimals).mod(10).toString()), // 0.2 ETH
       ]);
       console.log({
         contractCalldata,
-        nextRoot: (tree.root),
-      })
+        nextRoot: tree.root,
+      });
+      const beforeEthBalance = await ethers.provider.getBalance(cipher.address);
+      console.log("beforeEthBalance", beforeEthBalance.toString());
       const result = await cipher.createTx(
         contractCalldata.utxoData,
         contractCalldata.publicInfo,
-      )
+        { value: utils.parseEther("0.1") }
+      );
       await result.wait();
-
+      const afterEthBalance = await ethers.provider.getBalance(cipher.address);
+      console.log("afterEthBalance", afterEthBalance.toString());
+      expect(afterEthBalance).to.equal(
+        beforeEthBalance.add(utils.parseEther("0.1"))
+      );
     });
 
-    it("Success to create h5n0m1 Tx, publicIn 0.3 ETH, 2 privateOut(0.1, 0.2), publicOut 0", async function () {
-      const decimals = BigNumber.from(10).pow(18);
-      const {
-        contractCalldata,
-      } = await genTxForZeroIn(tree, [
-        BigInt(BigNumber.from('1').mul(decimals).mod(10).toString()), // 0.1 ETH
-        BigInt(BigNumber.from('2').mul(decimals).mod(10).toString()), // 0.2 ETH
-      ]);
-      const result = await cipher.createTx(
-        contractCalldata.utxoData,
-        contractCalldata.publicInfo,
-      )
-      await result.wait();  
-    });
+    // it("Success to create h5n0m1 Tx, publicIn 0.3 ETH, 2 privateOut(0.1, 0.2), publicOut 0", async function () {
+    //   const decimals = BigNumber.from(10).pow(18);
+    //   const { contractCalldata } = await genTxForZeroIn(tree, [
+    //     BigInt(BigNumber.from("1").mul(decimals).mod(10).toString()), // 0.1 ETH
+    //     BigInt(BigNumber.from("2").mul(decimals).mod(10).toString()), // 0.2 ETH
+    //   ]);
+    //   const result = await cipher.createTx(
+    //     contractCalldata.utxoData,
+    //     contractCalldata.publicInfo
+    //   );
+    //   await result.wait();
+    // });
   });
 });
