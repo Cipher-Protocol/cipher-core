@@ -1,0 +1,12 @@
+[profile.default]
+evm_version = "paris"
+extra_output = [
+  "storageLayout",
+]
+libs = ["node_modules", "lib"]
+optimizer = true
+optimizer_runs = 200
+out = "out"
+solc_version = "0.8.20"
+src = "contracts"
+test = "tests"
