@@ -161,7 +161,7 @@ export async function generateCipherTx(
   const publicInfoHash = toPublicInfoHash(publicInfo);
 
   const circuitInput = {
-    root: latestRoot,
+    root: previousRoot,
     publicInAmt,
     publicOutAmt,
     publicInfoHash: BigInt(publicInfoHash),
@@ -199,7 +199,9 @@ export async function generateCipherTx(
   const { calldata } = await proveByName(circuitName, inputPath);
 
   /** Contract calldata */
-
+  console.log({
+    calldata3: calldata[3],
+  });
   const utxoData: ProofStruct = {
     a: calldata[0],
     b: calldata[1],

@@ -126,7 +126,6 @@ describe("deploy", function () {
         const beforeEthBalance = await ethers.provider.getBalance(
           cipher.address
         );
-        console.log("proof", contractCalldata.utxoData);
         const result = await cipher.createTx(
           contractCalldata.utxoData,
           contractCalldata.publicInfo,
