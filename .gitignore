@@ -16,3 +16,6 @@ build/**/*
 # Added by cargo
 
 /target
+
+# foundry
+/out
