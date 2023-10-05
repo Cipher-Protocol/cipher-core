@@ -30,7 +30,6 @@ contract Verifier is VerifierConfig {
     uint16 constant pLastMem = 896;
 
     function verifyProof(Proof calldata proof, bytes2 _type) public view returns (bool) {
-        uint256 val;
         assembly {
             function checkField(v) {
                 if iszero(lt(v, q)) {
@@ -127,6 +126,7 @@ contract Verifier is VerifierConfig {
                     IC4x := n1m1_IC4x
                     IC4y := n1m1_IC4y
                 }
+
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -166,6 +166,7 @@ contract Verifier is VerifierConfig {
                     deltay1 := n1m1_deltay1
                     deltay2 := n1m1_deltay2
                 }
+
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -195,6 +196,7 @@ contract Verifier is VerifierConfig {
                     g1_mulAccC(_pVk, n1m1_IC5x, n1m1_IC5y, calldataload(add(inputNullifiersOffset, 32)))
                     g1_mulAccC(_pVk, n1m1_IC6x, n1m1_IC6y, calldataload(add(outputCommitmentsOffset, 32)))
                 }
+
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -241,7 +243,6 @@ contract Verifier is VerifierConfig {
 
             // Validate that all evaluations ∈ F
             // check field for root, publicInAmt, publicOutAmt, publicInfoHash
-            val := calldataload(add(proof, 288)) // proof.publicSignals.root
             checkField(calldataload(add(proof, 288))) // proof.publicSignals.root
             checkField(calldataload(add(proof, 320))) // proof.publicSignals.publicInAmt
             checkField(calldataload(add(proof, 352))) // proof.publicSignals.publicOutAmt
@@ -333,12 +334,11 @@ contract Verifier is VerifierConfig {
             mstore(add(_pPairing, 704), deltay1)
             mstore(add(_pPairing, 736), deltay2)
 
-            // let success := staticcall(sub(gas(), 2000), 8, _pPairing, 768, _pPairing, 0x20)
-            // success := and(success, mload(_pPairing))
+            let success := staticcall(sub(gas(), 2000), 8, _pPairing, 768, _pPairing, 0x20)
+            success := and(success, mload(_pPairing))
 
-            // mstore(0, success)
-            // return(0, 0x20)
+            mstore(0, success)
+            return(0, 0x20)
         }
-        console.log(val);
     }
 }
