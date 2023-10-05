@@ -102,8 +102,15 @@ async function mergeVerifiers(verifierBaseDir: string) {
     });
     const hexCode = name2HexCode(name);
     const deltaCase = parseDeltaCases(name, hexCode, delta);
-    const icCase = parseIcCases(name, hexCode, 1);
-    const mulAccCase = parseMulAccCases(name, hexCode, ic);
+    const icCase = parseIcCases(name, hexCode, 5);
+    const spec = name2Spec(name);
+    const mulAccCase = parseMulAccCases(
+      name,
+      spec.nNum,
+      spec.mNum,
+      hexCode,
+      ic
+    );
     ejsData.DeltaCases.push(deltaCase);
     ejsData.IcCases.push(icCase);
     ejsData.MulAccCases.push(mulAccCase);
@@ -220,6 +227,17 @@ async function readIcFromVerifier(file: string) {
   });
 }
 
+function name2Spec(name: string) {
+  const regex = /n(\d+)m(\d+)/;
+  const specs = regex.exec(name) || [];
+  const nNum = Number(specs[1]);
+  const mNum = Number(specs[2]);
+  return {
+    nNum,
+    mNum,
+  };
+}
+
 function name2HexCode(name: string): string {
   const regex = /n(\d+)m(\d+)/;
   const specs = regex.exec(name) || [];
@@ -254,15 +272,23 @@ function parseIcCases(name: string, hexCode: string, ic: number): string {
   str += `}`;
   return prettier(str, 16);
 }
-function parseMulAccCases(name: string, hexCode: string, ic: number): string {
+function parseMulAccCases(
+  name: string,
+  inNum: number,
+  outNumber: number,
+  hexCode: string,
+  ic: number
+): string {
   let str = `case hex"${hexCode}" {\n`;
-  for (let index = 1; index < ic; index++) {
-    const offset = (index - 1) * 32;
-    if (index === 1) {
-      str += `g1_mulAccC(_pVk, ${name}_IC${index}x, ${name}_IC${index}y, calldataload(pubSignals))\n`;
-    } else {
-      str += `g1_mulAccC(_pVk, ${name}_IC${index}x, ${name}_IC${index}y, calldataload(add(pubSignals, ${offset})))\n`;
-    }
+  const inIcLen = 5 + inNum;
+  const outIcLen = ic;
+  for (let index = 5; index < inIcLen; index++) {
+    const offset = (index - 4) * 32;
+    str += `g1_mulAccC(_pVk, ${name}_IC${index}x, ${name}_IC${index}y, calldataload(add(inputNullifiersOffset, ${offset})))\n`;
+  }
+  for (let index = inIcLen; index < outIcLen; index++) {
+    const offset = (index - inIcLen + 1) * 32;
+    str += `g1_mulAccC(_pVk, ${name}_IC${index}x, ${name}_IC${index}y, calldataload(add(outputCommitmentsOffset, ${offset})))\n`;
   }
   str += `}`;
   return prettier(str, 16);

@@ -1,23 +1,25 @@
-// SPDX-Ln2m2_icense-Identifier: GPL-3.0
+// SPDX-License-Identifier: GPL-3.0
 /*
     Copyright 2021 0KIMS association.
 
     This file is generated with [snarkJS](https://github.com/iden3/snarkjs).
 
     snarkJS is a free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Publn2m2_ic Ln2m2_icense as published by
-    the Free Software Foundation, either version 3 of the Ln2m2_icense, or
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
     snarkJS is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-    or FITNESS FOR A PARTn2m2_ICULAR PURPOSE. See the GNU General Publn2m2_ic
-    Ln2m2_icense for more details.
+    or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public
+    License for more details.
 
-    You should have received a copy of the GNU General Publn2m2_ic Ln2m2_icense
-    along with snarkJS. If not, see <https://www.gnu.org/ln2m2_icenses/>.
+    You should have received a copy of the GNU General Public License
+    along with snarkJS. If not, see <https://www.gnu.org/licenses/>.
 */
 import {VerifierConfig} from "./VerifierConfig.sol";
+import {Proof} from "./interfaces/IVerifier.sol";
+import "hardhat/console.sol";
 
 pragma solidity ^0.8.20;
 
@@ -25,16 +27,9 @@ contract Verifier is VerifierConfig {
     // Memory data
     uint16 constant pVk = 0;
     uint16 constant pPairing = 128;
-
     uint16 constant pLastMem = 896;
 
-    function verifyProof(
-        uint[2] calldata _pA,
-        uint[2][2] calldata _pB,
-        uint[2] calldata _pC,
-        uint[] calldata _pubSignals, // remove fix size
-        bytes2 _type
-    ) public view returns (bool) {
+    function verifyProof(Proof calldata proof, bytes2 _type) public view returns (bool) {
         assembly {
             function checkField(v) {
                 if iszero(lt(v, q)) {
@@ -69,17 +64,7 @@ contract Verifier is VerifierConfig {
                 }
             }
 
-            function getDelta(utxoType) -> deltax1, deltax2, deltay1, deltay2 {
-                switch utxoType
-<% for (let i = 0; i < DeltaCases.length; i++) __append(DeltaCases[i]) %>
-                default {
-                    // this is not allowed
-                    mstore(0, 0)
-                    return(0, 0x20)
-                }
-            }
-
-            function getIC0(utxoType) -> IC0x, IC0y {
+            function getFixedSizeConfigs(utxoType) -> IC0x, IC0y, IC1x, IC1y, IC2x, IC2y, IC3x, IC3y, IC4x, IC4y {
                 switch utxoType
 <% for (let i = 0; i < IcCases.length; i++) __append(IcCases[i]) %>
                 default {
@@ -89,7 +74,17 @@ contract Verifier is VerifierConfig {
                 }
             }
 
-            function g1_mulAccC_dispatcher(_pVk, pubSignals, utxoType) {
+            function getDeltas(utxoType) -> deltax1, deltax2, deltay1, deltay2 {
+                switch utxoType
+<% for (let i = 0; i < DeltaCases.length; i++) __append(DeltaCases[i]) %>
+                default {
+                    // this is not allowed
+                    mstore(0, 0)
+                    return(0, 0x20)
+                }
+            }
+
+            function dynamicMulAcc(_pVk, inputNullifiersOffset, outputCommitmentsOffset, utxoType) {
                 switch utxoType
 <% for (let i = 0; i < MulAccCases.length; i++) __append(MulAccCases[i]) %>
                 default {
@@ -99,81 +94,140 @@ contract Verifier is VerifierConfig {
                 }
             }
 
-            function checkPairing(pA, pB, pC, pubSignals, pMem, utxoType) -> isOk {
-                let _pPairing := add(pMem, pPairing)
-                let _pVk := add(pMem, pVk)
-
-                let IC0x, IC0y := getIC0(utxoType)
-                mstore(_pVk, IC0x)
-                mstore(add(_pVk, 32), IC0y)
-
-                // Compute the linear combination vk_x
-                g1_mulAccC_dispatcher(_pVk, pubSignals, utxoType)
-
-                // -A
-                mstore(_pPairing, calldataload(pA))
-                mstore(add(_pPairing, 32), mod(sub(q, mod(calldataload(add(pA, 32)), q)), q))
-
-                // B
-                mstore(add(_pPairing, 64), calldataload(pB))
-                mstore(add(_pPairing, 96), calldataload(add(pB, 32)))
-                mstore(add(_pPairing, 128), calldataload(add(pB, 64)))
-                mstore(add(_pPairing, 160), calldataload(add(pB, 96)))
-
-                // alpha1
-                mstore(add(_pPairing, 192), alphax)
-                mstore(add(_pPairing, 224), alphay)
-
-                // beta2
-                mstore(add(_pPairing, 256), betax1)
-                mstore(add(_pPairing, 288), betax2)
-                mstore(add(_pPairing, 320), betay1)
-                mstore(add(_pPairing, 352), betay2)
-
-                // vk_x
-                mstore(add(_pPairing, 384), mload(add(pMem, pVk)))
-                mstore(add(_pPairing, 416), mload(add(pMem, add(pVk, 32))))
-
-                // gamma2
-                mstore(add(_pPairing, 448), gammax1)
-                mstore(add(_pPairing, 480), gammax2)
-                mstore(add(_pPairing, 512), gammay1)
-                mstore(add(_pPairing, 544), gammay2)
-
-                // C
-                mstore(add(_pPairing, 576), calldataload(pC))
-                mstore(add(_pPairing, 608), calldataload(add(pC, 32)))
-
-                // delta2
-                // get delta by utxoType
-                let deltax1, deltax2, deltay1, deltay2 := getDelta(utxoType)
-                mstore(add(_pPairing, 640), deltax1)
-                mstore(add(_pPairing, 672), deltax2)
-                mstore(add(_pPairing, 704), deltay1)
-                mstore(add(_pPairing, 736), deltay2)
-
-                let success := staticcall(sub(gas(), 2000), 8, _pPairing, 768, _pPairing, 0x20)
-
-                isOk := and(success, mload(_pPairing))
-            }
+            /**
+             * | calldata layout:
+             * | ------------------ | ------------- | ----------------- | ----------------------------------------------------
+             * | pos                | pos           | pos               | value
+             * | (absolute)         | (rel proof)   | (rel pubSignals)  |
+             * | 0                  |               |                   | function selector
+             * | 4                  |               |                   | proof.offset (64)
+             * | 36                 |               |                   | uxtoType (right-padded to 32 bytes)
+             * | ------------------ | ------------- | ----------------- | ----------------------------------------------------
+             * | 68 + 0             | 0             |                   | proof.a[0]
+             * | 68 + 32            | 32            |                   | proof.a[1]
+             * | 68 + 64            | 64            |                   | proof.b[0][0]
+             * | 68 + 96            | 96            |                   | proof.b[0][1]
+             * | 68 + 128           | 128           |                   | proof.b[1][0]
+             * | 68 + 160           | 160           |                   | proof.b[1][1]
+             * | 68 + 192           | 192           |                   | proof.c[0]
+             * | 68 + 224           | 224           |                   | proof.c[1]
+             * | 68 + 256           | 256           |                   | proof.publicSignals.offset (288)
+             * | ------------------ | ------------- | ----------------- | ----------------------------------------------------
+             * | 68 + 288           | 288           | 0                 | proof.publicSignals.root
+             * | 68 + 320           | 320           | 32                | proof.publicSignals.publicInAmt
+             * | 68 + 352           | 352           | 64                | proof.publicSignals.publicOutAmt
+             * | 68 + 384           | 384           | 96                | proof.publicSignals.publicInfoHash
+             * | 68 + 416           | 416           | 128               | proof.publicSignals.inputNullifiers.offset (192)
+             * | 68 + 448           | 448           | 160               | proof.publicSignals.outputCommitments.offset (224 + 32*n)
+             * | 68 + 480           | 480           | 192               | proof.publicSignals.inputNullifiers.length (n)
+             * | 68 + 512           | 512           | 224               | proof.publicSignals.inputNullifiers[0]
+             * | 68 + ...           | ...           | ...               | ...
+             * | 68 + 512 + 32*n    | 512 + 32*n    | 224 + 32n         | proof.publicSignals.outputCommitments.length (m)
+             * | 68 + 544 + 32*n    | 544 + 32*n    | 256 + 32n         | proof.publicSignals.outputCommitments[0]
+             * | 68 + ...           | ...           | ...               | ...
+             * | ------------------ | ------------- | ----------------- | ----------------------------------------------------
+             */
 
             let pMem := mload(0x40)
             mstore(0x40, add(pMem, pLastMem))
 
             // Validate that all evaluations ∈ F
-            let end := mul(_pubSignals.length, 0x20)
+            // check field for root, publicInAmt, publicOutAmt, publicInfoHash
+            checkField(calldataload(add(proof, 288))) // proof.publicSignals.root
+            checkField(calldataload(add(proof, 320))) // proof.publicSignals.publicInAmt
+            checkField(calldataload(add(proof, 352))) // proof.publicSignals.publicOutAmt
+            checkField(calldataload(add(proof, 384))) // proof.publicSignals.publicInfoHash
+
+            // check field for inputNullifiers
+            let pos := add(proof, 480)
+            let bytesLen := mul(calldataload(pos), 32) // inputNullifiers.length * 32
+            pos := add(pos, 32) // inputNullifiers[0]
+            let end := add(bytesLen, pos)
             for {
-                let i := 0
-            } lt(i, end) {
-                i := add(i, 0x20)
+
+            } lt(pos, end) {
+                pos := add(pos, 32)
             } {
-                checkField(calldataload(add(_pubSignals.offset, i)))
+                checkField(calldataload(pos))
             }
 
-            // Validate all evaluations
-            let isValid := checkPairing(_pA, _pB, _pC, _pubSignals.offset, pMem, _type)
+            // check field for outputCommitments
+            bytesLen := mul(calldataload(pos), 32) // outputCommitments.length * 32
+            pos := add(pos, 32) // outputCommitments[0]
+            end := add(bytesLen, pos)
+            for {
 
-            mstore(0, isValid)
+            } lt(pos, end) {
+                pos := add(pos, 32)
+            } {
+                checkField(calldataload(pos))
+            }
+
+            let _pPairing := add(pMem, pPairing)
+            let _pVk := add(pMem, pVk)
+
+            let IC0x, IC0y, IC1x, IC1y, IC2x, IC2y, IC3x, IC3y, IC4x, IC4y := getFixedSizeConfigs(_type)
+
+            mstore(_pVk, IC0x)
+            mstore(add(_pVk, 32), IC0y)
+
+            let publicSignalsOffset := add(proof, 256)
+            g1_mulAccC(_pVk, IC1x, IC1y, calldataload(add(publicSignalsOffset, 32)))
+            g1_mulAccC(_pVk, IC2x, IC2y, calldataload(add(publicSignalsOffset, 64)))
+            g1_mulAccC(_pVk, IC3x, IC3y, calldataload(add(publicSignalsOffset, 96)))
+            g1_mulAccC(_pVk, IC4x, IC4y, calldataload(add(publicSignalsOffset, 128)))
+
+            let inputNullifiersOffset := add(add(publicSignalsOffset, 32), calldataload(add(proof, 416)))
+            let outputCommitmentsOffset := add(add(publicSignalsOffset, 32), calldataload(add(proof, 448)))
+            dynamicMulAcc(_pVk, inputNullifiersOffset, outputCommitmentsOffset, _type)
+
+            // -A
+            mstore(_pPairing, calldataload(proof))
+            mstore(add(_pPairing, 32), mod(sub(q, mod(calldataload(add(proof, 32)), q)), q))
+
+            // B
+            let pB := add(proof, 64)
+            mstore(add(_pPairing, 64), calldataload(pB))
+            mstore(add(_pPairing, 96), calldataload(add(pB, 32)))
+            mstore(add(_pPairing, 128), calldataload(add(pB, 64)))
+            mstore(add(_pPairing, 160), calldataload(add(pB, 96)))
+
+            // alpha1
+            mstore(add(_pPairing, 192), alphax)
+            mstore(add(_pPairing, 224), alphay)
+
+            // beta2
+            mstore(add(_pPairing, 256), betax1)
+            mstore(add(_pPairing, 288), betax2)
+            mstore(add(_pPairing, 320), betay1)
+            mstore(add(_pPairing, 352), betay2)
+
+            // vk_x
+            mstore(add(_pPairing, 384), mload(_pVk))
+            mstore(add(_pPairing, 416), mload(add(_pVk, 32)))
+
+            // gamma2
+            mstore(add(_pPairing, 448), gammax1)
+            mstore(add(_pPairing, 480), gammax2)
+            mstore(add(_pPairing, 512), gammay1)
+            mstore(add(_pPairing, 544), gammay2)
+
+            // C
+            let pC := add(proof, 192)
+            mstore(add(_pPairing, 576), calldataload(pC))
+            mstore(add(_pPairing, 608), calldataload(add(pC, 32)))
+
+            // delta2
+            let deltax1, deltax2, deltay1, deltay2 := getDeltas(_type)
+            mstore(add(_pPairing, 640), deltax1)
+            mstore(add(_pPairing, 672), deltax2)
+            mstore(add(_pPairing, 704), deltay1)
+            mstore(add(_pPairing, 736), deltay2)
+
+            let success := staticcall(sub(gas(), 2000), 8, _pPairing, 768, _pPairing, 0x20)
+            success := and(success, mload(_pPairing))
+
+            mstore(0, success)
             return(0, 0x20)
         }
     }
