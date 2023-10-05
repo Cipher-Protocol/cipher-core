@@ -15,6 +15,7 @@ import { Cipher } from "../typechain-types";
 import { resolve } from "path";
 import { proveByName } from "./prove";
 import { assert, toDecimalStringObject } from "./lib/helper";
+import { ProofStruct } from "../typechain-types/contracts/Cipher";
 
 const ethTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
@@ -29,14 +30,16 @@ async function main() {
   const tree = initTree(SPEC.treeHeight, SPEC.defaultLeafHash);
 
   const decimals = BigNumber.from(10).pow(18);
-  const { circuitInput, contractCalldata } = await generateCipherTx(tree, 
+  const { circuitInput, contractCalldata } = await generateCipherTx(
+    tree,
     BigInt(BigNumber.from("1").mul(decimals).mod(10).toString()),
     0n,
     [],
     [
       BigInt(BigNumber.from("1").mul(decimals).mod(10).toString()), // 0.1 ETH
       BigInt(BigNumber.from("2").mul(decimals).mod(10).toString()), // 0.2 ETH
-    ]);
+    ]
+  );
 
   console.log({
     circuitInput,
@@ -64,13 +67,16 @@ export function initTree(depth: number, zeroLeaf: string): IncrementalQuinTree {
   return tree;
 }
 
-export function getRandomAmtCoinInfo(privKey: bigint, {
-  inRandom,
-  inSaltOrSeed,
-}: {
-  inRandom: bigint;
-  inSaltOrSeed: bigint;
-}) {
+export function getRandomAmtCoinInfo(
+  privKey: bigint,
+  {
+    inRandom,
+    inSaltOrSeed,
+  }: {
+    inRandom: bigint;
+    inSaltOrSeed: bigint;
+  }
+) {
   const decimal = BigNumber.from(10).pow(18);
   const randomAmt = BigNumber.from(Math.floor(Math.random() * 10)).mul(decimal); // 0 ~ 9 ETH
   const coinInfo: CipherCoinInfo = {
@@ -84,13 +90,16 @@ export function getRandomAmtCoinInfo(privKey: bigint, {
   return coinInfo;
 }
 
-export function getCoinInfoFromAmt(amt: bigint, {
-  inRandom,
-  inSaltOrSeed,
-}: {
-  inRandom: bigint;
-  inSaltOrSeed: bigint;
-}) {
+export function getCoinInfoFromAmt(
+  amt: bigint,
+  {
+    inRandom,
+    inSaltOrSeed,
+  }: {
+    inRandom: bigint;
+    inSaltOrSeed: bigint;
+  }
+) {
   const coinInfo: CipherCoinInfo = {
     key: {
       inSaltOrSeed,
@@ -107,7 +116,7 @@ export async function generateCipherTx(
   publicInAmt: bigint,
   publicOutAmt: bigint,
   privateInCoins: CipherPayableCoin[] = [],
-  privateOutAmts: bigint[],
+  privateOutAmts: bigint[]
 ) {
   const privateOutCoins: CipherPayableCoin[] = [];
   const previousRoot = tree.root;
@@ -120,7 +129,10 @@ export async function generateCipherTx(
     (acc, amt) => acc + amt,
     0n
   );
-  assert(publicInAmt + totalPrivateInAmount === publicOutAmt + totalPrivateOutAmount, "inAmounts and outAmounts are not balanced")
+  assert(
+    publicInAmt + totalPrivateInAmount === publicOutAmt + totalPrivateOutAmount,
+    "inAmounts and outAmounts are not balanced"
+  );
 
   const privateInputLength = privateInCoins.length;
   const privateOutputLength = privateOutAmts.length;
@@ -165,7 +177,9 @@ export async function generateCipherTx(
     // Coin Outputs
     outputCommitment: privateOutCoins.map((coin) => coin.getCommitment()),
     outAmount: privateOutCoins.map((coin) => coin.coinInfo.amount),
-    outHashedSaltOrUserId: privateOutCoins.map((coin) => coin.coinInfo.key.hashedSaltOrUserId),
+    outHashedSaltOrUserId: privateOutCoins.map(
+      (coin) => coin.coinInfo.key.hashedSaltOrUserId
+    ),
     outRandom: privateOutCoins.map((coin) => coin.coinInfo.key.inRandom),
   };
 
@@ -185,19 +199,23 @@ export async function generateCipherTx(
   const { calldata } = await proveByName(circuitName, inputPath);
 
   /** Contract calldata */
-  const utxoData: Cipher.UtxoDataStruct = {
-    proof: {
-      a: calldata[0],
-      b: calldata[1],
-      c: calldata[2],
-      publicSignals: calldata[3],
+
+  const utxoData: ProofStruct = {
+    a: calldata[0],
+    b: calldata[1],
+    c: calldata[2],
+    publicSignals: {
+      root: utils.hexlify(previousRoot),
+      publicInAmt: publicInAmt.toString(),
+      publicOutAmt: publicOutAmt.toString(),
+      publicInfoHash,
+      inputNullifiers: privateInCoins.map((coin) =>
+        utils.hexlify(coin.getNullifier())
+      ),
+      outputCommitments: privateOutCoins.map((coin) =>
+        utils.hexlify(coin.getCommitment())
+      ),
     },
-    root: utils.hexlify(previousRoot),
-    publicInAmt: publicInAmt.toString(),
-    publicOutAmt: "0",
-    publicInfoHash,
-    inputNullifiers: privateInCoins.map((coin) => coin.getNullifier().toString()),
-    outputCommitments: privateOutCoins.map((coin) => coin.getCommitment().toString()),
   };
 
   return {

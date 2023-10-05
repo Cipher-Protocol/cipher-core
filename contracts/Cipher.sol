@@ -6,7 +6,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IncrementalBinaryTree, IncrementalTreeData} from "@zk-kit/incremental-merkle-tree.sol/IncrementalBinaryTree.sol";
 import {CipherStorage, TreeData, RelayerInfo} from "./CipherStorage.sol";
-import {IVerifier} from "./interfaces/IVerifier.sol";
+import {IVerifier, Proof, PublicSignals} from "./interfaces/IVerifier.sol";
 
 import "hardhat/console.sol";
 
@@ -40,22 +40,15 @@ contract Cipher is CipherStorage, Ownable {
         bytes data; // NOTE: abi.encode([tokenAddress, ...])
     }
 
-    struct UtxoData {
-        Proof proof;
-        uint256 root;
-        uint256 publicInAmt;
-        uint256 publicOutAmt;
-        uint256 publicInfoHash;
-        uint256[] inputNullifiers;
-        uint256[] outputCommitments;
-    }
-
-    struct Proof {
-        uint256[2] a;
-        uint256[2][2] b;
-        uint256[2] c;
-        uint256[] publicSignals;
-    }
+    // struct UtxoData {
+    //     Proof proof;
+    //     uint256 root;
+    //     uint256 publicInAmt;
+    //     uint256 publicOutAmt;
+    //     uint256 publicInfoHash;
+    //     uint256[] inputNullifiers;
+    //     uint256[] outputCommitments;
+    // }
 
     constructor(address verifierAddr, uint16 _fee) CipherStorage(verifierAddr) {
         if (_fee > FEE_BASE) revert InvalidFeeSetting(_fee);
@@ -101,7 +94,7 @@ contract Cipher is CipherStorage, Ownable {
         return false;
     }
 
-    function createTx(UtxoData memory utxoData, PublicInfo memory publicInfo) external payable {
+    function createTx(Proof memory proof, PublicInfo memory publicInfo) external payable {
         IERC20 token = IERC20(_parseData(publicInfo.data));
         TreeData storage tree = treeData[token];
         if (tree.incrementalTreeData.depth == 0) revert TokenTreeNotExists(token);
@@ -109,7 +102,7 @@ contract Cipher is CipherStorage, Ownable {
         // TODO: move to internal function _beforeCreateTx
         /* ========== before core logic start ========== */
         // check root is valid
-        if (utxoData.root != tree.incrementalTreeData.root) {
+        if (proof.publicSignals.root != tree.incrementalTreeData.root) {
             bool isHistoryRoot = false;
             uint256 start = VALID_HISTORY_ROOTS_SIZE - tree.historyRootsIdx; // 32 - 27 = 5
             uint256 end = start + VALID_HISTORY_ROOTS_SIZE; // 5 + 32 = 37
@@ -117,46 +110,45 @@ contract Cipher is CipherStorage, Ownable {
             for (start; start < end; ++start) {
                 // 27, 26, 25, ... 29, 28
                 uint256 rootIdx = VALID_HISTORY_ROOTS_SIZE - (start % VALID_HISTORY_ROOTS_SIZE); // 32 - (5 % 32) = 27
-                if (utxoData.root == tree.historyRoots[rootIdx]) {
+                if (proof.publicSignals.root == tree.historyRoots[rootIdx]) {
                     isHistoryRoot = true;
                     break;
                 }
             }
-            if (!isHistoryRoot) revert InvalidRoot(utxoData.root);
+            if (!isHistoryRoot) revert InvalidRoot(proof.publicSignals.root);
         }
 
-        _handleTransferFrom(token, msg.sender, utxoData.publicInAmt);
+        _handleTransferFrom(token, msg.sender, proof.publicSignals.publicInAmt);
 
         // check utxoType(nAmB), n is the number of INPUT nullifiers, m is the number of OUTPUT commitments
-        _checkUtxoType(publicInfo.utxoType, utxoData.inputNullifiers.length, utxoData.outputCommitments.length);
+        _checkUtxoType(
+            publicInfo.utxoType,
+            proof.publicSignals.inputNullifiers.length,
+            proof.publicSignals.outputCommitments.length
+        );
 
         uint256 publicInfoHash = uint256(keccak256(abi.encode(publicInfo))) % SNARK_SCALAR_FIELD;
-        if (utxoData.publicInfoHash != publicInfoHash)
-            revert InvalidPublicInfo(utxoData.publicInfoHash, publicInfoHash);
+        if (proof.publicSignals.publicInfoHash != publicInfoHash)
+            revert InvalidPublicInfo(proof.publicSignals.publicInfoHash, publicInfoHash);
 
         /* ========== before core logic end ========== */
 
         // TODO: move to internal function _createTx
         /* ========== core logic start ========== */
-        for (uint256 i; i < utxoData.inputNullifiers.length; ++i) {
-            if (tree.nullifiers[utxoData.inputNullifiers[i]]) revert InvalidNullifier(utxoData.inputNullifiers[i]);
+        for (uint256 i; i < proof.publicSignals.inputNullifiers.length; ++i) {
+            if (tree.nullifiers[proof.publicSignals.inputNullifiers[i]])
+                revert InvalidNullifier(proof.publicSignals.inputNullifiers[i]);
         }
 
         if (
             // NOTE: publicSignals: root, publicInAmt, publicOutAmt, publicInfoHash, inputNullifier, outputCommitment
             // TODO: circuit public need add: token??
             // TODO: public data: need to from contract storage, Ex. root
-            !verifier.verifyProof(
-                utxoData.proof.a,
-                utxoData.proof.b,
-                utxoData.proof.c,
-                utxoData.proof.publicSignals,
-                publicInfo.utxoType
-            )
-        ) revert InvalidProof(utxoData.proof);
+            !verifier.verifyProof(proof, publicInfo.utxoType)
+        ) revert InvalidProof(proof);
 
-        for (uint256 i; i < utxoData.inputNullifiers.length; ++i) {
-            uint256 nullifier = utxoData.inputNullifiers[i];
+        for (uint256 i; i < proof.publicSignals.inputNullifiers.length; ++i) {
+            uint256 nullifier = proof.publicSignals.inputNullifiers[i];
             tree.nullifiers[nullifier] = true;
             emit NewNullifier(token, nullifier);
         }
@@ -165,9 +157,9 @@ contract Cipher is CipherStorage, Ownable {
         tree.historyRoots[tree.historyRootsIdx] = tree.incrementalTreeData.root;
         tree.historyRootsIdx = uint8(addmod(tree.historyRootsIdx, 1, VALID_HISTORY_ROOTS_SIZE));
 
-        for (uint256 i; i < utxoData.outputCommitments.length; ++i) {
+        for (uint256 i; i < proof.publicSignals.outputCommitments.length; ++i) {
             // insert commitment into the tree
-            uint256 commitment = utxoData.outputCommitments[i];
+            uint256 commitment = proof.publicSignals.outputCommitments[i];
             tree.incrementalTreeData.insert(commitment);
             emit NewCommitment(token, commitment, tree.incrementalTreeData.numberOfLeaves);
         }
@@ -178,14 +170,14 @@ contract Cipher is CipherStorage, Ownable {
         /* ========== after core logic start ========== */
         uint256 feeAmt;
         if (publicInfo.fee > 0) {
-            feeAmt = (utxoData.publicOutAmt * publicInfo.fee) / FEE_BASE;
+            feeAmt = (proof.publicSignals.publicOutAmt * publicInfo.fee) / FEE_BASE;
         } else {
-            feeAmt = (utxoData.publicOutAmt * fee) / FEE_BASE;
+            feeAmt = (proof.publicSignals.publicOutAmt * fee) / FEE_BASE;
         }
 
-        if (utxoData.publicOutAmt > 0) {
+        if (proof.publicSignals.publicOutAmt > 0) {
             if (publicInfo.recipient == address(0)) revert InvalidRecipientAddr();
-            _transfer(token, publicInfo.recipient, utxoData.publicOutAmt - feeAmt);
+            _transfer(token, publicInfo.recipient, proof.publicSignals.publicOutAmt - feeAmt);
         }
 
         if (feeAmt > 0) _transfer(token, publicInfo.relayer, feeAmt);
