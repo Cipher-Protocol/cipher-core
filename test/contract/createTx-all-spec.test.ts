@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import hre from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import {
@@ -8,21 +7,19 @@ import {
   CipherVerifier__factory,
   CipherVerifier,
 } from "@typechain-types";
-import { DEFAULT_FEE, DEFAULT_TREE_HEIGHT } from "../../config";
+import { DEFAULT_FEE, DEFAULT_TREE_HEIGHT } from "@/config";
 
-import { initTree } from "@scripts/gen_testcase";
+import { ethTokenAddress, initTree } from "@/scripts/lib/cipher/CipherCore";
 import { asyncPoseidonHash } from "@scripts/lib/poseidonHash";
-import { getDefaultLeaf, getUtxoType } from "@scripts/lib/utxo.helper";
+import { getDefaultLeaf } from "@scripts/lib/utxo.helper";
 import { IncrementalQuinTree } from "@scripts/lib/IncrementalQuinTree";
 import { CreateTxTestCase, generateTest } from "./helper/ts.helper";
 
 const ethers = hre.ethers;
-const ethTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const SPEC = {
   treeHeight: DEFAULT_TREE_HEIGHT,
   defaultLeafHash: getDefaultLeaf(ethTokenAddress).toString(),
 };
-
 
 describe("deploy", function () {
   let cipherFactory: Cipher__factory;
@@ -32,13 +29,13 @@ describe("deploy", function () {
   let cipherVerifier: CipherVerifier;
   let tree!: IncrementalQuinTree;
 
-  let context: {
+  const context: {
     cipher: Cipher;
     tree: IncrementalQuinTree;
   } = {
     cipher: {} as Cipher,
     tree: {} as IncrementalQuinTree,
-  }
+  };
 
   before(async function () {
     await asyncPoseidonHash;
@@ -102,7 +99,7 @@ describe("deploy", function () {
             privateIns: ["1"],
             privateOuts: [],
           },
-        ]
+        ],
       },
       {
         tokenAddress: ethTokenAddress,
@@ -121,7 +118,7 @@ describe("deploy", function () {
             privateIns: ["1"],
             privateOuts: ["0.9"],
           },
-        ]
+        ],
       },
       {
         tokenAddress: ethTokenAddress,
@@ -140,7 +137,7 @@ describe("deploy", function () {
             privateIns: ["1"],
             privateOuts: ["0.4", "0.5"],
           },
-        ]
+        ],
       },
       {
         tokenAddress: ethTokenAddress,
@@ -159,7 +156,7 @@ describe("deploy", function () {
             privateIns: ["1"],
             privateOuts: ["0.3", "0.3", "0.3", "0.1"],
           },
-        ]
+        ],
       },
       {
         tokenAddress: ethTokenAddress,
@@ -178,7 +175,7 @@ describe("deploy", function () {
             privateIns: ["0.5", "0.5"],
             privateOuts: [],
           },
-        ]
+        ],
       },
       {
         tokenAddress: ethTokenAddress,
@@ -197,7 +194,7 @@ describe("deploy", function () {
             privateIns: ["0.5", "0.5"],
             privateOuts: ["1"],
           },
-        ]
+        ],
       },
       {
         tokenAddress: ethTokenAddress,
@@ -216,7 +213,7 @@ describe("deploy", function () {
             privateIns: ["0.5", "0.5"],
             privateOuts: ["0.6", "0.4"],
           },
-        ]
+        ],
       },
       {
         tokenAddress: ethTokenAddress,
@@ -233,9 +230,9 @@ describe("deploy", function () {
             publicIn: "0",
             publicOut: "0",
             privateIns: ["0.5", "0.5"],
-            privateOuts: ["0.25", "0.25", "0.25", "0.25",],
+            privateOuts: ["0.25", "0.25", "0.25", "0.25"],
           },
-        ]
+        ],
       },
       {
         tokenAddress: ethTokenAddress,
@@ -245,16 +242,16 @@ describe("deploy", function () {
             publicIn: "1",
             publicOut: "0",
             privateIns: [],
-            privateOuts: ["0.25", "0.25", "0.25", "0.25",],
+            privateOuts: ["0.25", "0.25", "0.25", "0.25"],
           },
           {
             name: "n4m0",
             publicIn: "0",
             publicOut: "1",
-            privateIns: ["0.25", "0.25", "0.25", "0.25",],
+            privateIns: ["0.25", "0.25", "0.25", "0.25"],
             privateOuts: [],
           },
-        ]
+        ],
       },
       {
         tokenAddress: ethTokenAddress,
@@ -264,16 +261,16 @@ describe("deploy", function () {
             publicIn: "1",
             publicOut: "0",
             privateIns: [],
-            privateOuts: ["0.25", "0.25", "0.25", "0.25",],
+            privateOuts: ["0.25", "0.25", "0.25", "0.25"],
           },
           {
             name: "n4m1",
             publicIn: "0",
             publicOut: "0",
-            privateIns: ["0.25", "0.25", "0.25", "0.25",],
+            privateIns: ["0.25", "0.25", "0.25", "0.25"],
             privateOuts: ["1"],
           },
-        ]
+        ],
       },
       {
         tokenAddress: ethTokenAddress,
@@ -283,16 +280,16 @@ describe("deploy", function () {
             publicIn: "1",
             publicOut: "0",
             privateIns: [],
-            privateOuts: ["0.25", "0.25", "0.25", "0.25",],
+            privateOuts: ["0.25", "0.25", "0.25", "0.25"],
           },
           {
             name: "n4m2",
             publicIn: "0",
             publicOut: "0",
-            privateIns: ["0.25", "0.25", "0.25", "0.25",],
-            privateOuts: ["0.5","0.5",],
+            privateIns: ["0.25", "0.25", "0.25", "0.25"],
+            privateOuts: ["0.5", "0.5"],
           },
-        ]
+        ],
       },
       {
         tokenAddress: ethTokenAddress,
@@ -302,22 +299,23 @@ describe("deploy", function () {
             publicIn: "1",
             publicOut: "0",
             privateIns: [],
-            privateOuts: ["0.25", "0.25", "0.25", "0.25",],
+            privateOuts: ["0.25", "0.25", "0.25", "0.25"],
           },
           {
             name: "n4m4",
             publicIn: "0",
             publicOut: "0.2",
-            privateIns: ["0.25", "0.25", "0.25", "0.25",],
-            privateOuts: ["0.2", "0.2", "0.2", "0.2",],
+            privateIns: ["0.25", "0.25", "0.25", "0.25"],
+            privateOuts: ["0.2", "0.2", "0.2", "0.2"],
           },
-        ]
+        ],
       },
     ];
     doubleTxsCases.forEach((testCase, i) => {
-      it(`doubleTxsCases: ${testCase.txs.map(t => t.name).join(' -> ')}`, generateTest(testCase, context));
+      it(
+        `doubleTxsCases: ${testCase.txs.map((t) => t.name).join(" -> ")}`,
+        generateTest(testCase, context)
+      );
     });
   });
-
-
 });

@@ -1,12 +1,12 @@
 import { expect } from "chai";
 import { utils } from "ethers";
 import { Cipher } from "@typechain-types";
-import { PublicInfoStruct } from "../../../typechain-types/contracts/Cipher";
-import { generateCipherTx } from "@scripts/gen_testcase";
+import { createCoin, generateCipherTx } from "@/scripts/lib/cipher/CipherCore";
 import { IncrementalQuinTree } from "@scripts/lib/IncrementalQuinTree";
 import { getUtxoType } from "@scripts/lib/utxo.helper";
-import { CipherPayableCoin } from "@scripts/lib/utxo/coin";
+import { CipherTransferableCoin } from "@/scripts/lib/cipher/CipherCoin";
 import hre from "hardhat";
+import { PublicInfoStruct } from "@/typechain-types/contracts/Cipher";
 const ethers = hre.ethers;
 
 export interface CreateTxTestCase {
@@ -26,15 +26,18 @@ export interface Transaction {
   privateOuts: string[];
 }
 
-export function generateTest(testCase: CreateTxTestCase, context: {
-  tree: IncrementalQuinTree,
-  cipher: Cipher
-}) {
+export function generateTest(
+  testCase: CreateTxTestCase,
+  context: {
+    tree: IncrementalQuinTree;
+    cipher: Cipher;
+  }
+) {
   return async () => {
     const { txs, tokenAddress } = testCase;
     const { tree, cipher } = context;
-    let previousOutCoins: CipherPayableCoin[] = [];
-    
+    let previousOutCoins: CipherTransferableCoin[] = [];
+
     for (let i = 0; i < txs.length; i++) {
       const tx = txs[i];
       const privateInputLength = txs[i].privateIns.length;
@@ -46,29 +49,32 @@ export function generateTest(testCase: CreateTxTestCase, context: {
         recipient: tx.recipient || "0xffffffffffffffffffffffffffffffffffffffff", // TODO: get from user address
         encodedData: utils.defaultAbiCoder.encode(["address"], [tokenAddress]),
       };
-      const {
-        privateOutCoins,
-        contractCalldata,
-      } = await generateCipherTx(
+      const privateOutCoins = tx.privateOuts.map((v) =>
+        createCoin(tree, {
+          amount: utils.parseEther(v).toBigInt(),
+          inRandom: BigInt(1),
+          inSaltOrSeed: BigInt(2),
+        })
+      );
+
+      const { transferableCoins, contractCalldata } = await generateCipherTx(
         tree,
         {
           publicInAmt: utils.parseEther(tx.publicIn).toBigInt(),
           publicOutAmt: utils.parseEther(tx.publicOut).toBigInt(),
           privateInCoins: previousOutCoins,
-          privateOutAmts: tx.privateOuts.map((v) => utils.parseEther(v).toBigInt()),
+          privateOutCoins,
         },
-        publicInfo,
+        publicInfo
       );
-      previousOutCoins = privateOutCoins;
+      previousOutCoins = transferableCoins;
 
       const circuitName = `n${privateInputLength}m${privateOutputLength}`;
       expect(circuitName).to.equal(txs[i].name);
       const testName = `createTx with n${privateInputLength}m${privateOutputLength}`;
       console.log(testName);
 
-      const beforeEthBalance = await ethers.provider.getBalance(
-        cipher.address
-      );
+      const beforeEthBalance = await ethers.provider.getBalance(cipher.address);
       console.log(
         `${testName}: txIndex=${i}, beforeEthBalance`,
         beforeEthBalance.toString()
@@ -80,13 +86,11 @@ export function generateTest(testCase: CreateTxTestCase, context: {
       );
       await result.wait();
       // TODO: check event log
-      const afterEthBalance = await ethers.provider.getBalance(
-        cipher.address
-      );
+      const afterEthBalance = await ethers.provider.getBalance(cipher.address);
       console.log(
         `${testName}: txIndex=${i}, afterEthBalance`,
         afterEthBalance.toString()
       );
     }
-  }
+  };
 }

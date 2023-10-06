@@ -17,11 +17,11 @@ export function getUtxoType(nIn: number, mOut: number): string {
     throw new Error(`Invalid nNum=${nIn}, mNum=${mOut}`);
   }
 
-  if(nIn < 0 || nIn > 255) {
+  if (nIn < 0 || nIn > 255) {
     throw new Error(`Invalid nNum=${nIn}, should be 0 ~ 255`);
   }
 
-  if(mOut < 0 || mOut > 255) {
+  if (mOut < 0 || mOut > 255) {
     throw new Error(`Invalid mNum=${mOut}, should be 0 ~ 255`);
   }
 
@@ -44,7 +44,11 @@ export function getAmountHash(amount: string): BigNumber {
   ).mod(BigNumber.from(SNARK_FIELD_SIZE));
 }
 
-export function generateCommitment(amount: bigint, publicKey: bigint, salt: bigint) {
+export function generateCommitment(
+  amount: bigint,
+  publicKey: bigint,
+  salt: bigint
+) {
   assert(amount <= FIELD_SIZE_BIGINT, "amount is too large");
   assert(publicKey <= FIELD_SIZE_BIGINT, "publicKey is too large");
   assert(salt <= FIELD_SIZE_BIGINT, "salt is too large");
@@ -74,12 +78,12 @@ export function generateNullifier(
 
 export function indicesToPathIndices(indices: number[]): bigint {
   // pathIndices bits is an array of 0/1 selectors telling whether given pathElement is on the left or right side of merkle path
-  let binaryString = '';
-  for (let index of indices) {
+  let binaryString = "";
+  for (const index of indices) {
     // Assuming 0 for left and 1 for right
-    binaryString += index % 2 === 0 ? '0' : '1';
+    binaryString += index % 2 === 0 ? "0" : "1";
   }
   // reverse
-  binaryString = binaryString.split('').reverse().join('');
-  return BigInt('0b' + binaryString);
+  binaryString = binaryString.split("").reverse().join("");
+  return BigInt("0b" + binaryString);
 }

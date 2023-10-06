@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import hre from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import {
@@ -8,21 +7,19 @@ import {
   CipherVerifier__factory,
   CipherVerifier,
 } from "@typechain-types";
-import { DEFAULT_FEE, DEFAULT_TREE_HEIGHT } from "../../config";
+import { DEFAULT_FEE, DEFAULT_TREE_HEIGHT } from "@/config";
 
-import { initTree } from "@scripts/gen_testcase";
+import { ethTokenAddress, initTree } from "@/scripts/lib/cipher/CipherCore";
 import { asyncPoseidonHash } from "@scripts/lib/poseidonHash";
-import { getDefaultLeaf, getUtxoType } from "@scripts/lib/utxo.helper";
+import { getDefaultLeaf } from "@scripts/lib/utxo.helper";
 import { IncrementalQuinTree } from "@scripts/lib/IncrementalQuinTree";
 import { CreateTxTestCase, generateTest } from "./helper/ts.helper";
 
 const ethers = hre.ethers;
-const ethTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const SPEC = {
   treeHeight: DEFAULT_TREE_HEIGHT,
   defaultLeafHash: getDefaultLeaf(ethTokenAddress).toString(),
 };
-
 
 describe("deploy", function () {
   let cipherFactory: Cipher__factory;
@@ -32,13 +29,13 @@ describe("deploy", function () {
   let cipherVerifier: CipherVerifier;
   let tree!: IncrementalQuinTree;
 
-  let context: {
+  const context: {
     cipher: Cipher;
     tree: IncrementalQuinTree;
   } = {
     cipher: {} as Cipher,
     tree: {} as IncrementalQuinTree,
-  }
+  };
 
   before(async function () {
     await asyncPoseidonHash;
@@ -87,38 +84,47 @@ describe("deploy", function () {
     const singleTxCases: CreateTxTestCase[] = [
       {
         tokenAddress: ethTokenAddress,
-        txs: [{
-          name: "n0m1",
-          publicIn: "1",
-          publicOut: "0",
-          privateIns: [],
-          privateOuts: ["1"],
-        }]
+        txs: [
+          {
+            name: "n0m1",
+            publicIn: "1",
+            publicOut: "0",
+            privateIns: [],
+            privateOuts: ["1"],
+          },
+        ],
       },
       {
         tokenAddress: ethTokenAddress,
-        txs: [{
-          name: "n0m2",
-          publicIn: "1",
-          publicOut: "0",
-          privateIns: [],
-          privateOuts: ["0.5", "0.5"],
-        }],
+        txs: [
+          {
+            name: "n0m2",
+            publicIn: "1",
+            publicOut: "0",
+            privateIns: [],
+            privateOuts: ["0.5", "0.5"],
+          },
+        ],
       },
       {
         tokenAddress: ethTokenAddress,
-        txs: [{
-          name: "n0m4",
-          publicIn: "2",
-          publicOut: "0",
-          privateIns: [],
-          privateOuts: ["0.5", "0.5", "0.5", "0.5"],
-        }],
+        txs: [
+          {
+            name: "n0m4",
+            publicIn: "2",
+            publicOut: "0",
+            privateIns: [],
+            privateOuts: ["0.5", "0.5", "0.5", "0.5"],
+          },
+        ],
       },
     ];
 
     singleTxCases.forEach((testCase, i) => {
-      it(`singleTxCases: ${testCase.txs.map(t => t.name).join(' -> ')}`, generateTest(testCase, context));
+      it(
+        `singleTxCases: ${testCase.txs.map((t) => t.name).join(" -> ")}`,
+        generateTest(testCase, context)
+      );
     });
 
     const multipleTxCases: CreateTxTestCase[] = [
@@ -181,9 +187,10 @@ describe("deploy", function () {
       },
     ];
     multipleTxCases.forEach((testCase, i) => {
-      it(`multipleTxCases: ${testCase.txs.map(t => t.name).join(' -> ')}`, generateTest(testCase, context));
+      it(
+        `multipleTxCases: ${testCase.txs.map((t) => t.name).join(" -> ")}`,
+        generateTest(testCase, context)
+      );
     });
   });
-
-
 });
