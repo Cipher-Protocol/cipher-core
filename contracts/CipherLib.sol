@@ -81,14 +81,16 @@ library CipherLib {
         if (publicInfoHash != calcPublicInfoHash) revert InvalidPublicInfo(publicInfoHash, calcPublicInfoHash);
     }
 
-    // TODO: not completed
     function isHistoryRoot(uint256 root, TreeData storage tree) internal view returns (bool) {
-        uint256 start = CipherConfig.VALID_HISTORY_ROOTS_SIZE - tree.historyRootsIdx; // 32 - 27 = 5
-        uint256 end = start + CipherConfig.VALID_HISTORY_ROOTS_SIZE; // 5 + 32 = 37
-        // 5, 6, 7, ...36
+        // ex: 32 - 27 = 5
+        uint256 start = CipherConfig.VALID_HISTORY_ROOTS_SIZE - tree.historyRootsIdx;
+        // ex: 5 + 32 = 37
+        uint256 end = start + CipherConfig.VALID_HISTORY_ROOTS_SIZE;
+        // ex: 5, 6, 7, ...36
         for (start; start < end; ++start) {
-            // 27, 26, 25, ... 29, 28
-            uint256 rootIdx = CipherConfig.VALID_HISTORY_ROOTS_SIZE - (start % CipherConfig.VALID_HISTORY_ROOTS_SIZE); // 32 - (5 % 32) = 27
+            // ex: (32 - (5 % 32)) % 32 = 27 (27, 26, 25, ... 1, 0, 31, 30, 29, 28)
+            uint256 rootIdx = (CipherConfig.VALID_HISTORY_ROOTS_SIZE -
+                (start % CipherConfig.VALID_HISTORY_ROOTS_SIZE)) % CipherConfig.VALID_HISTORY_ROOTS_SIZE;
             if (root == tree.historyRoots[rootIdx]) return true;
         }
         return false;
