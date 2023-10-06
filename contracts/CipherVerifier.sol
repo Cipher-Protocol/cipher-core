@@ -1,29 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
-/*
-    Copyright 2021 0KIMS association.
-
-    This file is generated with [snarkJS](https://github.com/iden3/snarkjs).
-
-    snarkJS is a free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    snarkJS is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-    or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public
-    License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with snarkJS. If not, see <https://www.gnu.org/licenses/>.
-*/
-import {VerifierConfig} from "./VerifierConfig.sol";
-import {Proof} from "./interfaces/IVerifier.sol";
-import "hardhat/console.sol";
-
+// solhint-disable const-name-snakecase
 pragma solidity ^0.8.20;
 
-contract Verifier is VerifierConfig {
+import {CipherVerifierConst} from "./CipherVerifierConst.sol";
+import {Proof} from "./CipherStorage.sol";
+
+contract CipherVerifier is CipherVerifierConst {
     // Memory data
     uint16 constant pVk = 0;
     uint16 constant pPairing = 128;
@@ -38,8 +20,13 @@ contract Verifier is VerifierConfig {
                 }
             }
 
-            // G1 function to multiply a G1 value(x,y) to value in an address
-            function g1_mulAccC(pR, x, y, s) {
+            /// @notice Elliptic curve multiplication then accumulation
+            /// @dev pR = pR + (x, y) * s
+            /// @param pR The pointer to the result
+            /// @param x The x coordinate of the point
+            /// @param y The y coordinate of the point
+            /// @param s The scalar
+            function eccMulAcc(pR, x, y, s) {
                 let success
                 let mIn := mload(0x40)
                 mstore(mIn, x)
@@ -64,9 +51,80 @@ contract Verifier is VerifierConfig {
                 }
             }
 
+            /// @notice Get the fixed size configurations for the given utxo type
+            /// @param utxoType The utxo type
+            /// @return IC0x The x coordinate of the default point
+            /// @return IC0y The y coordinate of the default point
+            /// @return IC1x The x coordinate of the input a[0]
+            /// @return IC1y The y coordinate of the input a[1]
+            /// @return IC2x The x coordinate of the first b[0][0]
+            /// @return IC2y The y coordinate of the first b[0][1]
+            /// @return IC3x The x coordinate of the first b[1][0]
+            /// @return IC3y The y coordinate of the first b[1][1]
+            /// @return IC4x The x coordinate of the output c[0]
+            /// @return IC4y The y coordinate of the output c[1]
             function getFixedSizeConfigs(utxoType) -> IC0x, IC0y, IC1x, IC1y, IC2x, IC2y, IC3x, IC3y, IC4x, IC4y {
                 switch utxoType
-<% for (let i = 0; i < IcCases.length; i++) __append(IcCases[i]) %>
+                case hex"0001" {
+                    IC0x := n0m1_IC0x
+                    IC0y := n0m1_IC0y
+                    IC1x := n0m1_IC1x
+                    IC1y := n0m1_IC1y
+                    IC2x := n0m1_IC2x
+                    IC2y := n0m1_IC2y
+                    IC3x := n0m1_IC3x
+                    IC3y := n0m1_IC3y
+                    IC4x := n0m1_IC4x
+                    IC4y := n0m1_IC4y
+                }
+                case hex"0002" {
+                    IC0x := n0m2_IC0x
+                    IC0y := n0m2_IC0y
+                    IC1x := n0m2_IC1x
+                    IC1y := n0m2_IC1y
+                    IC2x := n0m2_IC2x
+                    IC2y := n0m2_IC2y
+                    IC3x := n0m2_IC3x
+                    IC3y := n0m2_IC3y
+                    IC4x := n0m2_IC4x
+                    IC4y := n0m2_IC4y
+                }
+                case hex"0004" {
+                    IC0x := n0m4_IC0x
+                    IC0y := n0m4_IC0y
+                    IC1x := n0m4_IC1x
+                    IC1y := n0m4_IC1y
+                    IC2x := n0m4_IC2x
+                    IC2y := n0m4_IC2y
+                    IC3x := n0m4_IC3x
+                    IC3y := n0m4_IC3y
+                    IC4x := n0m4_IC4x
+                    IC4y := n0m4_IC4y
+                }
+                case hex"0100" {
+                    IC0x := n1m0_IC0x
+                    IC0y := n1m0_IC0y
+                    IC1x := n1m0_IC1x
+                    IC1y := n1m0_IC1y
+                    IC2x := n1m0_IC2x
+                    IC2y := n1m0_IC2y
+                    IC3x := n1m0_IC3x
+                    IC3y := n1m0_IC3y
+                    IC4x := n1m0_IC4x
+                    IC4y := n1m0_IC4y
+                }
+                case hex"0101" {
+                    IC0x := n1m1_IC0x
+                    IC0y := n1m1_IC0y
+                    IC1x := n1m1_IC1x
+                    IC1y := n1m1_IC1y
+                    IC2x := n1m1_IC2x
+                    IC2y := n1m1_IC2y
+                    IC3x := n1m1_IC3x
+                    IC3y := n1m1_IC3y
+                    IC4x := n1m1_IC4x
+                    IC4y := n1m1_IC4y
+                }
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -76,7 +134,36 @@ contract Verifier is VerifierConfig {
 
             function getDeltas(utxoType) -> deltax1, deltax2, deltay1, deltay2 {
                 switch utxoType
-<% for (let i = 0; i < DeltaCases.length; i++) __append(DeltaCases[i]) %>
+                case hex"0001" {
+                    deltax1 := n0m1_deltax1
+                    deltax2 := n0m1_deltax2
+                    deltay1 := n0m1_deltay1
+                    deltay2 := n0m1_deltay2
+                }
+                case hex"0002" {
+                    deltax1 := n0m2_deltax1
+                    deltax2 := n0m2_deltax2
+                    deltay1 := n0m2_deltay1
+                    deltay2 := n0m2_deltay2
+                }
+                case hex"0004" {
+                    deltax1 := n0m4_deltax1
+                    deltax2 := n0m4_deltax2
+                    deltay1 := n0m4_deltay1
+                    deltay2 := n0m4_deltay2
+                }
+                case hex"0100" {
+                    deltax1 := n1m0_deltax1
+                    deltax2 := n1m0_deltax2
+                    deltay1 := n1m0_deltay1
+                    deltay2 := n1m0_deltay2
+                }
+                case hex"0101" {
+                    deltax1 := n1m1_deltax1
+                    deltax2 := n1m1_deltax2
+                    deltay1 := n1m1_deltay1
+                    deltay2 := n1m1_deltay2
+                }
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -86,7 +173,26 @@ contract Verifier is VerifierConfig {
 
             function dynamicMulAcc(_pVk, inputNullifiersOffset, outputCommitmentsOffset, utxoType) {
                 switch utxoType
-<% for (let i = 0; i < MulAccCases.length; i++) __append(MulAccCases[i]) %>
+                case hex"0001" {
+                    eccMulAcc(_pVk, n0m1_IC5x, n0m1_IC5y, calldataload(add(outputCommitmentsOffset, 32)))
+                }
+                case hex"0002" {
+                    eccMulAcc(_pVk, n0m2_IC5x, n0m2_IC5y, calldataload(add(outputCommitmentsOffset, 32)))
+                    eccMulAcc(_pVk, n0m2_IC6x, n0m2_IC6y, calldataload(add(outputCommitmentsOffset, 64)))
+                }
+                case hex"0004" {
+                    eccMulAcc(_pVk, n0m4_IC5x, n0m4_IC5y, calldataload(add(outputCommitmentsOffset, 32)))
+                    eccMulAcc(_pVk, n0m4_IC6x, n0m4_IC6y, calldataload(add(outputCommitmentsOffset, 64)))
+                    eccMulAcc(_pVk, n0m4_IC7x, n0m4_IC7y, calldataload(add(outputCommitmentsOffset, 96)))
+                    eccMulAcc(_pVk, n0m4_IC8x, n0m4_IC8y, calldataload(add(outputCommitmentsOffset, 128)))
+                }
+                case hex"0100" {
+                    eccMulAcc(_pVk, n1m0_IC5x, n1m0_IC5y, calldataload(add(inputNullifiersOffset, 32)))
+                }
+                case hex"0101" {
+                    eccMulAcc(_pVk, n1m1_IC5x, n1m1_IC5y, calldataload(add(inputNullifiersOffset, 32)))
+                    eccMulAcc(_pVk, n1m1_IC6x, n1m1_IC6y, calldataload(add(outputCommitmentsOffset, 32)))
+                }
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -141,7 +247,7 @@ contract Verifier is VerifierConfig {
             // check field for inputNullifiers
             let pos := add(proof, 480)
             let bytesLen := mul(calldataload(pos), 32) // inputNullifiers.length * 32
-            pos := add(pos, 32) // inputNullifiers[0]
+            pos := add(pos, 32) // inputNullifiers[0], if length > 0
             let end := add(bytesLen, pos)
             for {
 
@@ -153,7 +259,7 @@ contract Verifier is VerifierConfig {
 
             // check field for outputCommitments
             bytesLen := mul(calldataload(pos), 32) // outputCommitments.length * 32
-            pos := add(pos, 32) // outputCommitments[0]
+            pos := add(pos, 32) // outputCommitments[0], if length > 0
             end := add(bytesLen, pos)
             for {
 
@@ -172,10 +278,10 @@ contract Verifier is VerifierConfig {
             mstore(add(_pVk, 32), IC0y)
 
             let publicSignalsOffset := add(proof, 256)
-            g1_mulAccC(_pVk, IC1x, IC1y, calldataload(add(publicSignalsOffset, 32)))
-            g1_mulAccC(_pVk, IC2x, IC2y, calldataload(add(publicSignalsOffset, 64)))
-            g1_mulAccC(_pVk, IC3x, IC3y, calldataload(add(publicSignalsOffset, 96)))
-            g1_mulAccC(_pVk, IC4x, IC4y, calldataload(add(publicSignalsOffset, 128)))
+            eccMulAcc(_pVk, IC1x, IC1y, calldataload(add(publicSignalsOffset, 32)))
+            eccMulAcc(_pVk, IC2x, IC2y, calldataload(add(publicSignalsOffset, 64)))
+            eccMulAcc(_pVk, IC3x, IC3y, calldataload(add(publicSignalsOffset, 96)))
+            eccMulAcc(_pVk, IC4x, IC4y, calldataload(add(publicSignalsOffset, 128)))
 
             let inputNullifiersOffset := add(add(publicSignalsOffset, 32), calldataload(add(proof, 416)))
             let outputCommitmentsOffset := add(add(publicSignalsOffset, 32), calldataload(add(proof, 448)))

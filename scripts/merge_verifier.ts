@@ -14,15 +14,21 @@ import { resolve } from "path";
 
 const outputVerifierConfigPath = resolve(
   __dirname,
-  "../contracts/VerifierConfig.sol"
+  "../contracts/CipherVerifierConst.sol"
 );
-const outputVerifierPath = resolve(__dirname, "../contracts/Verifier.sol");
+const outputVerifierPath = resolve(
+  __dirname,
+  "../contracts/CipherVerifier.sol"
+);
 const verifierBaseDir = resolve(__dirname, "../build/verifiers");
 const templateConfigPath = resolve(
   __dirname,
-  "./template/VerifierConfig.sol.ejs"
+  "./template/CipherVerifierConst.sol.ejs"
 );
-const templateMainPath = resolve(__dirname, "./template/Verifier.sol.ejs");
+const templateMainPath = resolve(
+  __dirname,
+  "./template/CipherVerifier.sol.ejs"
+);
 async function main() {
   rmSync(outputVerifierConfigPath, { force: true });
   rmSync(outputVerifierPath, { force: true });
@@ -48,7 +54,7 @@ async function mergeVerifiers(verifierBaseDir: string) {
   //     outputVerifierConfigPath,
   //     `// SPDX-License-Identifier: MIT
   // pragma solidity ^0.8.20;
-  // contract VerifierConfig {\n`
+  // contract CipherVerifierConst {\n`
   //   );
 
   const firstFile = files[0];
