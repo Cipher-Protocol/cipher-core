@@ -154,10 +154,10 @@ export async function generateCipherTx(
   const latestRoot = tree.root;
   const publicInfo: PublicInfoStruct = {
     utxoType: getUtxoType(privateInputLength, privateOutputLength),
-    recipient: "0xffffffffffffffffffffffffffffffffffffffff", // TODO: get from user address
+    feeRate: "0",
     relayer: "0x0000000000000000000000000000000000000000", // no fee
-    fee: "0",
-    data: utils.defaultAbiCoder.encode(["address"], [ethTokenAddress]),
+    recipient: "0xffffffffffffffffffffffffffffffffffffffff", // TODO: get from user address
+    encodedData: utils.defaultAbiCoder.encode(["address"], [ethTokenAddress]),
   };
 
   /** Circuit input */
@@ -235,14 +235,14 @@ export async function generateCipherTx(
 
 function toPublicInfoHash(publicInfo: PublicInfoStruct) {
   const data = utils.defaultAbiCoder.encode(
-    ["tuple(bytes2,address,address,uint256,bytes)"],
+    ["tuple(bytes2,uint16,address,address,bytes)"],
     [
       [
         publicInfo.utxoType,
-        publicInfo.recipient,
+        publicInfo.feeRate,
         publicInfo.relayer,
-        publicInfo.fee,
-        publicInfo.data,
+        publicInfo.recipient,
+        publicInfo.encodedData,
       ],
     ]
   );
