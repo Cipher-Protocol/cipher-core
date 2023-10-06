@@ -2,16 +2,17 @@
 // solhint-disable const-name-snakecase
 pragma solidity ^0.8.20;
 
-import {CipherVerifierConst} from "./CipherVerifierConst.sol";
+import {CipherVKeyConst} from "./CipherVKeyConst.sol";
 import {Proof} from "./CipherStorage.sol";
 
-contract CipherVerifier is CipherVerifierConst {
+contract CipherVerifier is CipherVKeyConst {
     // Memory data
     uint16 internal constant pVk = 0;
     uint16 internal constant pPairing = 128;
     uint16 internal constant pLastMem = 896;
 
     function verifyProof(Proof calldata proof, bytes2 _type) public view returns (bool) {
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             function checkField(v) {
                 if iszero(lt(v, q)) {

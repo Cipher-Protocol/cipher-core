@@ -3,7 +3,7 @@
 pragma solidity ^0.8.20;
 
 //TODO: add internal
-contract CipherVerifierConst {
+contract CipherVKeyConst {
     // Scalar field size
     uint256 constant r = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
     // Base field size
