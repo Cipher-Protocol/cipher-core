@@ -5,8 +5,8 @@ import {
   IncrementalBinaryTree,
   Cipher,
   Cipher__factory,
-  Verifier,
-  Verifier__factory,
+  CipherVerifier__factory,
+  CipherVerifier,
 } from "../../typechain-types";
 import { DEFAULT_FEE, DEFAULT_TREE_HEIGHT } from "../../config";
 import { BigNumber, utils } from "ethers";
@@ -36,8 +36,8 @@ describe("deploy", function () {
   let cipherFactory: Cipher__factory;
   let cipher: Cipher;
   let incrementalBinaryTree: IncrementalBinaryTree;
-  let VerifierFactory: Verifier__factory;
-  let verifier: Verifier;
+  let cipherVerifierFactory: CipherVerifier__factory;
+  let cipherVerifier: CipherVerifier;
   let tree!: IncrementalQuinTree;
 
   before(async function () {
@@ -45,10 +45,10 @@ describe("deploy", function () {
   });
 
   beforeEach(async function () {
-    VerifierFactory = (await ethers.getContractFactory(
-      "Verifier"
-    )) as Verifier__factory;
-    verifier = await VerifierFactory.deploy();
+    cipherVerifierFactory = (await ethers.getContractFactory(
+      "CipherVerifier"
+    )) as CipherVerifier__factory;
+    cipherVerifier = await cipherVerifierFactory.deploy();
 
     const PoseidonT3 = await ethers.getContractFactory("PoseidonT3");
     const poseidonT3 = await PoseidonT3.deploy();
@@ -71,7 +71,7 @@ describe("deploy", function () {
       },
     })) as Cipher__factory;
     cipher = (await cipherFactory.deploy(
-      verifier.address,
+      cipherVerifier.address,
       DEFAULT_FEE
     )) as Cipher;
     await cipher.deployed();
@@ -100,14 +100,14 @@ describe("deploy", function () {
         privateIns: [],
         privateOuts: ["1"],
       },
-      // { w
-      //   publicIn: "1",
-      //   privateOut: ["0.5", "0.5"],
-      // },
-      // {
-      //   publicIn: "2",
-      //   privateOut: ["0.5", "0.5","0.5", "0.5"],
-      // },
+      {
+        publicIn: "1",
+        privateOuts: ["0.5", "0.5"],
+      },
+      {
+        publicIn: "2",
+        privateOuts: ["0.5", "0.5", "0.5", "0.5"],
+      },
     ];
 
     singleTxCases.forEach((testCase, i) => {
@@ -142,110 +142,110 @@ describe("deploy", function () {
     });
 
     // const multipleTxCases = [
-    // {
-    //   txs: [
-    //     {
-    //       name: "n0m1",
-    //       publicIn: "1",
-    //       publicOut: "0",
-    //       privateIns: [],
-    //       privateOuts: ["1"],
-    //     },
-    //     {
-    //       name: "n1m0",
-    //       publicIn: "0",
-    //       publicOut: "1",
-    //       privateIns: ["1"],
-    //       privateOuts: [],
-    //     },
-    //   ],
-    // },
-    // {
-    //   txs: [
-    //     {
-    //       name: "n0m1",
-    //       publicIn: "1",
-    //       publicOut: "0",
-    //       privateIns: [],
-    //       privateOuts: ["1"],
-    //     },
-    //     {
-    //       name: "n1m1",
-    //       publicIn: "0",
-    //       publicOut: "0.1",
-    //       privateIns: ["1"],
-    //       privateOuts: ["0.9"],
-    //     },
-    //   ],
-    // },
-    // {
-    //   txs: [
-    //     {
-    //       name: "n0m1",
-    //       publicIn: "1",
-    //       publicOut: "0",
-    //       privateIns: [],
-    //       privateOuts: ["1"],
-    //     },
-    //     {
-    //       name: "n1m2",
-    //       publicIn: "0",
-    //       publicOut: "0.1",
-    //       privateIns: ["1"],
-    //       privateOuts: ["0.4", "0.5"],
-    //     },
-    //   ],
-    // },
-    //   ];
-    //   multipleTxCases.forEach((testCase, i) => {
-    //     it(`multiple Txs`, async function () {
-    //       const txs = testCase.txs;
-    //       let previousOutCoins: CipherPayableCoin[] = [];
-    //       for (let i = 0; i < txs.length; i++) {
-    //         const tx = txs[i];
-    //         const {
-    //           privateOutCoins,
-    //           contractCalldata,
-    //           privateInputLength,
-    //           privateOutputLength,
-    //         } = await generateCipherTx(
-    //           tree,
-    //           utils.parseEther(tx.publicIn).toBigInt(),
-    //           utils.parseEther(tx.publicOut).toBigInt(),
-    //           previousOutCoins,
-    //           tx.privateOuts.map((v) => utils.parseEther(v).toBigInt())
-    //         );
-    //         previousOutCoins = privateOutCoins;
+    //   {
+    //     txs: [
+    //       {
+    //         name: "n0m1",
+    //         publicIn: "1",
+    //         publicOut: "0",
+    //         privateIns: [],
+    //         privateOuts: ["1"],
+    //       },
+    //       {
+    //         name: "n1m0",
+    //         publicIn: "0",
+    //         publicOut: "1",
+    //         privateIns: ["1"],
+    //         privateOuts: [],
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     txs: [
+    //       {
+    //         name: "n0m1",
+    //         publicIn: "1",
+    //         publicOut: "0",
+    //         privateIns: [],
+    //         privateOuts: ["1"],
+    //       },
+    //       {
+    //         name: "n1m1",
+    //         publicIn: "0",
+    //         publicOut: "0.1",
+    //         privateIns: ["1"],
+    //         privateOuts: ["0.9"],
+    //       },
+    //     ],
+    //   },
+    //   {
+    //     txs: [
+    //       {
+    //         name: "n0m1",
+    //         publicIn: "1",
+    //         publicOut: "0",
+    //         privateIns: [],
+    //         privateOuts: ["1"],
+    //       },
+    //       {
+    //         name: "n1m2",
+    //         publicIn: "0",
+    //         publicOut: "0.1",
+    //         privateIns: ["1"],
+    //         privateOuts: ["0.4", "0.5"],
+    //       },
+    //     ],
+    //   },
+    // ];
+    // multipleTxCases.forEach((testCase, i) => {
+    //   it(`multiple Txs`, async function () {
+    //     const txs = testCase.txs;
+    //     let previousOutCoins: CipherPayableCoin[] = [];
+    //     for (let i = 0; i < txs.length; i++) {
+    //       const tx = txs[i];
+    //       const {
+    //         privateOutCoins,
+    //         contractCalldata,
+    //         privateInputLength,
+    //         privateOutputLength,
+    //       } = await generateCipherTx(
+    //         tree,
+    //         utils.parseEther(tx.publicIn).toBigInt(),
+    //         utils.parseEther(tx.publicOut).toBigInt(),
+    //         previousOutCoins,
+    //         tx.privateOuts.map((v) => utils.parseEther(v).toBigInt())
+    //       );
+    //       previousOutCoins = privateOutCoins;
 
-    //         const circuitName = `n${privateInputLength}m${privateOutputLength}`;
-    //         expect(circuitName).to.equal(txs[i].name);
-    //         const testName = `createTx with n${privateInputLength}m${privateOutputLength}`;
-    //         console.log(testName);
+    //       const circuitName = `n${privateInputLength}m${privateOutputLength}`;
+    //       expect(circuitName).to.equal(txs[i].name);
+    //       const testName = `createTx with n${privateInputLength}m${privateOutputLength}`;
+    //       console.log(testName);
 
-    //         const beforeEthBalance = await ethers.provider.getBalance(
-    //           cipher.address
-    //         );
-    //         console.log(
-    //           `${testName}: txIndex=${i}, beforeEthBalance`,
-    //           beforeEthBalance.toString()
-    //         );
-    //         const result = await cipher.createTx(
-    //           contractCalldata.utxoData,
-    //           contractCalldata.publicInfo,
-    //           { value: utils.parseEther(tx.publicIn) }
-    //         );
-    //         await result.wait();
-    //         // TODO: check event log
-    //         const afterEthBalance = await ethers.provider.getBalance(
-    //           cipher.address
-    //         );
-    //         console.log(
-    //           `${testName}: txIndex=${i}, afterEthBalance`,
-    //           afterEthBalance.toString()
-    //         );
-    //       }
-    //     });
+    //       const beforeEthBalance = await ethers.provider.getBalance(
+    //         cipher.address
+    //       );
+    //       console.log(
+    //         `${testName}: txIndex=${i}, beforeEthBalance`,
+    //         beforeEthBalance.toString()
+    //       );
+    //       const result = await cipher.createTx(
+    //         contractCalldata.utxoData,
+    //         contractCalldata.publicInfo,
+    //         { value: utils.parseEther(tx.publicIn) }
+    //       );
+    //       await result.wait();
+    //       // TODO: check event log
+    //       const afterEthBalance = await ethers.provider.getBalance(
+    //         cipher.address
+    //       );
+    //       console.log(
+    //         `${testName}: txIndex=${i}, afterEthBalance`,
+    //         afterEthBalance.toString()
+    //       );
+    //     }
     //   });
+    // });
   });
 });
 

@@ -30,7 +30,7 @@ template Cipher(levels, nIns, mOuts) {
     // utxo output signals
     signal input outputCommitment[mOuts]; // public
     signal input outAmount[mOuts];
-    signal input outHashedSaltOrUserId[mOuts]; // outPubKey
+    signal input outHashedSaltOrUserId[mOuts]; // output hashed salt or UserId
     signal input outRandom[mOuts];
 
     // internal calculation signals
@@ -68,6 +68,7 @@ template Cipher(levels, nIns, mOuts) {
         //TODO: check why need this?
         // calculate signature from input signal
         // inSignature[i] <== Signature()(inSaltOrSeed[i], inCommitmentHash[i], inPathIndices[i]);
+        // inNullifier[i] <== Poseidon(3)([inCommitmentHash[i], inPathIndices[i], inSignature[i]]);
         
         // calculate nullifier from input signal
         inNullifier[i] <== Poseidon(3)([inCommitmentHash[i], inPathIndices[i], inSaltOrSeed[i]]);

@@ -15,7 +15,10 @@ import { Cipher } from "../typechain-types";
 import { resolve } from "path";
 import { proveByName } from "./prove";
 import { assert, toDecimalStringObject } from "./lib/helper";
-import { ProofStruct } from "../typechain-types/contracts/Cipher";
+import {
+  ProofStruct,
+  PublicInfoStruct,
+} from "../typechain-types/contracts/Cipher";
 
 const ethTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
@@ -149,9 +152,9 @@ export async function generateCipherTx(
   }
 
   const latestRoot = tree.root;
-  const publicInfo: Cipher.PublicInfoStruct = {
+  const publicInfo: PublicInfoStruct = {
     utxoType: getUtxoType(privateInputLength, privateOutputLength),
-    recipient: "0x0000000000000000000000000000000000000000", // no out
+    recipient: "0xffffffffffffffffffffffffffffffffffffffff", // TODO: get from user address
     relayer: "0x0000000000000000000000000000000000000000", // no fee
     fee: "0",
     data: utils.defaultAbiCoder.encode(["address"], [ethTokenAddress]),
@@ -199,9 +202,6 @@ export async function generateCipherTx(
   const { calldata } = await proveByName(circuitName, inputPath);
 
   /** Contract calldata */
-  console.log({
-    calldata3: calldata[3],
-  });
   const utxoData: ProofStruct = {
     a: calldata[0],
     b: calldata[1],
@@ -233,7 +233,7 @@ export async function generateCipherTx(
   };
 }
 
-function toPublicInfoHash(publicInfo: Cipher.PublicInfoStruct) {
+function toPublicInfoHash(publicInfo: PublicInfoStruct) {
   const data = utils.defaultAbiCoder.encode(
     ["tuple(bytes2,address,address,uint256,bytes)"],
     [

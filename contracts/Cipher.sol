@@ -5,23 +5,19 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IncrementalBinaryTree, IncrementalTreeData} from "@zk-kit/incremental-merkle-tree.sol/IncrementalBinaryTree.sol";
-import {CipherStorage, TreeData, RelayerInfo} from "./CipherStorage.sol";
-import {IVerifier, Proof, PublicSignals} from "./interfaces/IVerifier.sol";
+import {CipherStorage, TreeData, RelayerInfo, Proof, PublicSignals, PublicInfo} from "./CipherStorage.sol";
+import {CipherConfig} from "./CipherConfig.sol";
+import {CipherLib} from "./CipherLib.sol";
+import {ICipherVerifier} from "./interfaces/ICipherVerifier.sol";
 
 import "hardhat/console.sol";
 
 contract Cipher is CipherStorage, Ownable {
-    using SafeERC20 for IERC20;
     using IncrementalBinaryTree for IncrementalTreeData;
+    using CipherLib for *;
 
     error TokenTreeAlreadyInitialized(IERC20 token);
     error TokenTreeNotExists(IERC20 token);
-    error InvalidMsgValue(uint256 msgValue);
-    error AmountInconsistent(uint256 amount, uint256 transferredAmt);
-    error TransferFailed(address payable receiver, uint256 amount, bytes data);
-    error InvalidUtxoType(bytes2 utxoType, uint256 nullifierNum, uint256 commitmentNum);
-    error InvalidNullifier(uint256 nullifier);
-    error InvalidPublicInfo(uint256 publicInfoHash, uint256 expectedPublicInfoHash);
     error InvalidProof(Proof proof);
     error InvalidRecipientAddr();
     error InvalidFeeSetting(uint16 fee);
@@ -29,163 +25,92 @@ contract Cipher is CipherStorage, Ownable {
 
     event NewTokenTree(IERC20 token, uint256 merkleTreeDepth, uint256 zeroValue);
     event NewRelayer(address relayer, uint16 fee, string url);
-    event NewNullifier(IERC20 token, uint256 nullifier);
-    event NewCommitment(IERC20 token, uint256 commitment, uint256 leafIndex);
-
-    struct PublicInfo {
-        bytes2 utxoType;
-        address payable recipient;
-        address payable relayer;
-        uint256 fee;
-        bytes data; // NOTE: abi.encode([tokenAddress, ...])
-    }
-
-    // struct UtxoData {
-    //     Proof proof;
-    //     uint256 root;
-    //     uint256 publicInAmt;
-    //     uint256 publicOutAmt;
-    //     uint256 publicInfoHash;
-    //     uint256[] inputNullifiers;
-    //     uint256[] outputCommitments;
-    // }
 
     constructor(address verifierAddr, uint16 _fee) CipherStorage(verifierAddr) {
-        if (_fee > FEE_BASE) revert InvalidFeeSetting(_fee);
+        if (_fee > CipherConfig.FEE_BASE) revert InvalidFeeSetting(_fee);
         fee = _fee;
-        IERC20 defaultEthToken = IERC20(DEFAULT_ETH_ADDRESS);
+        IERC20 defaultEthToken = IERC20(CipherConfig.DEFAULT_ETH_ADDRESS);
         // NOTE: reference railgun's implementation
-        uint256 zeroValue = uint256(keccak256(abi.encode(defaultEthToken))) % SNARK_SCALAR_FIELD;
-        treeData[defaultEthToken].incrementalTreeData.init(DEFAULT_TREE_DEPTH, zeroValue);
-        emit NewTokenTree(defaultEthToken, DEFAULT_TREE_DEPTH, zeroValue);
-
-        console.log("Utxo contract deployed");
-        console.log("zeroValue", zeroValue);
-        console.log("root", treeData[defaultEthToken].incrementalTreeData.root);
+        uint256 zeroValue = uint256(keccak256(abi.encode(defaultEthToken))) % CipherConfig.SNARK_SCALAR_FIELD;
+        treeData[defaultEthToken].incrementalTreeData.init(CipherConfig.DEFAULT_TREE_DEPTH, zeroValue);
+        emit NewTokenTree(defaultEthToken, CipherConfig.DEFAULT_TREE_DEPTH, zeroValue);
     }
 
     function initTokenTree(IERC20 token) external {
         TreeData storage tree = treeData[token];
         if (tree.incrementalTreeData.depth != 0) revert TokenTreeAlreadyInitialized(token);
 
-        uint256 zeroValue = uint256(keccak256(abi.encode(token))) % SNARK_SCALAR_FIELD;
-        tree.incrementalTreeData.init(DEFAULT_TREE_DEPTH, zeroValue);
-        emit NewTokenTree(token, DEFAULT_TREE_DEPTH, zeroValue);
+        uint256 zeroValue = uint256(keccak256(abi.encode(token))) % CipherConfig.SNARK_SCALAR_FIELD;
+        tree.incrementalTreeData.init(CipherConfig.DEFAULT_TREE_DEPTH, zeroValue);
+        emit NewTokenTree(token, CipherConfig.DEFAULT_TREE_DEPTH, zeroValue);
     }
 
     // TODO: not completed
-    function registerAsRelayer(uint16 fee, string memory url) external {
-        relayers[msg.sender] = RelayerInfo({fee: fee, numOfTx: 0, url: url});
+    function registerAsRelayer(uint16 feeRate, string memory url) external {
+        relayers[msg.sender] = RelayerInfo({feeRate: feeRate, numOfTx: 0, url: url});
         emit NewRelayer(msg.sender, fee, url);
     }
 
-    // TODO: not completed
-    function _isHistoryRoot(TreeData storage tree, uint256 root) internal view returns (bool) {
-        uint256 start = VALID_HISTORY_ROOTS_SIZE - tree.historyRootsIdx; // 32 - 27 = 5
-        uint256 end = start + VALID_HISTORY_ROOTS_SIZE; // 5 + 32 = 37
-        // 5, 6, 7, ...36
-        for (start; start < end; ++start) {
-            // 27, 26, 25, ... 29, 28
-            uint256 rootIdx = VALID_HISTORY_ROOTS_SIZE - (start % VALID_HISTORY_ROOTS_SIZE); // 32 - (5 % 32) = 27
-            if (root == tree.historyRoots[rootIdx]) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function createTx(Proof memory proof, PublicInfo memory publicInfo) external payable {
-        IERC20 token = IERC20(_parseData(publicInfo.data));
+    function createTx(Proof calldata proof, PublicInfo calldata publicInfo) external payable {
+        IERC20 token = IERC20(_parseData(publicInfo.encodedData));
         TreeData storage tree = treeData[token];
         if (tree.incrementalTreeData.depth == 0) revert TokenTreeNotExists(token);
+
+        PublicSignals calldata publicSignals = proof.publicSignals;
 
         // TODO: move to internal function _beforeCreateTx
         /* ========== before core logic start ========== */
         // check root is valid
-        if (proof.publicSignals.root != tree.incrementalTreeData.root) {
-            bool isHistoryRoot = false;
-            uint256 start = VALID_HISTORY_ROOTS_SIZE - tree.historyRootsIdx; // 32 - 27 = 5
-            uint256 end = start + VALID_HISTORY_ROOTS_SIZE; // 5 + 32 = 37
-            // 5, 6, 7, ...36
-            for (start; start < end; ++start) {
-                // 27, 26, 25, ... 29, 28
-                uint256 rootIdx = VALID_HISTORY_ROOTS_SIZE - (start % VALID_HISTORY_ROOTS_SIZE); // 32 - (5 % 32) = 27
-                if (proof.publicSignals.root == tree.historyRoots[rootIdx]) {
-                    isHistoryRoot = true;
-                    break;
-                }
-            }
-            if (!isHistoryRoot) revert InvalidRoot(proof.publicSignals.root);
-        }
+        if (!publicSignals.root.isValidRoot(tree)) revert InvalidRoot(publicSignals.root);
 
-        _handleTransferFrom(token, msg.sender, proof.publicSignals.publicInAmt);
+        token.handleTransferFrom(msg.sender, publicSignals.publicInAmt);
 
+        publicInfo.requireValidPublicInfo(publicSignals.publicInfoHash);
         // check utxoType(nAmB), n is the number of INPUT nullifiers, m is the number of OUTPUT commitments
-        _checkUtxoType(
-            publicInfo.utxoType,
-            proof.publicSignals.inputNullifiers.length,
-            proof.publicSignals.outputCommitments.length
+        publicInfo.utxoType.requireValidUtxoType(
+            publicSignals.inputNullifiers.length,
+            publicSignals.outputCommitments.length
         );
-
-        uint256 publicInfoHash = uint256(keccak256(abi.encode(publicInfo))) % SNARK_SCALAR_FIELD;
-        if (proof.publicSignals.publicInfoHash != publicInfoHash)
-            revert InvalidPublicInfo(proof.publicSignals.publicInfoHash, publicInfoHash);
 
         /* ========== before core logic end ========== */
 
         // TODO: move to internal function _createTx
         /* ========== core logic start ========== */
-        for (uint256 i; i < proof.publicSignals.inputNullifiers.length; ++i) {
-            if (tree.nullifiers[proof.publicSignals.inputNullifiers[i]])
-                revert InvalidNullifier(proof.publicSignals.inputNullifiers[i]);
-        }
 
         if (
             // NOTE: publicSignals: root, publicInAmt, publicOutAmt, publicInfoHash, inputNullifier, outputCommitment
             // TODO: circuit public need add: token??
             // TODO: public data: need to from contract storage, Ex. root
-            !verifier.verifyProof(proof, publicInfo.utxoType)
+            !cipherVerifier.verifyProof(proof, publicInfo.utxoType)
         ) revert InvalidProof(proof);
 
-        for (uint256 i; i < proof.publicSignals.inputNullifiers.length; ++i) {
-            uint256 nullifier = proof.publicSignals.inputNullifiers[i];
-            tree.nullifiers[nullifier] = true;
-            emit NewNullifier(token, nullifier);
-        }
-
+        tree.updateNullifiers(token, publicSignals.inputNullifiers);
         // update original root to history roots before insert new commitment
-        tree.historyRoots[tree.historyRootsIdx] = tree.incrementalTreeData.root;
-        tree.historyRootsIdx = uint8(addmod(tree.historyRootsIdx, 1, VALID_HISTORY_ROOTS_SIZE));
-
-        for (uint256 i; i < proof.publicSignals.outputCommitments.length; ++i) {
-            // insert commitment into the tree
-            uint256 commitment = proof.publicSignals.outputCommitments[i];
-            tree.incrementalTreeData.insert(commitment);
-            emit NewCommitment(token, commitment, tree.incrementalTreeData.numberOfLeaves);
-        }
+        tree.updateHistoryRoot(publicSignals.root);
+        tree.insertCommitments(token, publicSignals.outputCommitments);
 
         /* ========== core logic end ========== */
 
         // TODO: move to internal function _afterCreateTx
         /* ========== after core logic start ========== */
         uint256 feeAmt;
-        if (publicInfo.fee > 0) {
-            feeAmt = (proof.publicSignals.publicOutAmt * publicInfo.fee) / FEE_BASE;
+        if (publicInfo.feeRate > 0) {
+            feeAmt = (publicSignals.publicOutAmt * publicInfo.feeRate) / CipherConfig.FEE_BASE;
         } else {
-            feeAmt = (proof.publicSignals.publicOutAmt * fee) / FEE_BASE;
+            feeAmt = (publicSignals.publicOutAmt * fee) / CipherConfig.FEE_BASE;
         }
 
-        if (proof.publicSignals.publicOutAmt > 0) {
+        if (publicSignals.publicOutAmt > 0) {
             if (publicInfo.recipient == address(0)) revert InvalidRecipientAddr();
-            _transfer(token, publicInfo.recipient, proof.publicSignals.publicOutAmt - feeAmt);
+            token.handleTransfer(publicInfo.recipient, publicSignals.publicOutAmt - feeAmt);
         }
 
-        if (feeAmt > 0) _transfer(token, publicInfo.relayer, feeAmt);
+        if (feeAmt > 0) token.handleTransfer(publicInfo.relayer, feeAmt);
         /* ========== after core logic end ========== */
     }
 
     function setFee(uint16 newFee) external onlyOwner {
-        if (newFee > FEE_BASE) revert InvalidFeeSetting(newFee);
+        if (newFee > CipherConfig.FEE_BASE) revert InvalidFeeSetting(newFee);
         fee = newFee;
     }
 
@@ -209,53 +134,21 @@ contract Cipher is CipherStorage, Ownable {
         return treeData[token].incrementalTreeData.lastSubtrees[level];
     }
 
-    function getVerifier() external view returns (IVerifier) {
-        return verifier;
+    function getVerifier() external view returns (ICipherVerifier) {
+        return cipherVerifier;
     }
 
-    function isNullify(IERC20 token, uint256 nullifier) external view returns (bool) {
+    function isNullified(IERC20 token, uint256 nullifier) external view returns (bool) {
         return treeData[token].nullifiers[nullifier];
     }
 
-    function _checkUtxoType(bytes2 utxoType, uint256 nullifierNum, uint256 commitmentNum) internal pure {
-        // The first byte of utxoType should be equal to nullifierNum &&
-        // The second byte of utxoType should be equal to commitmentNum
-        if (uint8(utxoType[0]) != nullifierNum || uint8(utxoType[1]) != commitmentNum)
-            revert InvalidUtxoType(utxoType, nullifierNum, commitmentNum);
+    function isValidRoot(IERC20 token, uint256 root) external view returns (bool) {
+        return root.isValidRoot(treeData[token]);
     }
 
-    function _parseData(bytes memory data) internal pure virtual returns (address) {
-        return abi.decode(data, (address));
-    }
-
-    function _transfer(IERC20 token, address payable receiver, uint256 amount) internal {
-        if (address(token) == DEFAULT_ETH_ADDRESS) {
-            (bool success, bytes memory data) = receiver.call{value: amount}("");
-            if (!success) revert TransferFailed(receiver, amount, data);
-        } else {
-            token.safeTransfer(receiver, amount);
-        }
-    }
-
-    function _handleTransferFrom(IERC20 token, address sender, uint256 amount) internal {
-        if (address(token) == DEFAULT_ETH_ADDRESS) {
-            if (msg.value != amount) revert InvalidMsgValue(msg.value);
-        } else {
-            if (msg.value != 0) revert InvalidMsgValue(msg.value);
-            if (amount > 0) {
-                uint256 balanceBefore = token.balanceOf(address(this));
-                token.safeTransferFrom(sender, address(this), amount);
-                uint256 balanceAfter = token.balanceOf(address(this));
-                uint256 transferredAmt = balanceAfter - balanceBefore;
-                if (amount != transferredAmt) revert AmountInconsistent(amount, transferredAmt);
-            }
-        }
+    function _parseData(bytes memory encodedData) internal pure virtual returns (address) {
+        return abi.decode(encodedData, (address));
     }
 
     // function _beforeCreateTx(UtxoData memory utxoData, PublicInfo memory publicInfo) internal virtual {}
-
-    // function verify(address verifierAddr, Proof memory proof, bytes2 _type) external {
-    //     IVerifier verifier = IVerifier(verifierAddr);
-    //     require(verifier.verifyProof(proof.a, proof.b, proof.c, proof.publicSignals, _type), "Invalid proof");
-    // }
 }

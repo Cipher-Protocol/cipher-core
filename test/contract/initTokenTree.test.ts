@@ -5,10 +5,14 @@ import {
   IncrementalBinaryTree,
   Cipher,
   Cipher__factory,
-  Verifier,
-  Verifier__factory,
+  CipherVerifier__factory,
+  CipherVerifier,
 } from "../../typechain-types";
-import { DEFAULT_FEE, SNARK_FIELD_SIZE } from "../../config";
+import {
+  DEFAULT_FEE,
+  DEFAULT_TREE_HEIGHT,
+  SNARK_FIELD_SIZE,
+} from "../../config";
 import { keccak256 } from "ethers/lib/utils";
 import { BigNumber, utils } from "ethers";
 import { calcInitRoot, calcZeroValue } from "../../utils/calcZeroVal";
@@ -18,15 +22,15 @@ describe("deploy", function () {
   let cipherFactory: Cipher__factory;
   let cipher: Cipher;
   let incrementalBinaryTree: IncrementalBinaryTree;
-  let VerifierFactory: Verifier__factory;
-  let verifier: Verifier;
+  let cipherVerifierFactory: CipherVerifier__factory;
+  let cipherVerifier: CipherVerifier;
   let Erc20Factory: ERC20Mock__factory;
   let erc20: ERC20;
   beforeEach(async function () {
-    VerifierFactory = (await ethers.getContractFactory(
-      "Verifier"
-    )) as Verifier__factory;
-    verifier = await VerifierFactory.deploy();
+    cipherVerifierFactory = (await ethers.getContractFactory(
+      "CipherVerifier"
+    )) as CipherVerifier__factory;
+    cipherVerifier = await cipherVerifierFactory.deploy();
 
     const PoseidonT3 = await ethers.getContractFactory("PoseidonT3");
     const poseidonT3 = await PoseidonT3.deploy();
@@ -49,7 +53,7 @@ describe("deploy", function () {
       },
     })) as Cipher__factory;
     cipher = (await cipherFactory.deploy(
-      verifier.address,
+      cipherVerifier.address,
       DEFAULT_FEE
     )) as Cipher;
     await cipher.deployed();
@@ -70,17 +74,22 @@ describe("deploy", function () {
 
       await expect(initTokenTreeTx)
         .to.emit(cipher, "NewTokenTree")
-        .withArgs(erc20.address, 20, zeroVal.toString());
+        .withArgs(erc20.address, DEFAULT_TREE_HEIGHT, zeroVal.toString());
 
-      expect(await cipher.getTreeDepth(erc20.address)).to.equal(20);
+      expect(await cipher.getTreeDepth(erc20.address)).to.equal(
+        DEFAULT_TREE_HEIGHT
+      );
 
-      const zeroVals = calcZeroValue(zeroVal.toString(), 20);
+      const zeroVals = calcZeroValue(zeroVal.toString(), DEFAULT_TREE_HEIGHT);
       for (let i = 0; i < zeroVals.length; i++) {
         expect(await cipher.getTreeZeroes(erc20.address, i)).to.equal(
           zeroVals[i]
         );
       }
-      const calcTreeRoot = calcInitRoot(zeroVal.toString(), 20);
+      const calcTreeRoot = calcInitRoot(
+        zeroVal.toString(),
+        DEFAULT_TREE_HEIGHT
+      );
       expect(await cipher.getTreeRoot(erc20.address)).to.equal(calcTreeRoot);
       expect(await cipher.getTreeLeafNum(erc20.address)).to.equal(0);
     });
