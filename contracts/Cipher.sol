@@ -25,6 +25,7 @@ contract Cipher is CipherStorage, Ownable {
 
     event NewTokenTree(IERC20 token, uint256 merkleTreeDepth, uint256 zeroValue);
     event NewRelayer(address relayer, uint16 fee, string url);
+    event NewRoot(IERC20 token, uint256 root);
 
     constructor(address verifierAddr, uint16 _fee) CipherStorage(verifierAddr) {
         if (_fee > CipherConfig.FEE_BASE) revert InvalidFeeSetting(_fee);
@@ -88,6 +89,7 @@ contract Cipher is CipherStorage, Ownable {
         // update original root to history roots before insert new commitment
         tree.updateHistoryRoot(publicSignals.root);
         tree.insertCommitments(token, publicSignals.outputCommitments);
+        emit NewRoot(token, tree.incrementalTreeData.root);
 
         /* ========== core logic end ========== */
 
