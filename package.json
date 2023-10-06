@@ -10,6 +10,7 @@
     "build:contract": "hardhat compile && hardhat typechain",
     "test:contract": "hardhat test",
     "test:contract:tx": "hardhat test test/contract/createTx.test.ts",
+    "test:contract:all-spec": "hardhat test test/contract/createTx-all-spec.test.ts",
     "test:deploy": "hardhat test test/contract/deploy.test.ts",
     "test:initTokenTree": "hardhat test test/contract/initTokenTree.test.ts"
   },

@@ -79,5 +79,7 @@ export function indicesToPathIndices(indices: number[]): bigint {
     // Assuming 0 for left and 1 for right
     binaryString += index % 2 === 0 ? '0' : '1';
   }
+  // reverse
+  binaryString = binaryString.split('').reverse().join('');
   return BigInt('0b' + binaryString);
 }

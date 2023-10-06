@@ -16,12 +16,14 @@ export interface CipherCoinInfo {
 }
 
 export class CipherBaseCoin {
+  readonly leafId!: number;
   coinInfo!: CipherCoinInfo;
 
   constructor({
     key,
     amount,
-  }: CipherCoinInfo) {
+  }: CipherCoinInfo, leafId: number) {
+    this.leafId = leafId;
     this.coinInfo = {
       key,
       amount,
@@ -40,14 +42,12 @@ export class CipherBaseCoin {
 
 export class CipherPayableCoin extends CipherBaseCoin {
   readonly tree!: IncrementalQuinTree;
-  readonly leafId!: number;
+  
 
   constructor(coinInfo: CipherCoinInfo, tree: IncrementalQuinTree, leafId: number) {
-    super(coinInfo);
+    super(coinInfo, leafId);
     this.tree = tree;
 
-    // TODO: get leafId from tree by commitmentHash
-    this.leafId = leafId;
     assert(this.coinInfo.key.inSaltOrSeed, "privKey should not be null");
   }
 

@@ -27,37 +27,6 @@ const SPEC = {
   defaultLeafHash: getDefaultLeaf(ethTokenAddress).toString(),
 };
 
-async function main() {
-  await asyncPoseidonHash;
-
-  const tree = initTree(SPEC.treeHeight, SPEC.defaultLeafHash);
-
-  const decimals = BigNumber.from(10).pow(18);
-  const { circuitInput, contractCalldata } = await generateCipherTx(
-    tree,
-    BigInt(BigNumber.from("1").mul(decimals).mod(10).toString()),
-    0n,
-    [],
-    [
-      BigInt(BigNumber.from("1").mul(decimals).mod(10).toString()), // 0.1 ETH
-      BigInt(BigNumber.from("2").mul(decimals).mod(10).toString()), // 0.2 ETH
-    ]
-  );
-
-  console.log({
-    circuitInput,
-    contractCalldata,
-  });
-  console.log("done");
-}
-
-// main()
-//   .then(() => process.exit(0))
-//   .catch((error) => {
-//     console.error(error);
-//     process.exit(1);
-//   });
-
 /** Methods */
 export function initTree(depth: number, zeroLeaf: string): IncrementalQuinTree {
   const _leavesPerNode = 2;
@@ -114,15 +83,26 @@ export function getCoinInfoFromAmt(
   return coinInfo;
 }
 
-export async function generateCipherTx(
-  tree: IncrementalQuinTree,
+export interface CipherTxRequest {
   publicInAmt: bigint,
   publicOutAmt: bigint,
-  privateInCoins: CipherPayableCoin[] = [],
+  privateInCoins: CipherPayableCoin[],
   privateOutAmts: bigint[]
+}
+
+// TODO: parameters: publicInfo
+export async function generateCipherTx(
+  tree: IncrementalQuinTree,
+  {
+    publicInAmt,
+    publicOutAmt,
+    privateInCoins,
+    privateOutAmts,
+  }: CipherTxRequest,
+  publicInfo: PublicInfoStruct,
 ) {
   const privateOutCoins: CipherPayableCoin[] = [];
-  const previousRoot = tree.root;
+  const currentRoot = tree.root;
 
   const totalPrivateInAmount = privateInCoins.reduce(
     (acc, coin) => acc + coin.coinInfo.amount,
@@ -140,6 +120,32 @@ export async function generateCipherTx(
   const privateInputLength = privateInCoins.length;
   const privateOutputLength = privateOutAmts.length;
 
+  for(let i = 0; i < privateInputLength; i++) {
+    const ins = privateInCoins[i];
+    const leafId = ins.leafId;
+    const inSaltOrSeed = ins.coinInfo.key.inSaltOrSeed as bigint;
+    const hashedSaltOrUserId = PoseidonHash([inSaltOrSeed]);
+    const commitment = PoseidonHash([
+      ins.coinInfo.amount,
+      hashedSaltOrUserId,
+      ins.coinInfo.key.inRandom,
+    ]);
+    assert(
+      commitment === tree.leaves[ins.leafId],
+      "privateInCoins commitment is not in the tree"
+    );
+  }
+
+  const circuitUtxoInput = {
+    // Coin Inputs
+    inputNullifier: privateInCoins.map((coin) => coin.getNullifier()),
+    inAmount: privateInCoins.map((coin) => coin.coinInfo.amount),
+    inSaltOrSeed: privateInCoins.map((coin) => coin.coinInfo.key.inSaltOrSeed),
+    inRandom: privateInCoins.map((coin) => coin.coinInfo.key.inRandom),
+    inPathIndices: privateInCoins.map((coin) => coin.getPathIndices()),
+    inPathElements: privateInCoins.map((coin) => coin.getPathElements()),
+  }
+
   for (let index = 0; index < privateOutputLength; index++) {
     const coinInfo = getCoinInfoFromAmt(privateOutAmts[index], {
       inRandom: 1n, // TODO: How to get inRandom?
@@ -150,33 +156,7 @@ export async function generateCipherTx(
     tree.insert(payableCoin.getCommitment());
     privateOutCoins.push(payableCoin);
   }
-
-  const latestRoot = tree.root;
-  const publicInfo: PublicInfoStruct = {
-    utxoType: getUtxoType(privateInputLength, privateOutputLength),
-    feeRate: "0",
-    relayer: "0x0000000000000000000000000000000000000000", // no fee
-    recipient: "0xffffffffffffffffffffffffffffffffffffffff", // TODO: get from user address
-    encodedData: utils.defaultAbiCoder.encode(["address"], [ethTokenAddress]),
-  };
-
-  /** Circuit input */
-  const publicInfoHash = toPublicInfoHash(publicInfo);
-
-  const circuitInput = {
-    root: previousRoot,
-    publicInAmt,
-    publicOutAmt,
-    publicInfoHash: BigInt(publicInfoHash),
-
-    // Coin Inputs
-    inputNullifier: privateInCoins.map((coin) => coin.getNullifier()),
-    inAmount: privateInCoins.map((coin) => coin.coinInfo.amount),
-    inSaltOrSeed: privateInCoins.map((coin) => coin.coinInfo.key.inSaltOrSeed),
-    inRandom: privateInCoins.map((coin) => coin.coinInfo.key.inRandom),
-    inPathIndices: privateInCoins.map((coin) => coin.getPathIndices()),
-    inPathElements: privateInCoins.map((coin) => coin.getPathElements()),
-
+  const circuitUtxoOutput = {
     // Coin Outputs
     outputCommitment: privateOutCoins.map((coin) => coin.getCommitment()),
     outAmount: privateOutCoins.map((coin) => coin.coinInfo.amount),
@@ -184,12 +164,22 @@ export async function generateCipherTx(
       (coin) => coin.coinInfo.key.hashedSaltOrUserId
     ),
     outRandom: privateOutCoins.map((coin) => coin.coinInfo.key.inRandom),
+  }
+  /** Circuit input */
+  const publicInfoHash = toPublicInfoHash(publicInfo);
+  const circuitInput = {
+    root: currentRoot,
+    publicInAmt,
+    publicOutAmt,
+    publicInfoHash: BigInt(publicInfoHash),
+    ...circuitUtxoInput,
+    ...circuitUtxoOutput,
   };
 
   /** Prove */
   const circuitName = `h${tree.depth}n${privateInputLength}m${privateOutputLength}`;
-  const heightName = circuitName.slice(0, 2);
-  const specName = circuitName.slice(2, 6);
+  const heightName = `h${tree.depth}`;
+  const specName = `n${privateInputLength}m${privateOutputLength}`;
   const circomBaseDir = resolve(
     __dirname,
     `../build/circuits/${heightName}/${specName}`
@@ -207,7 +197,7 @@ export async function generateCipherTx(
     b: calldata[1],
     c: calldata[2],
     publicSignals: {
-      root: utils.hexlify(previousRoot),
+      root: utils.hexlify(currentRoot),
       publicInAmt: publicInAmt.toString(),
       publicOutAmt: publicOutAmt.toString(),
       publicInfoHash,
@@ -226,6 +216,8 @@ export async function generateCipherTx(
     privateOutputLength,
     privateOutCoins,
     circuitInput,
+    currentRoot,
+    newRoot: tree.root,
     contractCalldata: {
       utxoData,
       publicInfo,

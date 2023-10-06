@@ -6,8 +6,8 @@ import { readFileSync, writeFileSync } from "fs";
 const DEBUG = false;
 
 export async function proveByName(circuitName: string, inputPath?: string) {
-  const heightName = circuitName.slice(0, 2)
-  const specName = circuitName.slice(2, 6);
+  const heightName = circuitName.slice(0, 3)
+  const specName = circuitName.slice(3, 7);
   const circomBaseDir = resolve(__dirname, `../build/circuits/${heightName}/${specName}`);
   const zkeyPath = resolve(circomBaseDir, `${circuitName}_final.zkey`);
   return await prove(

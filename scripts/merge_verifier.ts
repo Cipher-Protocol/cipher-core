@@ -50,13 +50,6 @@ async function mergeVerifiers(verifierBaseDir: string) {
     files: files.length,
   });
 
-  //   appendFileSync(
-  //     outputVerifierConfigPath,
-  //     `// SPDX-License-Identifier: MIT
-  // pragma solidity ^0.8.20;
-  // contract CipherVKeyConst {\n`
-  //   );
-
   const firstFile = files[0];
   const test = resolve(verifierBaseDir, firstFile);
   console.log({ test });
@@ -86,7 +79,7 @@ async function mergeVerifiers(verifierBaseDir: string) {
       .replace(".sol", "")
       .replace("Verifier", "")
       .toLowerCase()
-      .slice(2, 6);
+      .slice(3, 7);
     ContDataList.push(`    /* ============ ${name} ============ */\n`);
     const { lines, delta, ic } = await readIcFromVerifier(
       resolve(verifierBaseDir, file)
@@ -160,7 +153,7 @@ async function readVkeyFromVerifier(file: string) {
         }
 
         if (isReading) {
-          lines.push(line);
+          lines.push(line.replace('uint256 constant', 'uint256 internal constant'));
         }
       });
       rlInterface.on("error", (err: any) => reject(err));
@@ -216,7 +209,7 @@ async function readIcFromVerifier(file: string) {
         }
 
         if (isReading) {
-          lines.push(line);
+          lines.push(line.replace('uint256 constant', 'uint256 internal constant'));
           if (deltaRegex.test(line)) {
             countInfo.delta++;
           }
@@ -290,11 +283,11 @@ function parseMulAccCases(
   const outIcLen = ic;
   for (let index = 5; index < inIcLen; index++) {
     const offset = (index - 4) * 32;
-    str += `g1_mulAccC(_pVk, ${name}_IC${index}x, ${name}_IC${index}y, calldataload(add(inputNullifiersOffset, ${offset})))\n`;
+    str += `eccMulAcc(_pVk, ${name}_IC${index}x, ${name}_IC${index}y, calldataload(add(inputNullifiersOffset, ${offset})))\n`;
   }
   for (let index = inIcLen; index < outIcLen; index++) {
     const offset = (index - inIcLen + 1) * 32;
-    str += `g1_mulAccC(_pVk, ${name}_IC${index}x, ${name}_IC${index}y, calldataload(add(outputCommitmentsOffset, ${offset})))\n`;
+    str += `eccMulAcc(_pVk, ${name}_IC${index}x, ${name}_IC${index}y, calldataload(add(outputCommitmentsOffset, ${offset})))\n`;
   }
   str += `}`;
   return prettier(str, 16);

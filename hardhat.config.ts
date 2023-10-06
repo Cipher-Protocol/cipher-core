@@ -9,6 +9,7 @@ import "hardhat-storage-layout";
 import "hardhat-tracer";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+import "tsconfig-paths/register";
 
 const config: HardhatUserConfig = {
   solidity: {

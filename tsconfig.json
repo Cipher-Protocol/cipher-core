@@ -9,9 +9,20 @@
     "sourceMap": true,
     "outDir": "./dist",
     "strict": true,
-    "rootDirs": ["./src", "./scripts", "./test"],
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["./*"],
+      "@scripts": ["scripts/"],
+      "@scripts/*": ["scripts/*"],
+      "@lib": ["lib/"],
+      "@lib/*": ["lib/*"],
+      "@test": ["test/"],
+      "@test/*": ["test/*"],
+      "@typechain-types": ["typechain-types/"],
+      "@typechain-types/*": ["typechain-types/*"]
+    }
   },
   "include": ["scripts/**/*.ts", "test/**/*.ts"],
   "ts-node": {

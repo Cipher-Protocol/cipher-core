@@ -7,15 +7,14 @@ import {
   Cipher__factory,
   CipherVerifier__factory,
   CipherVerifier,
-} from "../../typechain-types";
+} from "@typechain-types";
 import { DEFAULT_FEE, DEFAULT_TREE_HEIGHT } from "../../config";
-import { BigNumber, utils } from "ethers";
 
-import { generateCipherTx, initTree } from "../../scripts/gen_testcase";
-import { asyncPoseidonHash } from "../../scripts/lib/poseidonHash";
-import { getDefaultLeaf } from "../../scripts/lib/utxo.helper";
-import { IncrementalQuinTree } from "../../scripts/lib/IncrementalQuinTree";
-import { CipherPayableCoin } from "../../scripts/lib/utxo/coin";
+import { initTree } from "@scripts/gen_testcase";
+import { asyncPoseidonHash } from "@scripts/lib/poseidonHash";
+import { getDefaultLeaf, getUtxoType } from "@scripts/lib/utxo.helper";
+import { IncrementalQuinTree } from "@scripts/lib/IncrementalQuinTree";
+import { CreateTxTestCase, generateTest } from "./helper/ts.helper";
 
 const ethers = hre.ethers;
 const ethTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
@@ -24,13 +23,6 @@ const SPEC = {
   defaultLeafHash: getDefaultLeaf(ethTokenAddress).toString(),
 };
 
-interface Transaction {
-  privateIn?: number;
-  publicIn: number;
-
-  privateOut?: number;
-  publicOut: number;
-}
 
 describe("deploy", function () {
   let cipherFactory: Cipher__factory;
@@ -39,6 +31,14 @@ describe("deploy", function () {
   let cipherVerifierFactory: CipherVerifier__factory;
   let cipherVerifier: CipherVerifier;
   let tree!: IncrementalQuinTree;
+
+  let context: {
+    cipher: Cipher;
+    tree: IncrementalQuinTree;
+  } = {
+    cipher: {} as Cipher,
+    tree: {} as IncrementalQuinTree,
+  }
 
   before(async function () {
     await asyncPoseidonHash;
@@ -78,176 +78,112 @@ describe("deploy", function () {
 
     /** init tree */
     tree = initTree(SPEC.treeHeight, SPEC.defaultLeafHash);
+
+    context.cipher = cipher;
+    context.tree = tree;
   });
 
-  /** simple test case
-   * n0m1
-   * n0m2
-   * ....
-   * n0mX
-   * n0m1 -> n1m1
-   * n0m2 -> n2m0
-   * n0m2 -> n2m1
-   * etc .......
-   */
-
   describe("Simple Create Tx", function () {
-    const singleTxCases = [
+    const singleTxCases: CreateTxTestCase[] = [
       {
-        name: "n0m1",
-        publicIn: "1",
-        publicOut: "0",
-        privateIns: [],
-        privateOuts: ["1"],
+        tokenAddress: ethTokenAddress,
+        txs: [{
+          name: "n0m1",
+          publicIn: "1",
+          publicOut: "0",
+          privateIns: [],
+          privateOuts: ["1"],
+        }]
       },
       {
-        publicIn: "1",
-        privateOuts: ["0.5", "0.5"],
+        tokenAddress: ethTokenAddress,
+        txs: [{
+          name: "n0m2",
+          publicIn: "1",
+          publicOut: "0",
+          privateIns: [],
+          privateOuts: ["0.5", "0.5"],
+        }],
       },
       {
-        publicIn: "2",
-        privateOuts: ["0.5", "0.5", "0.5", "0.5"],
+        tokenAddress: ethTokenAddress,
+        txs: [{
+          name: "n0m4",
+          publicIn: "2",
+          publicOut: "0",
+          privateIns: [],
+          privateOuts: ["0.5", "0.5", "0.5", "0.5"],
+        }],
       },
     ];
 
     singleTxCases.forEach((testCase, i) => {
-      it(`Success to create h5n0m1 Tx, publicIn ${
-        testCase.publicIn
-      } ETH, privateOut ${testCase.privateOuts.join(
-        ", "
-      )}, publicOut 0`, async function () {
-        const { contractCalldata } = await generateCipherTx(
-          tree,
-          utils.parseEther(testCase.publicIn).toBigInt(),
-          0n,
-          [],
-          testCase.privateOuts.map((v) => utils.parseEther(v).toBigInt())
-        );
-        const beforeEthBalance = await ethers.provider.getBalance(
-          cipher.address
-        );
-        const result = await cipher.createTx(
-          contractCalldata.utxoData,
-          contractCalldata.publicInfo,
-          { value: utils.parseEther(testCase.publicIn) }
-        );
-        await result.wait();
-        const afterEthBalance = await ethers.provider.getBalance(
-          cipher.address
-        );
-        expect(afterEthBalance).to.equal(
-          beforeEthBalance.add(utils.parseEther(testCase.publicIn))
-        );
-      });
+      it(`singleTxCases: ${testCase.txs.map(t => t.name).join(' -> ')}`, generateTest(testCase, context));
     });
 
-    // const multipleTxCases = [
-    //   {
-    //     txs: [
-    //       {
-    //         name: "n0m1",
-    //         publicIn: "1",
-    //         publicOut: "0",
-    //         privateIns: [],
-    //         privateOuts: ["1"],
-    //       },
-    //       {
-    //         name: "n1m0",
-    //         publicIn: "0",
-    //         publicOut: "1",
-    //         privateIns: ["1"],
-    //         privateOuts: [],
-    //       },
-    //     ],
-    //   },
-    //   {
-    //     txs: [
-    //       {
-    //         name: "n0m1",
-    //         publicIn: "1",
-    //         publicOut: "0",
-    //         privateIns: [],
-    //         privateOuts: ["1"],
-    //       },
-    //       {
-    //         name: "n1m1",
-    //         publicIn: "0",
-    //         publicOut: "0.1",
-    //         privateIns: ["1"],
-    //         privateOuts: ["0.9"],
-    //       },
-    //     ],
-    //   },
-    //   {
-    //     txs: [
-    //       {
-    //         name: "n0m1",
-    //         publicIn: "1",
-    //         publicOut: "0",
-    //         privateIns: [],
-    //         privateOuts: ["1"],
-    //       },
-    //       {
-    //         name: "n1m2",
-    //         publicIn: "0",
-    //         publicOut: "0.1",
-    //         privateIns: ["1"],
-    //         privateOuts: ["0.4", "0.5"],
-    //       },
-    //     ],
-    //   },
-    // ];
-    // multipleTxCases.forEach((testCase, i) => {
-    //   it(`multiple Txs`, async function () {
-    //     const txs = testCase.txs;
-    //     let previousOutCoins: CipherPayableCoin[] = [];
-    //     for (let i = 0; i < txs.length; i++) {
-    //       const tx = txs[i];
-    //       const {
-    //         privateOutCoins,
-    //         contractCalldata,
-    //         privateInputLength,
-    //         privateOutputLength,
-    //       } = await generateCipherTx(
-    //         tree,
-    //         utils.parseEther(tx.publicIn).toBigInt(),
-    //         utils.parseEther(tx.publicOut).toBigInt(),
-    //         previousOutCoins,
-    //         tx.privateOuts.map((v) => utils.parseEther(v).toBigInt())
-    //       );
-    //       previousOutCoins = privateOutCoins;
-
-    //       const circuitName = `n${privateInputLength}m${privateOutputLength}`;
-    //       expect(circuitName).to.equal(txs[i].name);
-    //       const testName = `createTx with n${privateInputLength}m${privateOutputLength}`;
-    //       console.log(testName);
-
-    //       const beforeEthBalance = await ethers.provider.getBalance(
-    //         cipher.address
-    //       );
-    //       console.log(
-    //         `${testName}: txIndex=${i}, beforeEthBalance`,
-    //         beforeEthBalance.toString()
-    //       );
-    //       const result = await cipher.createTx(
-    //         contractCalldata.utxoData,
-    //         contractCalldata.publicInfo,
-    //         { value: utils.parseEther(tx.publicIn) }
-    //       );
-    //       await result.wait();
-    //       // TODO: check event log
-    //       const afterEthBalance = await ethers.provider.getBalance(
-    //         cipher.address
-    //       );
-    //       console.log(
-    //         `${testName}: txIndex=${i}, afterEthBalance`,
-    //         afterEthBalance.toString()
-    //       );
-    //     }
-    //   });
-    // });
+    const multipleTxCases: CreateTxTestCase[] = [
+      {
+        tokenAddress: ethTokenAddress,
+        txs: [
+          {
+            name: "n0m1",
+            publicIn: "1",
+            publicOut: "0",
+            privateIns: [],
+            privateOuts: ["1"],
+          },
+          {
+            name: "n1m0",
+            publicIn: "0",
+            publicOut: "1",
+            privateIns: ["1"],
+            privateOuts: [],
+          },
+        ],
+      },
+      {
+        tokenAddress: ethTokenAddress,
+        txs: [
+          {
+            name: "n0m1",
+            publicIn: "1",
+            publicOut: "0",
+            privateIns: [],
+            privateOuts: ["1"],
+          },
+          {
+            name: "n1m1",
+            publicIn: "0",
+            publicOut: "0.1",
+            privateIns: ["1"],
+            privateOuts: ["0.9"],
+          },
+        ],
+      },
+      {
+        tokenAddress: ethTokenAddress,
+        txs: [
+          {
+            name: "n0m1",
+            publicIn: "1",
+            publicOut: "0",
+            privateIns: [],
+            privateOuts: ["1"],
+          },
+          {
+            name: "n1m2",
+            publicIn: "0",
+            publicOut: "0.1",
+            privateIns: ["1"],
+            privateOuts: ["0.4", "0.5"],
+          },
+        ],
+      },
+    ];
+    multipleTxCases.forEach((testCase, i) => {
+      it(`multipleTxCases: ${testCase.txs.map(t => t.name).join(' -> ')}`, generateTest(testCase, context));
+    });
   });
-});
 
-// All spec
-// other token
+
+});

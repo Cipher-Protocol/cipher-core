@@ -17,7 +17,7 @@ import { getDefaultLeaf } from "./lib/utxo.helper";
 const _exec = util.promisify(require("child_process").exec);
 
 const PTAU_PATH = resolve(__dirname, "../ptau/pot16_final.ptau");
-const IS_CLEAR_CIRCOM_BUILD_DIR = false;
+const IS_CLEAR_CIRCOM_BUILD_DIR = true;
 const BASE_DIR = resolve(__dirname, "../build/circuits");
 const UTXO_CONFIG_PATH = resolve(__dirname, "../utxo_config.json");
 const VERIFIER_BASE_DIR = resolve(BASE_DIR, "../verifiers");
