@@ -218,16 +218,8 @@ export async function generateCipherTx(
 
 function toPublicInfoHash(publicInfo: PublicInfoStruct) {
   const data = utils.defaultAbiCoder.encode(
-    ["tuple(bytes2,uint16,address,address,bytes)"],
-    [
-      [
-        publicInfo.utxoType,
-        publicInfo.feeRate,
-        publicInfo.relayer,
-        publicInfo.recipient,
-        publicInfo.encodedData,
-      ],
-    ]
+    ["uint16", "address", "address"],
+    [publicInfo.maxAllowableFeeRate, publicInfo.recipient, publicInfo.token]
   );
   return utils.hexlify(
     BigNumber.from(utils.keccak256(data)).mod(FIELD_SIZE_BIGINT)

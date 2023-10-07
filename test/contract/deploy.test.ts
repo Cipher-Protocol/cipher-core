@@ -54,10 +54,7 @@ describe("deploy", function () {
           IncrementalBinaryTree: incrementalBinaryTree.address,
         },
       })) as Cipher__factory;
-      cipher = (await cipherFactory.deploy(
-        cipherVerifier.address,
-        DEFAULT_FEE
-      )) as Cipher;
+      cipher = (await cipherFactory.deploy(cipherVerifier.address)) as Cipher;
       await cipher.deployed();
 
       expect(await cipher.getTreeDepth(DEFAULT_ETH_ADDRESS)).to.equal(

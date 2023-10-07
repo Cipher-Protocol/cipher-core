@@ -5,7 +5,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IncrementalBinaryTree, IncrementalTreeData} from "@zk-kit/incremental-merkle-tree.sol/IncrementalBinaryTree.sol";
-import {CipherStorage, TreeData, RelayerInfo, Proof, PublicSignals, PublicInfo} from "./CipherStorage.sol";
+import {CipherStorage, TreeData, Proof, PublicSignals, PublicInfo, RelayerInfo} from "./CipherStorage.sol";
 import {CipherConfig} from "./CipherConfig.sol";
 import {CipherLib} from "./CipherLib.sol";
 import {ICipherVerifier} from "./interfaces/ICipherVerifier.sol";
@@ -20,16 +20,17 @@ contract Cipher is CipherStorage, Ownable {
     error TokenTreeNotExists(IERC20 token);
     error InvalidProof(Proof proof);
     error InvalidRecipientAddr();
-    error InvalidFeeSetting(uint16 fee);
     error InvalidRoot(uint256 root);
+    error InvalidMaxAllowableFeeRate(uint16 maxAllowableFeeRate);
+    error InvalidRelayerFeeRate(uint16 feeRate, uint16 maxAllowableFeeRate);
 
     event NewTokenTree(IERC20 token, uint256 merkleTreeDepth, uint256 zeroValue);
-    event NewRelayer(address relayer, uint16 fee, string url);
+    event NewRelayer(address relayer, string relayerMetadataUri);
+    event RelayerUpdated(address relayer, string newRelayerMetadataUri);
     event NewRoot(IERC20 token, uint256 root);
+    event RelayInfo(address sender, RelayerInfo relayerInfo, uint256 feeAmt);
 
-    constructor(address verifierAddr, uint16 _fee) CipherStorage(verifierAddr) {
-        if (_fee > CipherConfig.FEE_BASE) revert InvalidFeeSetting(_fee);
-        fee = _fee;
+    constructor(address verifierAddr) CipherStorage(verifierAddr) {
         IERC20 defaultEthToken = IERC20(CipherConfig.DEFAULT_ETH_ADDRESS);
         // NOTE: reference railgun's implementation
         uint256 zeroValue = uint256(keccak256(abi.encode(defaultEthToken))) % CipherConfig.SNARK_SCALAR_FIELD;
@@ -47,13 +48,18 @@ contract Cipher is CipherStorage, Ownable {
     }
 
     // TODO: not completed
-    function registerAsRelayer(uint16 feeRate, string memory url) external {
-        relayers[msg.sender] = RelayerInfo({feeRate: feeRate, numOfTx: 0, url: url});
-        emit NewRelayer(msg.sender, fee, url);
+    function registerAsRelayer(string memory relayerMetadataUri) external {
+        relayerMetadataUris[msg.sender] = relayerMetadataUri;
+        emit NewRelayer(msg.sender, relayerMetadataUri);
+    }
+
+    function updateRelayerMetadataUri(string memory newRelayerMetadataUri) external {
+        relayerMetadataUris[msg.sender] = newRelayerMetadataUri;
+        emit RelayerUpdated(msg.sender, newRelayerMetadataUri);
     }
 
     function createTx(Proof calldata proof, PublicInfo calldata publicInfo) external payable {
-        IERC20 token = IERC20(_parseData(publicInfo.encodedData));
+        IERC20 token = publicInfo.token;
         TreeData storage tree = treeData[token];
         if (tree.incrementalTreeData.depth == 0) revert TokenTreeNotExists(token);
 
@@ -67,8 +73,7 @@ contract Cipher is CipherStorage, Ownable {
         token.handleTransferFrom(msg.sender, publicSignals.publicInAmt);
 
         publicInfo.requireValidPublicInfo(publicSignals.publicInfoHash);
-        // check utxoType(nAmB), n is the number of INPUT nullifiers, m is the number of OUTPUT commitments
-        publicInfo.utxoType.requireValidUtxoType(
+        bytes2 utxoType = CipherLib.calcUtxoType(
             publicSignals.inputNullifiers.length,
             publicSignals.outputCommitments.length
         );
@@ -77,43 +82,83 @@ contract Cipher is CipherStorage, Ownable {
 
         // TODO: move to internal function _createTx
         /* ========== core logic start ========== */
-
-        if (
-            // NOTE: publicSignals: root, publicInAmt, publicOutAmt, publicInfoHash, inputNullifier, outputCommitment
-            // TODO: circuit public need add: token??
-            // TODO: public data: need to from contract storage, Ex. root
-            !cipherVerifier.verifyProof(proof, publicInfo.utxoType)
-        ) revert InvalidProof(proof);
+        if (!cipherVerifier.verifyProof(proof, utxoType)) revert InvalidProof(proof);
 
         tree.updateNullifiers(token, publicSignals.inputNullifiers);
         // update original root to history roots before insert new commitment
         tree.updateHistoryRoot(publicSignals.root);
         tree.insertCommitments(token, publicSignals.outputCommitments);
+        // TODO: emit a event for whole info
         emit NewRoot(token, tree.incrementalTreeData.root);
 
         /* ========== core logic end ========== */
 
         // TODO: move to internal function _afterCreateTx
         /* ========== after core logic start ========== */
-        uint256 feeAmt;
-        if (publicInfo.feeRate > 0) {
-            feeAmt = (publicSignals.publicOutAmt * publicInfo.feeRate) / CipherConfig.FEE_BASE;
-        } else {
-            feeAmt = (publicSignals.publicOutAmt * fee) / CipherConfig.FEE_BASE;
-        }
 
         if (publicSignals.publicOutAmt > 0) {
             if (publicInfo.recipient == address(0)) revert InvalidRecipientAddr();
-            token.handleTransfer(publicInfo.recipient, publicSignals.publicOutAmt - feeAmt);
+            token.handleTransfer(publicInfo.recipient, publicSignals.publicOutAmt);
         }
 
-        if (feeAmt > 0) token.handleTransfer(publicInfo.relayer, feeAmt);
         /* ========== after core logic end ========== */
     }
 
-    function setFee(uint16 newFee) external onlyOwner {
-        if (newFee > CipherConfig.FEE_BASE) revert InvalidFeeSetting(newFee);
-        fee = newFee;
+    function createTxWithRelayer(
+        Proof calldata proof,
+        PublicInfo calldata publicInfo,
+        RelayerInfo calldata relayerInfo
+    ) external payable {
+        IERC20 token = publicInfo.token;
+        TreeData storage tree = treeData[token];
+        if (tree.incrementalTreeData.depth == 0) revert TokenTreeNotExists(token);
+
+        PublicSignals calldata publicSignals = proof.publicSignals;
+
+        // TODO: move to internal function _beforeCreateTx
+        /* ========== before core logic start ========== */
+        // check root is valid
+        if (!publicSignals.root.isValidRoot(tree)) revert InvalidRoot(publicSignals.root);
+
+        token.handleTransferFrom(msg.sender, publicSignals.publicInAmt);
+
+        publicInfo.requireValidPublicInfo(publicSignals.publicInfoHash);
+        bytes2 utxoType = CipherLib.calcUtxoType(
+            publicSignals.inputNullifiers.length,
+            publicSignals.outputCommitments.length
+        );
+
+        /* ========== before core logic end ========== */
+
+        // TODO: move to internal function _createTx
+        /* ========== core logic start ========== */
+        if (!cipherVerifier.verifyProof(proof, utxoType)) revert InvalidProof(proof);
+
+        tree.updateNullifiers(token, publicSignals.inputNullifiers);
+        // update original root to history roots before insert new commitment
+        tree.updateHistoryRoot(publicSignals.root);
+        tree.insertCommitments(token, publicSignals.outputCommitments);
+        // TODO: emit a event for whole info
+        emit NewRoot(token, tree.incrementalTreeData.root);
+
+        /* ========== core logic end ========== */
+
+        // TODO: move to internal function _afterCreateTx
+        /* ========== after core logic start ========== */
+        // TODO: check position of this line
+        if (publicInfo.maxAllowableFeeRate > CipherConfig.FEE_BASE)
+            revert InvalidMaxAllowableFeeRate(publicInfo.maxAllowableFeeRate);
+        if (relayerInfo.feeRate > publicInfo.maxAllowableFeeRate)
+            revert InvalidRelayerFeeRate(relayerInfo.feeRate, publicInfo.maxAllowableFeeRate);
+
+        if (publicSignals.publicOutAmt > 0) {
+            if (publicInfo.recipient == address(0)) revert InvalidRecipientAddr();
+            uint256 feeAmt = (publicSignals.publicOutAmt * relayerInfo.feeRate) / CipherConfig.FEE_BASE;
+            token.handleTransfer(publicInfo.recipient, publicSignals.publicOutAmt - feeAmt);
+            token.handleTransfer(relayerInfo.feeReceiver, feeAmt);
+            emit RelayInfo(msg.sender, relayerInfo, feeAmt);
+        }
+        /* ========== after core logic end ========== */
     }
 
     function getTreeDepth(IERC20 token) external view returns (uint256) {
@@ -146,10 +191,6 @@ contract Cipher is CipherStorage, Ownable {
 
     function isValidRoot(IERC20 token, uint256 root) external view returns (bool) {
         return root.isValidRoot(treeData[token]);
-    }
-
-    function _parseData(bytes memory encodedData) internal pure virtual returns (address) {
-        return abi.decode(encodedData, (address));
     }
 
     // function _beforeCreateTx(UtxoData memory utxoData, PublicInfo memory publicInfo) internal virtual {}

@@ -3,7 +3,6 @@ import { utils } from "ethers";
 import { Cipher } from "@typechain-types";
 import { createCoin, generateCipherTx } from "@/scripts/lib/cipher/CipherCore";
 import { IncrementalQuinTree } from "@scripts/lib/IncrementalQuinTree";
-import { getUtxoType } from "@scripts/lib/utxo.helper";
 import { CipherTransferableCoin } from "@/scripts/lib/cipher/CipherCoin";
 import hre from "hardhat";
 import { PublicInfoStruct } from "@/typechain-types/contracts/Cipher";
@@ -16,8 +15,7 @@ export interface CreateTxTestCase {
 
 export interface Transaction {
   name: string;
-  feeRate?: string;
-  relayer?: string;
+  maxAllowableFeeRate?: string;
   recipient?: string;
 
   publicIn: string;
@@ -43,11 +41,9 @@ export function generateTest(
       const privateInputLength = txs[i].privateIns.length;
       const privateOutputLength = txs[i].privateOuts.length;
       const publicInfo: PublicInfoStruct = {
-        utxoType: getUtxoType(privateInputLength, privateOutputLength),
-        feeRate: tx.feeRate || "0",
-        relayer: tx.relayer || "0xffffffffffffffffffffffffffffffffffffffff",
+        maxAllowableFeeRate: tx.maxAllowableFeeRate || "0",
         recipient: tx.recipient || "0xffffffffffffffffffffffffffffffffffffffff", // TODO: get from user address
-        encodedData: utils.defaultAbiCoder.encode(["address"], [tokenAddress]),
+        token: tokenAddress,
       };
       const privateOutCoins = tx.privateOuts.map((v) =>
         createCoin(tree, {
@@ -86,6 +82,7 @@ export function generateTest(
       );
       await result.wait();
       // TODO: check event log
+      // TODO: check balance change
       const afterEthBalance = await ethers.provider.getBalance(cipher.address);
       // console.log(
       //   `${testName}: txIndex=${i}, afterEthBalance`,

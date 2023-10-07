@@ -17,4 +17,6 @@ library CipherConfig {
     uint16 internal constant FEE_BASE = 10000;
     /// @notice The size of valid history roots
     uint8 internal constant VALID_HISTORY_ROOTS_SIZE = 32;
+    /// @notice The number of one bytes in decimal
+    uint256 internal constant NUM_OF_ONE_BYTES = 256;
 }

@@ -15,12 +15,6 @@ struct TreeData {
     mapping(uint256 => bool) nullifiers;
 }
 
-struct RelayerInfo {
-    uint16 feeRate;
-    uint240 numOfTx;
-    string url;
-}
-
 struct Proof {
     uint256[2] a;
     uint256[2][2] b;
@@ -38,23 +32,25 @@ struct PublicSignals {
 }
 
 struct PublicInfo {
-    bytes2 utxoType;
-    uint16 feeRate;
-    address payable relayer;
+    uint16 maxAllowableFeeRate;
     address payable recipient;
-    bytes encodedData; // NOTE: abi.encode([tokenAddress, ...])
+    IERC20 token;
+}
+
+struct RelayerInfo {
+    address payable registeredAddr;
+    address payable feeReceiver;
+    // transfered amount * feeRate / FEE_BASE = fee amount
+    // i.e. 1000 * 300 / 10000 = 30 (3% fee)
+    uint16 feeRate;
 }
 
 contract CipherStorage {
     ICipherVerifier internal immutable cipherVerifier;
 
-    // transfered amount * fee / FEE_BASE = fee amount
-    // i.e. 1000 * 300 / 10000 = 30 (3% fee)
-    uint16 internal fee;
-
     mapping(IERC20 => TreeData) internal treeData;
 
-    mapping(address => RelayerInfo) internal relayers;
+    mapping(address => string) internal relayerMetadataUris;
 
     constructor(address cipherVerifierAddr) {
         cipherVerifier = ICipherVerifier(cipherVerifierAddr);

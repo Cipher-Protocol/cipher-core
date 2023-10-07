@@ -17,6 +17,8 @@ library CipherLib {
     error InvalidUtxoType(bytes2 utxoType, uint256 nullifierNum, uint256 commitmentNum);
     error InvalidPublicInfo(uint256 publicInfoHash, uint256 calcPublicInfoHash);
     error InvalidNullifier(uint256 nullifier);
+    error InvalidNullifierNum(uint256 nullifierNum);
+    error InvalidCommitmentNum(uint256 commitmentNum);
 
     event NewNullifier(IERC20 token, uint256 nullifier);
     event NewCommitment(IERC20 token, uint256 commitment, uint256 leafIndex);
@@ -67,6 +69,12 @@ library CipherLib {
             tree.incrementalTreeData.insert(commitment);
             emit NewCommitment(token, commitment, tree.incrementalTreeData.numberOfLeaves);
         }
+    }
+
+    function calcUtxoType(uint256 inputNullifierNum, uint256 outputCommitmentNum) internal pure returns (bytes2) {
+        if (inputNullifierNum > CipherConfig.NUM_OF_ONE_BYTES) revert InvalidNullifierNum(inputNullifierNum);
+        if (outputCommitmentNum > CipherConfig.NUM_OF_ONE_BYTES) revert InvalidCommitmentNum(outputCommitmentNum);
+        return bytes2(uint16((inputNullifierNum << 8) | outputCommitmentNum));
     }
 
     function requireValidUtxoType(bytes2 utxoType, uint256 nullifierNum, uint256 commitmentNum) internal pure {
