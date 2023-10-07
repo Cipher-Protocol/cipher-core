@@ -497,7 +497,7 @@ contract CipherVerifier is CipherVKeyConst {
             // check field for inputNullifiers
             let pos := add(proof, 480)
             let bytesLen := mul(calldataload(pos), 32) // inputNullifiers.length * 32
-            pos := add(pos, 32) // inputNullifiers[0]
+            pos := add(pos, 32) // inputNullifiers[0], if length > 0
             let end := add(bytesLen, pos)
             for {
 
@@ -509,7 +509,7 @@ contract CipherVerifier is CipherVKeyConst {
 
             // check field for outputCommitments
             bytesLen := mul(calldataload(pos), 32) // outputCommitments.length * 32
-            pos := add(pos, 32) // outputCommitments[0]
+            pos := add(pos, 32) // outputCommitments[0], if length > 0
             end := add(bytesLen, pos)
             for {
 

@@ -45,7 +45,7 @@ export function generateTest(
       const publicInfo: PublicInfoStruct = {
         utxoType: getUtxoType(privateInputLength, privateOutputLength),
         feeRate: tx.feeRate || "0",
-        relayer: tx.relayer || "0x0000000000000000000000000000000000000000", // no fee
+        relayer: tx.relayer || "0xffffffffffffffffffffffffffffffffffffffff",
         recipient: tx.recipient || "0xffffffffffffffffffffffffffffffffffffffff", // TODO: get from user address
         encodedData: utils.defaultAbiCoder.encode(["address"], [tokenAddress]),
       };
@@ -75,10 +75,10 @@ export function generateTest(
       console.log(testName);
 
       const beforeEthBalance = await ethers.provider.getBalance(cipher.address);
-      console.log(
-        `${testName}: txIndex=${i}, beforeEthBalance`,
-        beforeEthBalance.toString()
-      );
+      // console.log(
+      //   `${testName}: txIndex=${i}, beforeEthBalance`,
+      //   beforeEthBalance.toString()
+      // );
       const result = await cipher.createTx(
         contractCalldata.utxoData,
         contractCalldata.publicInfo,
@@ -87,10 +87,10 @@ export function generateTest(
       await result.wait();
       // TODO: check event log
       const afterEthBalance = await ethers.provider.getBalance(cipher.address);
-      console.log(
-        `${testName}: txIndex=${i}, afterEthBalance`,
-        afterEthBalance.toString()
-      );
+      // console.log(
+      //   `${testName}: txIndex=${i}, afterEthBalance`,
+      //   afterEthBalance.toString()
+      // );
     }
   };
 }
