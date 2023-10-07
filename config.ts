@@ -1,7 +1,7 @@
 export const SNARK_FIELD_SIZE =
   "21888242871839275222246405745257275088548364400416034343698204186575808495617";
 
-export const DEFAULT_ETH_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
+export const DEFAULT_ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
 export const DEFAULT_PRIVATE_KEY = "0x00";
 
