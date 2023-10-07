@@ -153,7 +153,9 @@ async function readVkeyFromVerifier(file: string) {
         }
 
         if (isReading) {
-          lines.push(line.replace('uint256 constant', 'uint256 internal constant'));
+          lines.push(
+            line.replace("uint256 constant", "uint256 internal constant")
+          );
         }
       });
       rlInterface.on("error", (err: any) => reject(err));
@@ -209,7 +211,9 @@ async function readIcFromVerifier(file: string) {
         }
 
         if (isReading) {
-          lines.push(line.replace('uint256 constant', 'uint256 internal constant'));
+          lines.push(
+            line.replace("uint256 constant", "uint256 internal constant")
+          );
           if (deltaRegex.test(line)) {
             countInfo.delta++;
           }
@@ -283,11 +287,11 @@ function parseMulAccCases(
   const outIcLen = ic;
   for (let index = 5; index < inIcLen; index++) {
     const offset = (index - 4) * 32;
-    str += `eccMulAcc(_pVk, ${name}_IC${index}x, ${name}_IC${index}y, calldataload(add(inputNullifiersOffset, ${offset})))\n`;
+    str += `ecMulAcc(_pVk, ${name}_IC${index}x, ${name}_IC${index}y, calldataload(add(inputNullifiersPos, ${offset})))\n`;
   }
   for (let index = inIcLen; index < outIcLen; index++) {
     const offset = (index - inIcLen + 1) * 32;
-    str += `eccMulAcc(_pVk, ${name}_IC${index}x, ${name}_IC${index}y, calldataload(add(outputCommitmentsOffset, ${offset})))\n`;
+    str += `ecMulAcc(_pVk, ${name}_IC${index}x, ${name}_IC${index}y, calldataload(add(outputCommitmentsPos, ${offset})))\n`;
   }
   str += `}`;
   return prettier(str, 16);

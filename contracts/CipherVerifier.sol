@@ -27,7 +27,7 @@ contract CipherVerifier is CipherVKeyConst {
             /// @param x The x coordinate of the point
             /// @param y The y coordinate of the point
             /// @param s The scalar
-            function eccMulAcc(pR, x, y, s) {
+            function ecMulAcc(pR, x, y, s) {
                 let success
                 let mIn := mload(0x40)
                 mstore(mIn, x)
@@ -64,7 +64,7 @@ contract CipherVerifier is CipherVKeyConst {
             /// @return IC3y The y coordinate of the first b[1][1]
             /// @return IC4x The x coordinate of the output c[0]
             /// @return IC4y The y coordinate of the output c[1]
-            function getFixedSizeConfigs(utxoType) -> IC0x, IC0y, IC1x, IC1y, IC2x, IC2y, IC3x, IC3y, IC4x, IC4y {
+            function getFixedSizeVkeys(utxoType) -> IC0x, IC0y, IC1x, IC1y, IC2x, IC2y, IC3x, IC3y, IC4x, IC4y {
                 switch utxoType
                 case hex"0001" {
                     IC0x := n0m1_IC0x
@@ -354,93 +354,98 @@ contract CipherVerifier is CipherVKeyConst {
                 }
             }
 
-            function dynamicMulAcc(_pVk, inputNullifiersOffset, outputCommitmentsOffset, utxoType) {
+            /// @notice Elliptic curve multiplication then accumulation for dynamic public signals array (inputNullifiers, outputCommitments)
+            /// @param _pVk The pointer to the verification key
+            /// @param inputNullifiersPos The pointer to the inputNullifiers array, the first 32 bytes is the length of the array
+            /// @param outputCommitmentsPos The pointer to the outputCommitments array, the first 32 bytes is the length of the array
+            /// @param utxoType The utxo type
+            function dynamicEcMulAcc(_pVk, inputNullifiersPos, outputCommitmentsPos, utxoType) {
                 switch utxoType
                 case hex"0001" {
-                    eccMulAcc(_pVk, n0m1_IC5x, n0m1_IC5y, calldataload(add(outputCommitmentsOffset, 32)))
+                    ecMulAcc(_pVk, n0m1_IC5x, n0m1_IC5y, calldataload(add(outputCommitmentsPos, 32)))
                 }
                 case hex"0002" {
-                    eccMulAcc(_pVk, n0m2_IC5x, n0m2_IC5y, calldataload(add(outputCommitmentsOffset, 32)))
-                    eccMulAcc(_pVk, n0m2_IC6x, n0m2_IC6y, calldataload(add(outputCommitmentsOffset, 64)))
+                    ecMulAcc(_pVk, n0m2_IC5x, n0m2_IC5y, calldataload(add(outputCommitmentsPos, 32)))
+                    ecMulAcc(_pVk, n0m2_IC6x, n0m2_IC6y, calldataload(add(outputCommitmentsPos, 64)))
                 }
                 case hex"0004" {
-                    eccMulAcc(_pVk, n0m4_IC5x, n0m4_IC5y, calldataload(add(outputCommitmentsOffset, 32)))
-                    eccMulAcc(_pVk, n0m4_IC6x, n0m4_IC6y, calldataload(add(outputCommitmentsOffset, 64)))
-                    eccMulAcc(_pVk, n0m4_IC7x, n0m4_IC7y, calldataload(add(outputCommitmentsOffset, 96)))
-                    eccMulAcc(_pVk, n0m4_IC8x, n0m4_IC8y, calldataload(add(outputCommitmentsOffset, 128)))
+                    ecMulAcc(_pVk, n0m4_IC5x, n0m4_IC5y, calldataload(add(outputCommitmentsPos, 32)))
+                    ecMulAcc(_pVk, n0m4_IC6x, n0m4_IC6y, calldataload(add(outputCommitmentsPos, 64)))
+                    ecMulAcc(_pVk, n0m4_IC7x, n0m4_IC7y, calldataload(add(outputCommitmentsPos, 96)))
+                    ecMulAcc(_pVk, n0m4_IC8x, n0m4_IC8y, calldataload(add(outputCommitmentsPos, 128)))
                 }
                 case hex"0100" {
-                    eccMulAcc(_pVk, n1m0_IC5x, n1m0_IC5y, calldataload(add(inputNullifiersOffset, 32)))
+                    ecMulAcc(_pVk, n1m0_IC5x, n1m0_IC5y, calldataload(add(inputNullifiersPos, 32)))
                 }
                 case hex"0101" {
-                    eccMulAcc(_pVk, n1m1_IC5x, n1m1_IC5y, calldataload(add(inputNullifiersOffset, 32)))
-                    eccMulAcc(_pVk, n1m1_IC6x, n1m1_IC6y, calldataload(add(outputCommitmentsOffset, 32)))
+                    ecMulAcc(_pVk, n1m1_IC5x, n1m1_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n1m1_IC6x, n1m1_IC6y, calldataload(add(outputCommitmentsPos, 32)))
                 }
                 case hex"0102" {
-                    eccMulAcc(_pVk, n1m2_IC5x, n1m2_IC5y, calldataload(add(inputNullifiersOffset, 32)))
-                    eccMulAcc(_pVk, n1m2_IC6x, n1m2_IC6y, calldataload(add(outputCommitmentsOffset, 32)))
-                    eccMulAcc(_pVk, n1m2_IC7x, n1m2_IC7y, calldataload(add(outputCommitmentsOffset, 64)))
+                    ecMulAcc(_pVk, n1m2_IC5x, n1m2_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n1m2_IC6x, n1m2_IC6y, calldataload(add(outputCommitmentsPos, 32)))
+                    ecMulAcc(_pVk, n1m2_IC7x, n1m2_IC7y, calldataload(add(outputCommitmentsPos, 64)))
                 }
                 case hex"0104" {
-                    eccMulAcc(_pVk, n1m4_IC5x, n1m4_IC5y, calldataload(add(inputNullifiersOffset, 32)))
-                    eccMulAcc(_pVk, n1m4_IC6x, n1m4_IC6y, calldataload(add(outputCommitmentsOffset, 32)))
-                    eccMulAcc(_pVk, n1m4_IC7x, n1m4_IC7y, calldataload(add(outputCommitmentsOffset, 64)))
-                    eccMulAcc(_pVk, n1m4_IC8x, n1m4_IC8y, calldataload(add(outputCommitmentsOffset, 96)))
-                    eccMulAcc(_pVk, n1m4_IC9x, n1m4_IC9y, calldataload(add(outputCommitmentsOffset, 128)))
+                    ecMulAcc(_pVk, n1m4_IC5x, n1m4_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n1m4_IC6x, n1m4_IC6y, calldataload(add(outputCommitmentsPos, 32)))
+                    ecMulAcc(_pVk, n1m4_IC7x, n1m4_IC7y, calldataload(add(outputCommitmentsPos, 64)))
+                    ecMulAcc(_pVk, n1m4_IC8x, n1m4_IC8y, calldataload(add(outputCommitmentsPos, 96)))
+                    ecMulAcc(_pVk, n1m4_IC9x, n1m4_IC9y, calldataload(add(outputCommitmentsPos, 128)))
                 }
                 case hex"0200" {
-                    eccMulAcc(_pVk, n2m0_IC5x, n2m0_IC5y, calldataload(add(inputNullifiersOffset, 32)))
-                    eccMulAcc(_pVk, n2m0_IC6x, n2m0_IC6y, calldataload(add(inputNullifiersOffset, 64)))
+                    ecMulAcc(_pVk, n2m0_IC5x, n2m0_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n2m0_IC6x, n2m0_IC6y, calldataload(add(inputNullifiersPos, 64)))
                 }
                 case hex"0201" {
-                    eccMulAcc(_pVk, n2m1_IC5x, n2m1_IC5y, calldataload(add(inputNullifiersOffset, 32)))
-                    eccMulAcc(_pVk, n2m1_IC6x, n2m1_IC6y, calldataload(add(inputNullifiersOffset, 64)))
-                    eccMulAcc(_pVk, n2m1_IC7x, n2m1_IC7y, calldataload(add(outputCommitmentsOffset, 32)))
+                    ecMulAcc(_pVk, n2m1_IC5x, n2m1_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n2m1_IC6x, n2m1_IC6y, calldataload(add(inputNullifiersPos, 64)))
+                    ecMulAcc(_pVk, n2m1_IC7x, n2m1_IC7y, calldataload(add(outputCommitmentsPos, 32)))
                 }
                 case hex"0202" {
-                    eccMulAcc(_pVk, n2m2_IC5x, n2m2_IC5y, calldataload(add(inputNullifiersOffset, 32)))
-                    eccMulAcc(_pVk, n2m2_IC6x, n2m2_IC6y, calldataload(add(inputNullifiersOffset, 64)))
-                    eccMulAcc(_pVk, n2m2_IC7x, n2m2_IC7y, calldataload(add(outputCommitmentsOffset, 32)))
-                    eccMulAcc(_pVk, n2m2_IC8x, n2m2_IC8y, calldataload(add(outputCommitmentsOffset, 64)))
+                    ecMulAcc(_pVk, n2m2_IC5x, n2m2_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n2m2_IC6x, n2m2_IC6y, calldataload(add(inputNullifiersPos, 64)))
+                    ecMulAcc(_pVk, n2m2_IC7x, n2m2_IC7y, calldataload(add(outputCommitmentsPos, 32)))
+                    ecMulAcc(_pVk, n2m2_IC8x, n2m2_IC8y, calldataload(add(outputCommitmentsPos, 64)))
                 }
                 case hex"0204" {
-                    eccMulAcc(_pVk, n2m4_IC5x, n2m4_IC5y, calldataload(add(inputNullifiersOffset, 32)))
-                    eccMulAcc(_pVk, n2m4_IC6x, n2m4_IC6y, calldataload(add(inputNullifiersOffset, 64)))
-                    eccMulAcc(_pVk, n2m4_IC7x, n2m4_IC7y, calldataload(add(outputCommitmentsOffset, 32)))
-                    eccMulAcc(_pVk, n2m4_IC8x, n2m4_IC8y, calldataload(add(outputCommitmentsOffset, 64)))
-                    eccMulAcc(_pVk, n2m4_IC9x, n2m4_IC9y, calldataload(add(outputCommitmentsOffset, 96)))
-                    eccMulAcc(_pVk, n2m4_IC10x, n2m4_IC10y, calldataload(add(outputCommitmentsOffset, 128)))
+                    ecMulAcc(_pVk, n2m4_IC5x, n2m4_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n2m4_IC6x, n2m4_IC6y, calldataload(add(inputNullifiersPos, 64)))
+                    ecMulAcc(_pVk, n2m4_IC7x, n2m4_IC7y, calldataload(add(outputCommitmentsPos, 32)))
+                    ecMulAcc(_pVk, n2m4_IC8x, n2m4_IC8y, calldataload(add(outputCommitmentsPos, 64)))
+                    ecMulAcc(_pVk, n2m4_IC9x, n2m4_IC9y, calldataload(add(outputCommitmentsPos, 96)))
+                    ecMulAcc(_pVk, n2m4_IC10x, n2m4_IC10y, calldataload(add(outputCommitmentsPos, 128)))
                 }
                 case hex"0400" {
-                    eccMulAcc(_pVk, n4m0_IC5x, n4m0_IC5y, calldataload(add(inputNullifiersOffset, 32)))
-                    eccMulAcc(_pVk, n4m0_IC6x, n4m0_IC6y, calldataload(add(inputNullifiersOffset, 64)))
-                    eccMulAcc(_pVk, n4m0_IC7x, n4m0_IC7y, calldataload(add(inputNullifiersOffset, 96)))
-                    eccMulAcc(_pVk, n4m0_IC8x, n4m0_IC8y, calldataload(add(inputNullifiersOffset, 128)))
+                    ecMulAcc(_pVk, n4m0_IC5x, n4m0_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n4m0_IC6x, n4m0_IC6y, calldataload(add(inputNullifiersPos, 64)))
+                    ecMulAcc(_pVk, n4m0_IC7x, n4m0_IC7y, calldataload(add(inputNullifiersPos, 96)))
+                    ecMulAcc(_pVk, n4m0_IC8x, n4m0_IC8y, calldataload(add(inputNullifiersPos, 128)))
                 }
                 case hex"0401" {
-                    eccMulAcc(_pVk, n4m1_IC5x, n4m1_IC5y, calldataload(add(inputNullifiersOffset, 32)))
-                    eccMulAcc(_pVk, n4m1_IC6x, n4m1_IC6y, calldataload(add(inputNullifiersOffset, 64)))
-                    eccMulAcc(_pVk, n4m1_IC7x, n4m1_IC7y, calldataload(add(inputNullifiersOffset, 96)))
-                    eccMulAcc(_pVk, n4m1_IC8x, n4m1_IC8y, calldataload(add(inputNullifiersOffset, 128)))
-                    eccMulAcc(_pVk, n4m1_IC9x, n4m1_IC9y, calldataload(add(outputCommitmentsOffset, 32)))
+                    ecMulAcc(_pVk, n4m1_IC5x, n4m1_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n4m1_IC6x, n4m1_IC6y, calldataload(add(inputNullifiersPos, 64)))
+                    ecMulAcc(_pVk, n4m1_IC7x, n4m1_IC7y, calldataload(add(inputNullifiersPos, 96)))
+                    ecMulAcc(_pVk, n4m1_IC8x, n4m1_IC8y, calldataload(add(inputNullifiersPos, 128)))
+                    ecMulAcc(_pVk, n4m1_IC9x, n4m1_IC9y, calldataload(add(outputCommitmentsPos, 32)))
                 }
                 case hex"0402" {
-                    eccMulAcc(_pVk, n4m2_IC5x, n4m2_IC5y, calldataload(add(inputNullifiersOffset, 32)))
-                    eccMulAcc(_pVk, n4m2_IC6x, n4m2_IC6y, calldataload(add(inputNullifiersOffset, 64)))
-                    eccMulAcc(_pVk, n4m2_IC7x, n4m2_IC7y, calldataload(add(inputNullifiersOffset, 96)))
-                    eccMulAcc(_pVk, n4m2_IC8x, n4m2_IC8y, calldataload(add(inputNullifiersOffset, 128)))
-                    eccMulAcc(_pVk, n4m2_IC9x, n4m2_IC9y, calldataload(add(outputCommitmentsOffset, 32)))
-                    eccMulAcc(_pVk, n4m2_IC10x, n4m2_IC10y, calldataload(add(outputCommitmentsOffset, 64)))
+                    ecMulAcc(_pVk, n4m2_IC5x, n4m2_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n4m2_IC6x, n4m2_IC6y, calldataload(add(inputNullifiersPos, 64)))
+                    ecMulAcc(_pVk, n4m2_IC7x, n4m2_IC7y, calldataload(add(inputNullifiersPos, 96)))
+                    ecMulAcc(_pVk, n4m2_IC8x, n4m2_IC8y, calldataload(add(inputNullifiersPos, 128)))
+                    ecMulAcc(_pVk, n4m2_IC9x, n4m2_IC9y, calldataload(add(outputCommitmentsPos, 32)))
+                    ecMulAcc(_pVk, n4m2_IC10x, n4m2_IC10y, calldataload(add(outputCommitmentsPos, 64)))
                 }
                 case hex"0404" {
-                    eccMulAcc(_pVk, n4m4_IC5x, n4m4_IC5y, calldataload(add(inputNullifiersOffset, 32)))
-                    eccMulAcc(_pVk, n4m4_IC6x, n4m4_IC6y, calldataload(add(inputNullifiersOffset, 64)))
-                    eccMulAcc(_pVk, n4m4_IC7x, n4m4_IC7y, calldataload(add(inputNullifiersOffset, 96)))
-                    eccMulAcc(_pVk, n4m4_IC8x, n4m4_IC8y, calldataload(add(inputNullifiersOffset, 128)))
-                    eccMulAcc(_pVk, n4m4_IC9x, n4m4_IC9y, calldataload(add(outputCommitmentsOffset, 32)))
-                    eccMulAcc(_pVk, n4m4_IC10x, n4m4_IC10y, calldataload(add(outputCommitmentsOffset, 64)))
-                    eccMulAcc(_pVk, n4m4_IC11x, n4m4_IC11y, calldataload(add(outputCommitmentsOffset, 96)))
-                    eccMulAcc(_pVk, n4m4_IC12x, n4m4_IC12y, calldataload(add(outputCommitmentsOffset, 128)))
+                    ecMulAcc(_pVk, n4m4_IC5x, n4m4_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n4m4_IC6x, n4m4_IC6y, calldataload(add(inputNullifiersPos, 64)))
+                    ecMulAcc(_pVk, n4m4_IC7x, n4m4_IC7y, calldataload(add(inputNullifiersPos, 96)))
+                    ecMulAcc(_pVk, n4m4_IC8x, n4m4_IC8y, calldataload(add(inputNullifiersPos, 128)))
+                    ecMulAcc(_pVk, n4m4_IC9x, n4m4_IC9y, calldataload(add(outputCommitmentsPos, 32)))
+                    ecMulAcc(_pVk, n4m4_IC10x, n4m4_IC10y, calldataload(add(outputCommitmentsPos, 64)))
+                    ecMulAcc(_pVk, n4m4_IC11x, n4m4_IC11y, calldataload(add(outputCommitmentsPos, 96)))
+                    ecMulAcc(_pVk, n4m4_IC12x, n4m4_IC12y, calldataload(add(outputCommitmentsPos, 128)))
                 }
 
                 default {
@@ -484,11 +489,11 @@ contract CipherVerifier is CipherVKeyConst {
              * | ------------------ | ------------- | ----------------- | ----------------------------------------------------
              */
 
-            let pMem := mload(0x40)
+             let pMem := mload(0x40)
             mstore(0x40, add(pMem, pLastMem))
 
             // Validate that all evaluations ∈ F
-            // check field for root, publicInAmt, publicOutAmt, publicInfoHash
+            // check field for fixed size public signals (root, publicInAmt, publicOutAmt, publicInfoHash)
             checkField(calldataload(add(proof, 288))) // proof.publicSignals.root
             checkField(calldataload(add(proof, 320))) // proof.publicSignals.publicInAmt
             checkField(calldataload(add(proof, 352))) // proof.publicSignals.publicOutAmt
@@ -499,6 +504,7 @@ contract CipherVerifier is CipherVKeyConst {
             let bytesLen := mul(calldataload(pos), 32) // inputNullifiers.length * 32
             pos := add(pos, 32) // inputNullifiers[0], if length > 0
             let end := add(bytesLen, pos)
+            // solhint-disable-next-line no-empty-blocks
             for {
 
             } lt(pos, end) {
@@ -511,6 +517,7 @@ contract CipherVerifier is CipherVKeyConst {
             bytesLen := mul(calldataload(pos), 32) // outputCommitments.length * 32
             pos := add(pos, 32) // outputCommitments[0], if length > 0
             end := add(bytesLen, pos)
+            // solhint-disable-next-line no-empty-blocks
             for {
 
             } lt(pos, end) {
@@ -522,20 +529,28 @@ contract CipherVerifier is CipherVKeyConst {
             let _pPairing := add(pMem, pPairing)
             let _pVk := add(pMem, pVk)
 
-            let IC0x, IC0y, IC1x, IC1y, IC2x, IC2y, IC3x, IC3y, IC4x, IC4y := getFixedSizeConfigs(_type)
+            // get fixed size vkey configs
+            let IC0x, IC0y, IC1x, IC1y, IC2x, IC2y, IC3x, IC3y, IC4x, IC4y := getFixedSizeVkeys(_type)
 
             mstore(_pVk, IC0x)
             mstore(add(_pVk, 32), IC0y)
 
-            let publicSignalsOffset := add(proof, 256)
-            eccMulAcc(_pVk, IC1x, IC1y, calldataload(add(publicSignalsOffset, 32)))
-            eccMulAcc(_pVk, IC2x, IC2y, calldataload(add(publicSignalsOffset, 64)))
-            eccMulAcc(_pVk, IC3x, IC3y, calldataload(add(publicSignalsOffset, 96)))
-            eccMulAcc(_pVk, IC4x, IC4y, calldataload(add(publicSignalsOffset, 128)))
+            // The pointer to the public signals, the first 32 bytes is the offset of the public signals
+            let publicSignalsPos := add(proof, 256)
+            // G1 point eliptic curve multiplications then accumulations
+            // for fixed size public signals (root, publicInAmt, publicOutAmt, publicInfoHash)
+            ecMulAcc(_pVk, IC1x, IC1y, calldataload(add(publicSignalsPos, 32))) // proof.publicSignals.root
+            ecMulAcc(_pVk, IC2x, IC2y, calldataload(add(publicSignalsPos, 64))) // proof.publicSignals.publicInAmt
+            ecMulAcc(_pVk, IC3x, IC3y, calldataload(add(publicSignalsPos, 96))) // proof.publicSignals.publicOutAmt
+            ecMulAcc(_pVk, IC4x, IC4y, calldataload(add(publicSignalsPos, 128))) // proof.publicSignals.publicInfoHash
 
-            let inputNullifiersOffset := add(add(publicSignalsOffset, 32), calldataload(add(proof, 416)))
-            let outputCommitmentsOffset := add(add(publicSignalsOffset, 32), calldataload(add(proof, 448)))
-            dynamicMulAcc(_pVk, inputNullifiersOffset, outputCommitmentsOffset, _type)
+            // inputNullifiers absolute position (inputNullifiersPos)
+            // = public signals start position + inputNullifiers offset relative to public signals start position
+            let inputNullifiersPos := add(add(publicSignalsPos, 32), calldataload(add(proof, 416)))
+            // outputCommitments absolute position (outputCommitmentsPos)
+            // = public signals start position + outputCommitments offset relative to public signals start position
+            let outputCommitmentsPos := add(add(publicSignalsPos, 32), calldataload(add(proof, 448)))
+            dynamicEcMulAcc(_pVk, inputNullifiersPos, outputCommitmentsPos, _type)
 
             // -A
             mstore(_pPairing, calldataload(proof))
@@ -585,6 +600,6 @@ contract CipherVerifier is CipherVKeyConst {
 
             mstore(0, success)
             return(0, 0x20)
-        }
-    }
-}
+         }
+     }
+ }
