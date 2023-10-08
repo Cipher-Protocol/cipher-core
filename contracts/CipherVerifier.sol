@@ -246,7 +246,6 @@ contract CipherVerifier is CipherVKeyConst {
                     IC4x := n4m4_IC4x
                     IC4y := n4m4_IC4y
                 }
-
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -346,7 +345,6 @@ contract CipherVerifier is CipherVKeyConst {
                     deltay1 := n4m4_deltay1
                     deltay2 := n4m4_deltay2
                 }
-
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -447,7 +445,6 @@ contract CipherVerifier is CipherVKeyConst {
                     ecMulAcc(_pVk, n4m4_IC11x, n4m4_IC11y, calldataload(add(outputCommitmentsPos, 96)))
                     ecMulAcc(_pVk, n4m4_IC12x, n4m4_IC12y, calldataload(add(outputCommitmentsPos, 128)))
                 }
-
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -489,7 +486,7 @@ contract CipherVerifier is CipherVKeyConst {
              * | ------------------ | ------------- | ----------------- | ----------------------------------------------------
              */
 
-             let pMem := mload(0x40)
+            let pMem := mload(0x40)
             mstore(0x40, add(pMem, pLastMem))
 
             // Validate that all evaluations ∈ F
@@ -600,6 +597,6 @@ contract CipherVerifier is CipherVKeyConst {
 
             mstore(0, success)
             return(0, 0x20)
-         }
-     }
- }
+        }
+    }
+}
