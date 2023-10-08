@@ -7,12 +7,12 @@ import {
   CipherVerifier__factory,
   CipherVerifier,
 } from "@typechain-types";
-import { DEFAULT_FEE, DEFAULT_TREE_HEIGHT } from "@/config";
+import { DEFAULT_TREE_HEIGHT } from "@/config";
 
-import { ethTokenAddress, initTree } from "@/scripts/lib/cipher/CipherCore";
-import { asyncPoseidonHash } from "@scripts/lib/poseidonHash";
-import { getDefaultLeaf } from "@scripts/lib/utxo.helper";
-import { IncrementalQuinTree } from "@scripts/lib/IncrementalQuinTree";
+import { ethTokenAddress, initTree } from "../utils/lib/cipher/CipherCore";
+import { asyncPoseidonHash } from "../utils/lib/poseidonHash";
+import { getDefaultLeaf } from "../utils/lib/utxo.helper";
+import { IncrementalQuinTree } from "../utils/lib/IncrementalQuinTree";
 import { CreateTxTestCase, generateTest } from "./helper/ts.helper";
 
 const ethers = hre.ethers;

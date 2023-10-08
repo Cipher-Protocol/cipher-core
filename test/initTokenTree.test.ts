@@ -7,15 +7,11 @@ import {
   Cipher__factory,
   CipherVerifier__factory,
   CipherVerifier,
-} from "../../typechain-types";
-import {
-  DEFAULT_FEE,
-  DEFAULT_TREE_HEIGHT,
-  SNARK_FIELD_SIZE,
-} from "../../config";
+} from "../typechain-types";
+import { DEFAULT_TREE_HEIGHT, SNARK_FIELD_SIZE } from "../config";
 import { keccak256 } from "ethers/lib/utils";
 import { BigNumber, utils } from "ethers";
-import { calcInitRoot, calcZeroValue } from "../../utils/calcZeroVal";
+import { calcInitRoot, calcZeroValue } from "../utils/calcZeroVal";
 import { expect } from "chai";
 
 describe("deploy", function () {

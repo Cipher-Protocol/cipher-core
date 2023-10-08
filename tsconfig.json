@@ -24,7 +24,7 @@
       "@typechain-types/*": ["typechain-types/*"]
     }
   },
-  "include": ["scripts/**/*.ts", "test/**/*.ts", "scripts/lib/cipher"],
+  "include": ["scripts/**/*.ts", "test/**/*.ts", "utils/lib/cipher"],
   "ts-node": {
     "files": true
   },

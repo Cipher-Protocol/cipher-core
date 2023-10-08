@@ -1,9 +1,12 @@
 import { expect } from "chai";
 import { utils } from "ethers";
 import { Cipher } from "@typechain-types";
-import { createCoin, generateCipherTx } from "@/scripts/lib/cipher/CipherCore";
-import { IncrementalQuinTree } from "@scripts/lib/IncrementalQuinTree";
-import { CipherTransferableCoin } from "@/scripts/lib/cipher/CipherCoin";
+import {
+  createCoin,
+  generateCipherTx,
+} from "../../utils/lib/cipher/CipherCore";
+import { IncrementalQuinTree } from "../../utils/lib/IncrementalQuinTree";
+import { CipherTransferableCoin } from "../../utils/lib/cipher/CipherCoin";
 import hre from "hardhat";
 import { PublicInfoStruct } from "@/typechain-types/contracts/Cipher";
 const ethers = hre.ethers;

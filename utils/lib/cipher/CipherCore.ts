@@ -1,21 +1,21 @@
 import { writeFileSync } from "fs";
 import { resolve } from "path";
-import { IncrementalQuinTree } from "@/scripts/lib/IncrementalQuinTree";
 import {
   CipherCoinInfo,
   CipherTransferableCoin,
   CipherBaseCoin,
-} from "@/scripts/lib/cipher/CipherCoin";
-import { toDecimalStringObject } from "@/scripts/lib/helper";
-import { PoseidonHash } from "@/scripts/lib/poseidonHash";
-import { FIELD_SIZE_BIGINT } from "@/scripts/lib/utxo.helper";
-import { proveByName } from "@/scripts/prove";
+} from "./CipherCoin";
+import { toDecimalStringObject } from "../helper";
+import { PoseidonHash } from "../poseidonHash";
+import { FIELD_SIZE_BIGINT } from "../utxo.helper";
+import { proveByName } from "../../prove";
 import {
   PublicInfoStruct,
   ProofStruct,
-} from "@/typechain-types/contracts/Cipher";
+} from "../../../typechain-types/contracts/Cipher";
 import { assert } from "chai";
 import { utils, BigNumber } from "ethers";
+import { IncrementalQuinTree } from "../IncrementalQuinTree";
 
 export const ethTokenAddress = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 

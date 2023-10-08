@@ -6,13 +6,13 @@
   "author": "ray880301@gmail.com",
   "scripts": {
     "clean": "hardhat clean && rm -rf cache",
-    "build:circuit": "ts-node scripts/build.ts && ts-node scripts/merge_verifier.ts",
+    "build:circuit": "ts-node utils/build.ts && ts-node utils/merge_verifier.ts",
     "build:contract": "hardhat compile && hardhat typechain",
-    "test:contract": "hardhat test",
-    "test:contract:tx": "hardhat test test/contract/createTx.test.ts",
-    "test:contract:all-spec": "hardhat test test/contract/createTx-all-spec.test.ts",
-    "test:deploy": "hardhat test test/contract/deploy.test.ts",
-    "test:initTokenTree": "hardhat test test/contract/initTokenTree.test.ts"
+    "test": "hardhat test",
+    "test:tx": "hardhat test test/createTx.test.ts",
+    "test:all-spec": "hardhat test test/createTx-all-spec.test.ts",
+    "test:deploy": "hardhat test test/deploy.test.ts",
+    "test:initTokenTree": "hardhat test test/initTokenTree.test.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",

@@ -1,10 +1,10 @@
-import { IncrementalQuinTree } from "@/scripts/lib/IncrementalQuinTree";
-import { PoseidonHash } from "@/scripts/lib/poseidonHash";
+import { IncrementalQuinTree } from "../../lib/IncrementalQuinTree";
+import { PoseidonHash } from "../../lib/poseidonHash";
 import {
   generateCommitment,
   indicesToPathIndices,
   generateNullifier,
-} from "@/scripts/lib/utxo.helper";
+} from "../../lib/utxo.helper";
 import { assert } from "chai";
 
 export interface CipherCoinKey {
