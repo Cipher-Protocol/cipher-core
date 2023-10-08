@@ -11,6 +11,12 @@ git clone git@github.com:Cipher-Protocol/cipher-core.git
 npm i
 ```
 
+### download ptau
+
+```bash
+curl -L https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_16.ptau --create-dirs -o ptau/pot16_final.ptau
+```
+
 ## Build
 
 Build different type of the UTXO circuit and generate the solidity verifier contract

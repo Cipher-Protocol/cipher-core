@@ -5,6 +5,9 @@ coverage.json
 typechain
 typechain-types
 .vscode
+ptau/*
+contracts/CipherVerifier.sol
+contracts/CipherVKeyConst.sol
 
 # Hardhat files
 cache

@@ -13,6 +13,7 @@ const ethers = hre.ethers;
 
 export interface CreateTxTestCase {
   tokenAddress: string;
+  tokenDecimals?: number;
   txs: Array<Transaction>;
 }
 
@@ -35,7 +36,7 @@ export function generateTest(
   }
 ) {
   return async () => {
-    const { txs, tokenAddress } = testCase;
+    const { txs, tokenAddress, tokenDecimals = 18 } = testCase;
     const { tree, cipher } = context;
     let previousOutCoins: CipherTransferableCoin[] = [];
 
@@ -50,7 +51,7 @@ export function generateTest(
       };
       const privateOutCoins = tx.privateOuts.map((v) =>
         createCoin(tree, {
-          amount: utils.parseEther(v).toBigInt(),
+          amount: utils.parseUnits(v, tokenDecimals).toBigInt(),
           inRandom: BigInt(1),
           inSaltOrSeed: BigInt(2),
         })
@@ -59,8 +60,10 @@ export function generateTest(
       const { transferableCoins, contractCalldata } = await generateCipherTx(
         tree,
         {
-          publicInAmt: utils.parseEther(tx.publicIn).toBigInt(),
-          publicOutAmt: utils.parseEther(tx.publicOut).toBigInt(),
+          publicInAmt: utils.parseUnits(tx.publicIn, tokenDecimals).toBigInt(),
+          publicOutAmt: utils
+            .parseUnits(tx.publicOut, tokenDecimals)
+            .toBigInt(),
           privateInCoins: previousOutCoins,
           privateOutCoins,
         },
@@ -81,7 +84,7 @@ export function generateTest(
       const result = await cipher.createTx(
         contractCalldata.utxoData,
         contractCalldata.publicInfo,
-        { value: utils.parseEther(tx.publicIn) }
+        { value: utils.parseUnits(tx.publicIn, tokenDecimals) }
       );
       await result.wait();
       // TODO: check event log
