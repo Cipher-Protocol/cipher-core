@@ -36,7 +36,7 @@ contract DeployTest is Test {
         verifier = new CipherVerifier();
 
         // deploy cipher
-        main = new Cipher(address(verifier), DEFAULT_FEE);
+        main = new Cipher(address(verifier));
     }
 
     function testTreeDepth() external {

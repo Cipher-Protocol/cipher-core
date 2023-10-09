@@ -7,7 +7,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {PoseidonT3} from "poseidon-solidity/PoseidonT3.sol";
 import {CipherVerifier} from "../contracts/CipherVerifier.sol";
 import {Cipher} from "../contracts/Cipher.sol";
-import {ERC20Mock} from "../contracts/test/ERC20Mock.sol";
+import {ERC20Mock} from "../contracts/mock/ERC20Mock.sol";
 import {
     DEFAULT_FEE,
     DEFAULT_ETH_ADDRESS,
@@ -28,7 +28,7 @@ contract InitTokenTree is Test {
     ERC20Mock internal erc20;
 
     // TODO move event and error to another file
-    event NewTokenTree(IERC20 token, uint256 merkleTreeDepth, uint256 zeroValue);
+    event NewTokenTree(IERC20 indexed token, uint256 merkleTreeDepth, uint256 zeroValue);
 
     // TODO move event and error to another file
     error TokenTreeAlreadyInitialized(IERC20);
@@ -46,7 +46,7 @@ contract InitTokenTree is Test {
         verifier = new CipherVerifier();
 
         // deploy cipher
-        main = new Cipher(address(verifier), DEFAULT_FEE);
+        main = new Cipher(address(verifier));
 
         // deploy erc20
         erc20 = new ERC20Mock("Test", "T", 18);

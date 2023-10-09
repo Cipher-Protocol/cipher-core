@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Proof} from "../CipherStorage.sol";
+import {Proof} from "../utils/DataType.sol";
 
 interface ICipherVerifier {
     function verifyProof(
