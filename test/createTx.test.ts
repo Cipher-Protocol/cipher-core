@@ -13,7 +13,11 @@ import { ethTokenAddress, initTree } from "../utils/lib/cipher/CipherCore";
 import { asyncPoseidonHash } from "../utils/lib/poseidonHash";
 import { getDefaultLeaf } from "../utils/lib/utxo.helper";
 import { IncrementalQuinTree } from "../utils/lib/IncrementalQuinTree";
-import { CreateTxTestCase, generateTest } from "./helper/ts.helper";
+import { generateTest } from "./helper/ts.helper";
+import {
+  withdrawTxCases,
+  depositTxCases,
+} from "@/test/testcase/createTx.testcase";
 
 const ethers = hre.ethers;
 const SPEC = {
@@ -78,114 +82,16 @@ describe("deploy", function () {
   });
 
   describe("Simple Create Tx", function () {
-    const singleTxCases: CreateTxTestCase[] = [
-      {
-        tokenAddress: ethTokenAddress,
-        txs: [
-          {
-            name: "n0m1",
-            publicIn: "1",
-            publicOut: "0",
-            privateIns: [],
-            privateOuts: ["1"],
-          },
-        ],
-      },
-      {
-        tokenAddress: ethTokenAddress,
-        txs: [
-          {
-            name: "n0m2",
-            publicIn: "1",
-            publicOut: "0",
-            privateIns: [],
-            privateOuts: ["0.5", "0.5"],
-          },
-        ],
-      },
-      {
-        tokenAddress: ethTokenAddress,
-        txs: [
-          {
-            name: "n0m4",
-            publicIn: "2",
-            publicOut: "0",
-            privateIns: [],
-            privateOuts: ["0.5", "0.5", "0.5", "0.5"],
-          },
-        ],
-      },
-    ];
-
-    singleTxCases.forEach((testCase, i) => {
+    depositTxCases.forEach((testCase, i) => {
       it(
-        `singleTxCases: ${testCase.txs.map((t) => t.name).join(" -> ")}`,
+        `depositTxCases: ${testCase.txs.map((t) => t.name).join(" -> ")}`,
         generateTest(testCase, context)
       );
     });
 
-    const multipleTxCases: CreateTxTestCase[] = [
-      {
-        tokenAddress: ethTokenAddress,
-        txs: [
-          {
-            name: "n0m1",
-            publicIn: "1",
-            publicOut: "0",
-            privateIns: [],
-            privateOuts: ["1"],
-          },
-          {
-            name: "n1m0",
-            publicIn: "0",
-            publicOut: "1",
-            privateIns: ["1"],
-            privateOuts: [],
-          },
-        ],
-      },
-      {
-        tokenAddress: ethTokenAddress,
-        txs: [
-          {
-            name: "n0m1",
-            publicIn: "1",
-            publicOut: "0",
-            privateIns: [],
-            privateOuts: ["1"],
-          },
-          {
-            name: "n1m1",
-            publicIn: "0",
-            publicOut: "0.1",
-            privateIns: ["1"],
-            privateOuts: ["0.9"],
-          },
-        ],
-      },
-      {
-        tokenAddress: ethTokenAddress,
-        txs: [
-          {
-            name: "n0m1",
-            publicIn: "1",
-            publicOut: "0",
-            privateIns: [],
-            privateOuts: ["1"],
-          },
-          {
-            name: "n1m2",
-            publicIn: "0",
-            publicOut: "0.1",
-            privateIns: ["1"],
-            privateOuts: ["0.4", "0.5"],
-          },
-        ],
-      },
-    ];
-    multipleTxCases.forEach((testCase, i) => {
+    withdrawTxCases.forEach((testCase, i) => {
       it(
-        `multipleTxCases: ${testCase.txs.map((t) => t.name).join(" -> ")}`,
+        `withdrawTxCases: ${testCase.txs.map((t) => t.name).join(" -> ")}`,
         generateTest(testCase, context)
       );
     });

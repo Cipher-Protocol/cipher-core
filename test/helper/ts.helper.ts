@@ -1,3 +1,4 @@
+import { writeFileSync } from "fs";
 import { expect } from "chai";
 import { utils } from "ethers";
 import { Cipher } from "@typechain-types";
@@ -8,7 +9,10 @@ import {
 import { IncrementalQuinTree } from "../../utils/lib/IncrementalQuinTree";
 import { CipherTransferableCoin } from "../../utils/lib/cipher/CipherCoin";
 import hre from "hardhat";
-import { PublicInfoStruct } from "@/typechain-types/contracts/Cipher";
+import {
+  ProofStruct,
+  PublicInfoStruct,
+} from "@/typechain-types/contracts/Cipher";
 const ethers = hre.ethers;
 
 export interface CreateTxTestCase {
@@ -95,5 +99,64 @@ export function generateTest(
       //   afterEthBalance.toString()
       // );
     }
+  };
+}
+
+export async function exportTestData(
+  testCase: CreateTxTestCase,
+  context: {
+    tree: IncrementalQuinTree;
+  }
+) {
+  const { txs, tokenAddress, tokenDecimals = 18 } = testCase;
+  const { tree } = context;
+  let previousOutCoins: CipherTransferableCoin[] = [];
+  const testName = txs.map((t) => t.name).join("_");
+  const calldataList: Array<{
+    name: string;
+    utxoData: ProofStruct;
+    publicInfo: PublicInfoStruct;
+  }> = [];
+
+  for (let i = 0; i < txs.length; i++) {
+    const tx = txs[i];
+    const privateInputLength = txs[i].privateIns.length;
+    const privateOutputLength = txs[i].privateOuts.length;
+    const publicInfo: PublicInfoStruct = {
+      maxAllowableFeeRate: tx.maxAllowableFeeRate || "0",
+      recipient: tx.recipient || "0xffffffffffffffffffffffffffffffffffffffff", // TODO: get from user address
+      token: tokenAddress,
+    };
+    const privateOutCoins = tx.privateOuts.map((v) =>
+      createCoin(tree, {
+        amount: utils.parseUnits(v, tokenDecimals).toBigInt(),
+        inRandom: BigInt(1),
+        inSaltOrSeed: BigInt(2),
+      })
+    );
+
+    const { transferableCoins, contractCalldata } = await generateCipherTx(
+      tree,
+      {
+        publicInAmt: utils.parseUnits(tx.publicIn, tokenDecimals).toBigInt(),
+        publicOutAmt: utils.parseUnits(tx.publicOut, tokenDecimals).toBigInt(),
+        privateInCoins: previousOutCoins,
+        privateOutCoins,
+      },
+      publicInfo
+    );
+    previousOutCoins = transferableCoins;
+
+    const result = {
+      name: tx.name,
+      utxoData: contractCalldata.utxoData,
+      publicInfo: contractCalldata.publicInfo,
+    };
+    calldataList.push(result);
+  }
+
+  return {
+    testName,
+    calldataList,
   };
 }

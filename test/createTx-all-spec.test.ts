@@ -14,7 +14,11 @@ import { asyncPoseidonHash } from "../utils/lib/poseidonHash";
 import { getDefaultLeaf } from "../utils/lib/utxo.helper";
 import { IncrementalQuinTree } from "../utils/lib/IncrementalQuinTree";
 import { CreateTxTestCase, generateTest } from "./helper/ts.helper";
-import { doubleTxsCases } from "@/test/testcase/createTx-all-spec.testcase";
+import {
+  doubleTxsCases,
+  multipleTxsCases,
+  tripleTxsCases,
+} from "@/test/testcase/createTx-all-spec.testcase";
 
 const ethers = hre.ethers;
 const SPEC = {
@@ -78,8 +82,22 @@ describe("deploy", function () {
     context.tree = tree;
   });
 
-  describe("Create Tx", function () {
+  describe("Create Tx for all spec", function () {
     doubleTxsCases.forEach((testCase, i) => {
+      it(
+        `doubleTxsCases: ${testCase.txs.map((t) => t.name).join(" -> ")}`,
+        generateTest(testCase, context)
+      );
+    });
+
+    tripleTxsCases.forEach((testCase, i) => {
+      it(
+        `doubleTxsCases: ${testCase.txs.map((t) => t.name).join(" -> ")}`,
+        generateTest(testCase, context)
+      );
+    });
+
+    multipleTxsCases.forEach((testCase, i) => {
       it(
         `doubleTxsCases: ${testCase.txs.map((t) => t.name).join(" -> ")}`,
         generateTest(testCase, context)

@@ -14,17 +14,20 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["./*"],
-      "@scripts": ["scripts/"],
-      "@scripts/*": ["scripts/*"],
-      "@lib": ["lib/"],
-      "@lib/*": ["lib/*"],
+      "@utils": ["utils/"],
+      "@utils/*": ["utils/*"],
       "@test": ["test/"],
       "@test/*": ["test/*"],
       "@typechain-types": ["typechain-types/"],
       "@typechain-types/*": ["typechain-types/*"]
     }
   },
-  "include": ["scripts/**/*.ts", "test/**/*.ts", "utils/lib/cipher"],
+  "include": [
+    "scripts/**/*.ts",
+    "test/**/*.ts",
+    "utils/**/*.ts",
+    "typechain-types/**/*.ts"
+  ],
   "ts-node": {
     "files": true
   },
