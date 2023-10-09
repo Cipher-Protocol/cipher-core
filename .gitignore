@@ -8,6 +8,7 @@ typechain-types
 .vscode
 ptau/*
 contracts/CipherVerifier.sol
+dist/**/*
 contracts/CipherVKeyConst.sol
 
 # Hardhat files
