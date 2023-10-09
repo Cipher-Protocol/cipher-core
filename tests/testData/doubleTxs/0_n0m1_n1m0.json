@@ -3,22 +3,22 @@
     "name": "n0m1",
     "utxoData": {
       "a": [
-        "0x28736a59629a63b83f5bf7c5359a9d070d2d28cbc6e5bba650d7bfffdbef6f46",
-        "0x2481603e2a7d654e447ab94bb825ad3737b6aa2cb40f157b88e9d15343315e50"
+        "0x0e4ef4941642a046a5847556306339ba7c36d8336c5a70256c5320bac38f328e",
+        "0x0f6a50d459dd64eacb11438b577793dad9ee8309b98d9f0eea5e348304f2ce70"
       ],
       "b": [
         [
-          "0x1e380b1629c7f06817c1708488aa6fe8aa277fb22a69daf912c3202097a01902",
-          "0x02371d07e1e1f0e03d4f5ba2be8aac8379f00e76611a15e9b01ae96fbd3fc869"
+          "0x0b482e718fff0e57e076d874158ce2347fb9223dc8805b66801cfd54eda6d811",
+          "0x29f59d0f57ed42d4a1d55541dc6372649fd21f35e4c483d8461306551c3fec63"
         ],
         [
-          "0x04cc303432681f49cf2cd0da92480866fdc880d1002fc4470ccb68e77ad1a236",
-          "0x1c4aa1d51e1111d71d602216efc3501c6522dcfcd4ed85218ca5db9c8a83a86b"
+          "0x1c708ada367bc9bf56d1782c0ee604a0f79c639ec00a8ed1e79ccd8e1793b636",
+          "0x2cb7eb725a763219651a4fae773af971cc4df16571b270dddffdfaaa9f9810a3"
         ]
       ],
       "c": [
-        "0x2aa243118ea5d951f2d0c8601f52cab8a31089ac48abb22c2ecdf33894cc839f",
-        "0x0decf5dbb1631fb2ff7e7ce79b4eccdbe88096b88443deae233317e0102e9fdd"
+        "0x02c31015092171f1d3202b7bcb9341213a41c71c3e1f219d1b63c39eaec0add2",
+        "0x0c9897678a3214f20680423e620607bc84f3414f6a31ba490da9dde1ffd32deb"
       ],
       "publicSignals": {
         "root": "0x094793a616afd53615c1c4d1815a853803758a243c6c7dc863775fee0e9bc9b2",
@@ -41,22 +41,22 @@
     "name": "n1m0",
     "utxoData": {
       "a": [
-        "0x16bef2d1ab6a80343f5ee84a9a035f3046e60d27f5a54e7daa9c4e6e5739b403",
-        "0x19fff2e3227b6896c144d4ec8b215efe0c9ae643289043992127fbdf261fca07"
+        "0x16a66fd717013d1dbaf19c9a23c151379da74992ec6117130bfd875c0854c564",
+        "0x2b0db8e982ebee3af50e35a67bdeccdfdef58a919bfa7f38a3a0bfbb33247312"
       ],
       "b": [
         [
-          "0x2c38a28cf3745d025e150fef30659af23faecae39a1fbe2a6e629fddd51dd219",
-          "0x2a018cf42affdc437dddce5757992d9f3d63968011f6b44d29d048538080fe71"
+          "0x14f75375a870401105bfd7ca605ade4b4cb5eaeec54cca49185386397b97437d",
+          "0x28625c9890f2c6cb9fa6cec1f6b19b90b3fcf9e89532019522277d7a6d60dc63"
         ],
         [
-          "0x2a4e52dc1975f999d03b232b6ed807d59bc5591da80790524eedce2de9723dc3",
-          "0x1031e0c8b5d2a584e5517dd25f10228ddc1482c3d8ca88401efb436543f80455"
+          "0x15d070dceb2d3afe37acf255eed30f9a41cf5c9e1dfdc6912ff97dca4c993885",
+          "0x2b90afbd25de7fc55d0da2e75a7c1b2ee611a6d4aa342ed0fa4f0ae9a65a227e"
         ]
       ],
       "c": [
-        "0x17a5863029881c3be19e5cf3cc2a20ded143c40531baa8808a94a30ad3aba239",
-        "0x22765bba0e24853bee4ba3dc4fa73854ea2b27d376c3d4c1d24cddd878aebcdd"
+        "0x280506f77b9b4101bf0d90f582c9a0412a418e2c3caa2ee86064c1fdead51139",
+        "0x17184b78071b3359ed55f6ff60c1ed3c0402777ff534403188bcb760fae46967"
       ],
       "publicSignals": {
         "root": "0x148b6e93ee36bd64a8ba332e55949f2e3d8da4f9fe902292da438bb8333879ad",

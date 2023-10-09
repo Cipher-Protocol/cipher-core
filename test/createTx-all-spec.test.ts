@@ -92,14 +92,14 @@ describe("deploy", function () {
 
     tripleTxsCases.forEach((testCase, i) => {
       it(
-        `doubleTxsCases: ${testCase.txs.map((t) => t.name).join(" -> ")}`,
+        `tripleTxsCases: ${testCase.txs.map((t) => t.name).join(" -> ")}`,
         generateTest(testCase, context)
       );
     });
 
     multipleTxsCases.forEach((testCase, i) => {
       it(
-        `doubleTxsCases: ${testCase.txs.map((t) => t.name).join(" -> ")}`,
+        `multipleTxsCases: ${testCase.txs.map((t) => t.name).join(" -> ")}`,
         generateTest(testCase, context)
       );
     });

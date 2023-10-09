@@ -277,7 +277,7 @@ export const tripleTxsCases: CreateTxTestCase[] = [
         privateOuts: ["0.1", "0.2", "0.3", "0.4"],
       },
       {
-        name: "n4m2",
+        name: "n4m4",
         publicIn: "0",
         publicOut: "0.2",
         privateIns: ["0.1", "0.2", "0.3", "0.4"],
@@ -342,7 +342,7 @@ export const multipleTxsCases: CreateTxTestCase[] = [
         name: "n1m2",
         publicIn: "0",
         publicOut: "0.1",
-        privateIns: ["0.1", "0.2", "0.3", "0.3"],
+        privateIns: ["0.8"],
         privateOuts: ["0.6", "0.1"],
       },
       {
@@ -388,7 +388,7 @@ export const multipleTxsCases: CreateTxTestCase[] = [
       {
         name: "n1m2",
         publicIn: "0",
-        publicOut: "0.1",
+        publicOut: "0",
         privateIns: ["0.6"],
         privateOuts: ["0.3", "0.3"],
       },
@@ -396,7 +396,7 @@ export const multipleTxsCases: CreateTxTestCase[] = [
         name: "n2m1",
         publicIn: "0",
         publicOut: "0.5",
-        privateIns: ["0.6"],
+        privateIns: ["0.3", "0.3"],
         privateOuts: ["0.1"],
       },
       {
