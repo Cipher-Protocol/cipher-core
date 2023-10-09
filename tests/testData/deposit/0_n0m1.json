@@ -1,0 +1,40 @@
+[
+  {
+    "name": "n0m1",
+    "utxoData": {
+      "a": [
+        "0x209419ef7d3aad8bee48950f71a1eb96f6d411389074cc51ad81aff930faeb82",
+        "0x2486ae119a18dc680904b6be2350c4ae1da4c0c2fe0a73066de020204d8b156e"
+      ],
+      "b": [
+        [
+          "0x1301ac03defa7ce5ed386b8220b0020933daf6f2bcd8d4592e0d5704899c8f2c",
+          "0x2b142596d9c0f157d0d4276b3d8a6a6248bebab388c92a557a30a07f1c13d290"
+        ],
+        [
+          "0x08108b014e880e291d28233428793fc67e1dde59c0f981e549105e82988f9915",
+          "0x2c3203278799d5be4060be36898beb3886899e7268ba9e1048ce7d690895ad0a"
+        ]
+      ],
+      "c": [
+        "0x2e220248933fc1e0c2c361b72f670b61877cde67b499803aeabdf64dc73e605e",
+        "0x10f3574919754013c818b3da6e3fbeb00163acdb62e7807dabef72342583d160"
+      ],
+      "publicSignals": {
+        "root": "0x094793a616afd53615c1c4d1815a853803758a243c6c7dc863775fee0e9bc9b2",
+        "publicInAmt": "1000000000000000000",
+        "publicOutAmt": "0",
+        "publicInfoHash": "0x0d3d2fd9581ce214353e6617504b39ee945806c7d3d8d4f8eca74fb5a65fb6ac",
+        "inputNullifiers": [],
+        "outputCommitments": [
+          "0x2ccf8ad229038231f04b9b61a854f69235c02cdb989201b7bad03b743743839b"
+        ]
+      }
+    },
+    "publicInfo": {
+      "maxAllowableFeeRate": "0",
+      "recipient": "0xffffffffffffffffffffffffffffffffffffffff",
+      "token": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+    }
+  }
+]

@@ -1,0 +1,85 @@
+[
+  {
+    "name": "n0m2",
+    "utxoData": {
+      "a": [
+        "0x2f92d86181d8a51511f4bfd4c2806ffd64386a9137ee8175d02e5494e8b8c4ce",
+        "0x015dc36b911e9675d89eff40c44512cfe889df3e62846d5b01b5dbcd3315c8e1"
+      ],
+      "b": [
+        [
+          "0x0481a5482a3238a063ed6ecf46a2f4a897b40ce66d86596fa3a246010d1dede5",
+          "0x0e7284c8c8a8c5af66e36d0a095052e8764e4507dc7b729739ccdbc0636db5b7"
+        ],
+        [
+          "0x0ed35dd87a70437f85a5026d9f80f19e84a5f1ea358ea646b61b5e0e134d936e",
+          "0x2bdfe45844539e079e417ea9b67e4376adce5a5d9a930fd2f782937a02568ea9"
+        ]
+      ],
+      "c": [
+        "0x12f8d4cab3a88ec5dcc345bdc28b73d8c20fce75ae35b2c8585f030628fb5ef9",
+        "0x1a562a2baea95daa69f3e7b7b1b507c5208dd061a076d5b13cc24ebc3805a2ae"
+      ],
+      "publicSignals": {
+        "root": "0x094793a616afd53615c1c4d1815a853803758a243c6c7dc863775fee0e9bc9b2",
+        "publicInAmt": "1000000000000000000",
+        "publicOutAmt": "0",
+        "publicInfoHash": "0x0d3d2fd9581ce214353e6617504b39ee945806c7d3d8d4f8eca74fb5a65fb6ac",
+        "inputNullifiers": [],
+        "outputCommitments": [
+          "0x1631ed5b9b3ccba1d0c8fce41d7fc236c52fdb162081ce48be2dd9ff57aaf45a",
+          "0x1631ed5b9b3ccba1d0c8fce41d7fc236c52fdb162081ce48be2dd9ff57aaf45a"
+        ]
+      }
+    },
+    "publicInfo": {
+      "maxAllowableFeeRate": "0",
+      "recipient": "0xffffffffffffffffffffffffffffffffffffffff",
+      "token": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+    }
+  },
+  {
+    "name": "n2m4",
+    "utxoData": {
+      "a": [
+        "0x11cf32c6cc9539bb345e47d242a2aad3658b9729ebd12f8dd5b2daac7c51ad41",
+        "0x080b13ae72be192784dd6e2d7118235f89ef0d4258829550ae051275a31fb283"
+      ],
+      "b": [
+        [
+          "0x2bf99481411d2080759e84894d068d35dc6baeaa819a12f269b3cccd1fb44c2f",
+          "0x2a3ebbe8dab4ee5dd947c3cdba74ee40b9f5c3198f95655f76dba840bd29bb19"
+        ],
+        [
+          "0x084c518798bbe7d20606f072f8c7f86166121fc8eecbcdf1d3fe135d9225b0cc",
+          "0x22df076f234746ada43bac5632cf654366aff6c37c346d3d96245080e2d79936"
+        ]
+      ],
+      "c": [
+        "0x11a1e84c84b228335ced3eb40e280bdf12c5605c138a26d31615ceefaad5c10c",
+        "0x10958edea4fbbbd46783c8393554a8cf399fc2e41afc8853ddbb326515d5f00d"
+      ],
+      "publicSignals": {
+        "root": "0x0efd041b55307abd6367a78d07fd172092e4188fd3377fdd39cf1bea5c16bbb1",
+        "publicInAmt": "0",
+        "publicOutAmt": "0",
+        "publicInfoHash": "0x0d3d2fd9581ce214353e6617504b39ee945806c7d3d8d4f8eca74fb5a65fb6ac",
+        "inputNullifiers": [
+          "0x15b1a45b6fd7a4350770362f2cb6564d45890939876b82c42ce2942669c68342",
+          "0x1ca68470e8544876f550c8ca148e6e57cc32e902e49384d32175137a1027ed47"
+        ],
+        "outputCommitments": [
+          "0x2ce1f805fdc04754c251d7456a2671ffe25aa37cdb048b580c40d12782df5f35",
+          "0x2ce1f805fdc04754c251d7456a2671ffe25aa37cdb048b580c40d12782df5f35",
+          "0x2ce1f805fdc04754c251d7456a2671ffe25aa37cdb048b580c40d12782df5f35",
+          "0x2ce1f805fdc04754c251d7456a2671ffe25aa37cdb048b580c40d12782df5f35"
+        ]
+      }
+    },
+    "publicInfo": {
+      "maxAllowableFeeRate": "0",
+      "recipient": "0xffffffffffffffffffffffffffffffffffffffff",
+      "token": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+    }
+  }
+]
