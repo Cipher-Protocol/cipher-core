@@ -3,7 +3,7 @@
 pragma solidity ^0.8.20;
 
 import {CipherVKeyConst} from "./CipherVKeyConst.sol";
-import {Proof} from "./CipherStorage.sol";
+import {Proof} from "./utils/DataType.sol";
 
 contract CipherVerifier is CipherVKeyConst {
     // Memory data
