@@ -51,8 +51,8 @@ library LibTreeData {
         // ex: 5, 6, 7, ...36
         for (start; start < end; ++start) {
             // ex: (32 - (5 % 32)) % 32 = 27 (27, 26, 25, ... 1, 0, 31, 30, 29, 28)
-            uint256 rootIdx = (Constants.VALID_HISTORY_ROOTS_SIZE -
-                (start % Constants.VALID_HISTORY_ROOTS_SIZE)) % Constants.VALID_HISTORY_ROOTS_SIZE;
+            uint256 rootIdx = (Constants.VALID_HISTORY_ROOTS_SIZE - (start % Constants.VALID_HISTORY_ROOTS_SIZE)) %
+                Constants.VALID_HISTORY_ROOTS_SIZE;
             if (_root == _tree.historyRoots[rootIdx]) return true;
         }
         return false;

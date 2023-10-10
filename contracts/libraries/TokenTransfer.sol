@@ -9,24 +9,16 @@ import {Errors} from "./Errors.sol";
 library TokenTransfer {
     using SafeERC20 for IERC20;
 
-    function handleTransfer(
-        IERC20 _token,
-        address payable _receiver,
-        uint256 _amount
-    ) internal {
+    function handleTransfer(IERC20 _token, address payable _receiver, uint256 _amount) internal {
         if (address(_token) == Constants.DEFAULT_ETH_ADDRESS) {
-            // gas limited to 23000 and throw error by default.
+            // gas limited to 2300 and throw error by default.
             _receiver.transfer(_amount);
         } else {
             _token.safeTransfer(_receiver, _amount);
         }
     }
 
-    function handleTransferFrom(
-        IERC20 _token,
-        address _receiver,
-        uint256 _amount
-    ) internal {
+    function handleTransferFrom(IERC20 _token, address _receiver, uint256 _amount) internal {
         if (address(_token) == Constants.DEFAULT_ETH_ADDRESS) {
             // if transfer ETH, msg.value should equal to input amount
             if (msg.value != _amount) revert Errors.InvalidMsgValue(msg.value);
@@ -37,7 +29,7 @@ library TokenTransfer {
             uint256 beforeBalance = _token.balanceOf(address(this));
             _token.safeTransferFrom(_receiver, address(this), _amount);
             uint256 amt = _token.balanceOf(address(this)) - beforeBalance;
-            if(_amount == amt) revert Errors.AmountInconsistent(_amount, amt);
+            if (_amount == amt) revert Errors.AmountInconsistent(_amount, amt);
         }
     }
 }
