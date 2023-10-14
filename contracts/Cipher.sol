@@ -47,10 +47,12 @@ contract Cipher is ICipher {
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         User-facing external function
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
+    /// @inheritdoc ICipher
     function initTokenTree(IERC20 token) external {
         _initTokenTree(token);
     }
 
+    /// @inheritdoc ICipher
     function cipherTransact(Proof calldata proof, PublicInfo calldata publicInfo) external payable {
         IERC20 token = publicInfo.token;
         PublicSignals calldata publicSignals = proof.publicSignals;
@@ -58,6 +60,7 @@ contract Cipher is ICipher {
         if (publicSignals.publicOutAmt > 0) _selfWithdraw(token, publicInfo, publicSignals);
     }
 
+    /// @inheritdoc ICipher
     function cipherTransactWithRelayer(
         Proof calldata proof,
         PublicInfo calldata publicInfo,
@@ -74,11 +77,13 @@ contract Cipher is ICipher {
         Relayer External function
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
     // TODO: not completed
+    /// @inheritdoc ICipher
     function registerAsRelayer(string memory relayerMetadataUri) external {
         relayerMetadataUris[msg.sender] = relayerMetadataUri;
         emit Events.NewRelayer(msg.sender, relayerMetadataUri);
     }
 
+    /// @inheritdoc ICipher
     function updateRelayerMetadataUri(string memory newRelayerMetadataUri) external {
         relayerMetadataUris[msg.sender] = newRelayerMetadataUri;
         emit Events.RelayerUpdated(msg.sender, newRelayerMetadataUri);
@@ -87,34 +92,47 @@ contract Cipher is ICipher {
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         View function
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
+    /// @inheritdoc ICipher
     function getTreeDepth(IERC20 token) external view returns (uint256) {
         return treeData[token].incrementalTreeData.depth;
     }
 
+    /// @inheritdoc ICipher
     function getTreeRoot(IERC20 token) external view returns (uint256) {
         return treeData[token].incrementalTreeData.root;
     }
 
+    /// @inheritdoc ICipher
     function getTreeLeafNum(IERC20 token) external view returns (uint256) {
         return treeData[token].incrementalTreeData.numberOfLeaves;
     }
 
+    /// @inheritdoc ICipher
     function getTreeZeroes(IERC20 token, uint256 level) external view returns (uint256) {
         return treeData[token].incrementalTreeData.zeroes[level];
     }
 
+    /// @inheritdoc ICipher
     function getTreeLastSubtrees(IERC20 token, uint256 level) external view returns (uint256[2] memory) {
         return treeData[token].incrementalTreeData.lastSubtrees[level];
     }
 
+    /// @inheritdoc ICipher
+    function getRelayerMetadataUri(address relayerAddr) external view returns (string memory) {
+        return relayerMetadataUris[relayerAddr];
+    }
+
+    /// @inheritdoc ICipher
     function getVerifier() external view returns (ICipherVerifier) {
         return cipherVerifier;
     }
 
+    /// @inheritdoc ICipher
     function isNullified(IERC20 token, uint256 nullifier) external view returns (bool) {
         return treeData[token].nullifiers[nullifier];
     }
 
+    /// @inheritdoc ICipher
     function isValidRoot(IERC20 token, uint256 root) external view returns (bool) {
         return treeData[token].isValidRoot(root);
     }
@@ -145,7 +163,7 @@ contract Cipher is ICipher {
         if (publicSignals.publicInfoHash != calcPublicInfoHash)
             revert Errors.InvalidPublicInfo(publicSignals.publicInfoHash, calcPublicInfoHash);
 
-        /* ======== check with token tree ======== */
+        /* ======== check with token tree state ======== */
         TreeData storage tree = treeData[token];
         if (tree.incrementalTreeData.depth == 0) revert Errors.TokenTreeNotExists(token);
         if (!tree.isValidRoot(publicSignals.root)) revert Errors.InvalidRoot(publicSignals.root);
@@ -164,7 +182,7 @@ contract Cipher is ICipher {
         bytes2 utxoType = Helper.calcUtxoType(inputNullifierLen, outputCommitmentLen);
         if (!cipherVerifier.verifyProof(proof, utxoType)) revert Errors.InvalidProof(proof);
 
-        /* ======== update token tree ======== */
+        /* ======== update token tree state ======== */
         if (inputNullifierLen > 0) tree.updateNullifiers(token, publicSignals.inputNullifiers, inputNullifierLen);
         if (outputCommitmentLen > 0) {
             // update original root to history roots before insert new commitment
