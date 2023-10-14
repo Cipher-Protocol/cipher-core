@@ -8,13 +8,7 @@ import {PoseidonT3} from "poseidon-solidity/PoseidonT3.sol";
 import {CipherVerifier} from "../contracts/CipherVerifier.sol";
 import {Cipher} from "../contracts/Cipher.sol";
 import {ERC20Mock} from "../contracts/mock/ERC20Mock.sol";
-import {
-    DEFAULT_FEE,
-    DEFAULT_ETH_ADDRESS,
-    DEFAULT_ETH_IERC20,
-    DEFAULT_TREE_DEPTH,
-    SNARK_FIELD_SIZE
-} from "./utils.sol";
+import {DEFAULT_NATIVE_TOKEN_ADDRESS, DEFAULT_NATIVE_TOKEN, DEFAULT_TREE_DEPTH, SNARK_FIELD_SIZE} from "./utils.sol";
 
 contract InitTokenTree is Test {
     address internal poseidonT3;
@@ -85,9 +79,7 @@ contract InitTokenTree is Test {
     function testShouldFailedInitTokenTree() external {
         main.initTokenTree(IERC20(erc20));
 
-        vm.expectRevert(
-            abi.encodeWithSelector(TokenTreeAlreadyInitialized.selector, IERC20(erc20))
-        );
+        vm.expectRevert(abi.encodeWithSelector(TokenTreeAlreadyInitialized.selector, IERC20(erc20)));
         main.initTokenTree(IERC20(erc20));
     }
 }
