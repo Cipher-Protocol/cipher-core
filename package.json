@@ -57,6 +57,6 @@
     "ffjavascript": "^0.2.60",
     "merkletreejs": "^0.3.10",
     "poseidon-encryption": "^1.0.2",
-    "snarkjs": "^0.7.0"
+    "snarkjs": "^0.7.1"
   }
 }
