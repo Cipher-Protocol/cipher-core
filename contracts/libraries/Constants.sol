@@ -1,9 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 library Constants {
-    /// @dev The address to represent ETH token when using ETH in Cipher Protocol
-    address internal constant DEFAULT_ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    /// @dev The address to represent native token on deployed network (i.e. ETH on Ethereum)
+    address internal constant DEFAULT_NATIVE_TOKEN_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
+    /// @dev The native token on deployed network
+    IERC20 internal constant DEFAULT_NATIVE_TOKEN = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
     /// @dev The default tree depth for the incremental tree
     uint256 internal constant DEFAULT_TREE_DEPTH = 24;
