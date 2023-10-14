@@ -69,8 +69,9 @@ library TreeLib {
     ) internal {
         for (uint256 i; i < commitmentLen; ++i) {
             uint256 commitment = _commitments[i];
+            uint256 leafIndex = _tree.incrementalTreeData.numberOfLeaves;
             _tree.incrementalTreeData.insert(commitment);
-            emit Events.NewCommitment(_token, commitment, _tree.incrementalTreeData.numberOfLeaves);
+            emit Events.NewCommitment(_token, commitment, leafIndex);
         }
     }
 
