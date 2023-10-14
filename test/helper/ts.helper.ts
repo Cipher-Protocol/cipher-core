@@ -52,6 +52,7 @@ export function generateTest(
         maxAllowableFeeRate: tx.maxAllowableFeeRate || "0",
         recipient: tx.recipient || "0xffffffffffffffffffffffffffffffffffffffff", // TODO: get from user address
         token: tokenAddress,
+        deadline: "2524579200", // 2050-01-01-00:00:00
       };
       const privateOutCoins = tx.privateOuts.map((v) =>
         createCoin(tree, {
@@ -85,7 +86,7 @@ export function generateTest(
       //   `${testName}: txIndex=${i}, beforeEthBalance`,
       //   beforeEthBalance.toString()
       // );
-      const result = await cipher.createTx(
+      const result = await cipher.cipherTransact(
         contractCalldata.utxoData,
         contractCalldata.publicInfo,
         { value: utils.parseUnits(tx.publicIn, tokenDecimals) }
@@ -126,6 +127,7 @@ export async function exportTestData(
       maxAllowableFeeRate: tx.maxAllowableFeeRate || "0",
       recipient: tx.recipient || "0xffffffffffffffffffffffffffffffffffffffff", // TODO: get from user address
       token: tokenAddress,
+      deadline: "2524579200", // 2050-01-01-00:00:00
     };
     const privateOutCoins = tx.privateOuts.map((v) =>
       createCoin(tree, {

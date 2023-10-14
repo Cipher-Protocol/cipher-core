@@ -7,20 +7,23 @@ import {ICipher} from "./interfaces/ICipher.sol";
 import {ICipherVerifier} from "./interfaces/ICipherVerifier.sol";
 
 // libraries
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {IncrementalBinaryTree, IncrementalTreeData} from "@zk-kit/incremental-merkle-tree.sol/IncrementalBinaryTree.sol";
 import {Constants} from "./libraries/Constants.sol";
 import {Errors} from "./libraries/Errors.sol";
 import {Events} from "./libraries/Events.sol";
 import {Helper} from "./libraries/Helper.sol";
-import {TokenTransfer} from "./libraries/TokenTransfer.sol";
-import {TreeData, LibTreeData} from "./libraries/TreeData.sol";
+import {TokenLib} from "./libraries/TokenLib.sol";
+import {TreeData, TreeLib} from "./libraries/TreeLib.sol";
 import {Proof, PublicInfo, PublicSignals, RelayerInfo} from "./utils/DataType.sol";
 
-contract Cipher is ICipher, Ownable {
+contract Cipher is ICipher {
     using IncrementalBinaryTree for IncrementalTreeData;
-    using LibTreeData for TreeData;
-    using TokenTransfer for IERC20;
+    using Strings for string;
+    using Math for uint256;
+    using TreeLib for TreeData;
+    using TokenLib for IERC20;
 
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         Constants & Immutable
@@ -38,7 +41,7 @@ contract Cipher is ICipher, Ownable {
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
     constructor(address verifierAddr) {
         cipherVerifier = ICipherVerifier(verifierAddr);
-        _initTokenTree(IERC20(Constants.DEFAULT_ETH_ADDRESS));
+        _initTokenTree(Constants.DEFAULT_NATIVE_TOKEN);
     }
 
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
@@ -48,108 +51,23 @@ contract Cipher is ICipher, Ownable {
         _initTokenTree(token);
     }
 
-    function createTx(Proof calldata proof, PublicInfo calldata publicInfo) external payable {
+    function cipherTransact(Proof calldata proof, PublicInfo calldata publicInfo) external payable {
         IERC20 token = publicInfo.token;
-        TreeData storage tree = treeData[token];
-        if (tree.incrementalTreeData.depth == 0) revert Errors.TokenTreeNotExists(token);
-
         PublicSignals calldata publicSignals = proof.publicSignals;
-
-        // TODO: move to internal function _beforeCreateTx
-        /* ========== before core logic start ========== */
-        // check root is valid
-        // if (!publicSignals.root.isValidRoot(tree)) revert Errors.InvalidRoot(publicSignals.root);
-        if (!tree.isValidRoot(publicSignals.root)) revert Errors.InvalidRoot(publicSignals.root);
-
-        token.handleTransferFrom(msg.sender, publicSignals.publicInAmt);
-
-        Helper.requireValidPublicInfo(publicInfo, publicSignals.publicInfoHash);
-        bytes2 utxoType = Helper.calcUtxoType(
-            publicSignals.inputNullifiers.length,
-            publicSignals.outputCommitments.length
-        );
-
-        /* ========== before core logic end ========== */
-
-        // TODO: move to internal function _createTx
-        /* ========== core logic start ========== */
-        if (!cipherVerifier.verifyProof(proof, utxoType)) revert Errors.InvalidProof(proof);
-
-        tree.updateNullifiers(token, publicSignals.inputNullifiers);
-        // update original root to history roots before insert new commitment
-        tree.updateHistoryRoot(publicSignals.root);
-        tree.insertCommitments(token, publicSignals.outputCommitments);
-        // TODO: emit a event for whole info
-        emit Events.NewRoot(token, tree.incrementalTreeData.root);
-
-        /* ========== core logic end ========== */
-
-        // TODO: move to internal function _afterCreateTx
-        /* ========== after core logic start ========== */
-
-        if (publicSignals.publicOutAmt > 0) {
-            if (publicInfo.recipient == address(0)) revert Errors.InvalidRecipientAddr();
-            token.handleTransfer(publicInfo.recipient, publicSignals.publicOutAmt);
-        }
-
-        /* ========== after core logic end ========== */
+        _cipherTransact(token, proof, publicInfo, publicSignals);
+        if (publicSignals.publicOutAmt > 0) _selfWithdraw(token, publicInfo, publicSignals);
     }
 
-    function createTxWithRelayer(
+    function cipherTransactWithRelayer(
         Proof calldata proof,
         PublicInfo calldata publicInfo,
         RelayerInfo calldata relayerInfo
     ) external payable {
+        _checkFeeAndRelayerInfo(publicInfo.maxAllowableFeeRate, relayerInfo);
         IERC20 token = publicInfo.token;
-        TreeData storage tree = treeData[token];
-        if (tree.incrementalTreeData.depth == 0) revert Errors.TokenTreeNotExists(token);
-
         PublicSignals calldata publicSignals = proof.publicSignals;
-
-        // TODO: move to internal function _beforeCreateTx
-        /* ========== before core logic start ========== */
-        // check root is valid
-        if (!tree.isValidRoot(publicSignals.root)) revert Errors.InvalidRoot(publicSignals.root);
-
-        token.handleTransferFrom(msg.sender, publicSignals.publicInAmt);
-
-        Helper.requireValidPublicInfo(publicInfo, publicSignals.publicInfoHash);
-        bytes2 utxoType = Helper.calcUtxoType(
-            publicSignals.inputNullifiers.length,
-            publicSignals.outputCommitments.length
-        );
-
-        /* ========== before core logic end ========== */
-
-        // TODO: move to internal function _createTx
-        /* ========== core logic start ========== */
-        if (!cipherVerifier.verifyProof(proof, utxoType)) revert Errors.InvalidProof(proof);
-
-        tree.updateNullifiers(token, publicSignals.inputNullifiers);
-        // update original root to history roots before insert new commitment
-        tree.updateHistoryRoot(publicSignals.root);
-        tree.insertCommitments(token, publicSignals.outputCommitments);
-        // TODO: emit a event for whole info
-        emit Events.NewRoot(token, tree.incrementalTreeData.root);
-
-        /* ========== core logic end ========== */
-
-        // TODO: move to internal function _afterCreateTx
-        /* ========== after core logic start ========== */
-        // TODO: check position of this line
-        if (publicInfo.maxAllowableFeeRate > Constants.FEE_BASE)
-            revert Errors.InvalidMaxAllowableFeeRate(publicInfo.maxAllowableFeeRate);
-        if (relayerInfo.feeRate > publicInfo.maxAllowableFeeRate)
-            revert Errors.InvalidRelayerFeeRate(relayerInfo.feeRate, publicInfo.maxAllowableFeeRate);
-
-        if (publicSignals.publicOutAmt > 0) {
-            if (publicInfo.recipient == address(0)) revert Errors.InvalidRecipientAddr();
-            uint256 feeAmt = (publicSignals.publicOutAmt * relayerInfo.feeRate) / Constants.FEE_BASE;
-            token.handleTransfer(publicInfo.recipient, publicSignals.publicOutAmt - feeAmt);
-            token.handleTransfer(relayerInfo.feeReceiver, feeAmt);
-            emit Events.RelayInfo(msg.sender, relayerInfo, feeAmt);
-        }
-        /* ========== after core logic end ========== */
+        _cipherTransact(token, proof, publicInfo, publicSignals);
+        if (publicSignals.publicOutAmt > 0) _withdrawWithRelayer(token, publicInfo, publicSignals, relayerInfo);
     }
 
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
@@ -214,5 +132,84 @@ contract Cipher is ICipher, Ownable {
         emit Events.NewTokenTree(token, Constants.DEFAULT_TREE_DEPTH, zeroValue);
     }
 
-    // function _beforeCreateTx(UtxoData memory utxoData, PublicInfo memory publicInfo) internal virtual {}
+    function _cipherTransact(
+        IERC20 token,
+        Proof calldata proof,
+        PublicInfo calldata publicInfo,
+        PublicSignals calldata publicSignals
+    ) internal {
+        /* ======== check public info ======== */
+        // solhint-disable-next-line not-rely-on-time
+        if (publicInfo.deadline < block.timestamp) revert Errors.ExpiredDeadline(publicInfo.deadline);
+        uint256 calcPublicInfoHash = Helper.calcPublicInfoHash(publicInfo);
+        if (publicSignals.publicInfoHash != calcPublicInfoHash)
+            revert Errors.InvalidPublicInfo(publicSignals.publicInfoHash, calcPublicInfoHash);
+
+        /* ======== check with token tree ======== */
+        TreeData storage tree = treeData[token];
+        if (tree.incrementalTreeData.depth == 0) revert Errors.TokenTreeNotExists(token);
+        if (!tree.isValidRoot(publicSignals.root)) revert Errors.InvalidRoot(publicSignals.root);
+
+        /* ======== transfer token in ======== */
+        if (publicSignals.publicInAmt > 0) {
+            token.tokenTransferFrom(msg.sender, publicSignals.publicInAmt);
+        } else {
+            // if publicInAmt is 0, msg.value should equal to 0
+            if (msg.value != 0) revert Errors.InvalidMsgValue(msg.value);
+        }
+
+        /* ======== verify proof ======== */
+        uint256 inputNullifierLen = publicSignals.inputNullifiers.length;
+        uint256 outputCommitmentLen = publicSignals.outputCommitments.length;
+        bytes2 utxoType = Helper.calcUtxoType(inputNullifierLen, outputCommitmentLen);
+        if (!cipherVerifier.verifyProof(proof, utxoType)) revert Errors.InvalidProof(proof);
+
+        /* ======== update token tree ======== */
+        if (inputNullifierLen > 0) tree.updateNullifiers(token, publicSignals.inputNullifiers, inputNullifierLen);
+        if (outputCommitmentLen > 0) {
+            // update original root to history roots before insert new commitment
+            tree.updateHistoryRoot(publicSignals.root);
+            tree.insertCommitments(token, publicSignals.outputCommitments, outputCommitmentLen);
+            // TODO: emit a event for whole info
+            emit Events.NewRoot(token, tree.incrementalTreeData.root);
+        }
+    }
+
+    function _checkFeeAndRelayerInfo(uint16 maxAllowableFeeRate, RelayerInfo calldata relayerInfo) internal view {
+        // TODO: check position of this line
+        if (maxAllowableFeeRate > Constants.FEE_BASE) revert Errors.InvalidMaxAllowableFeeRate(maxAllowableFeeRate);
+
+        if (relayerInfo.feeRate > maxAllowableFeeRate)
+            revert Errors.InvalidRelayerFeeRate(relayerInfo.feeRate, maxAllowableFeeRate);
+
+        if (relayerInfo.feeReceiver == address(0)) revert Errors.InvalidFeeReceiverAddr();
+
+        if (relayerMetadataUris[relayerInfo.registeredAddr].equal(""))
+            revert Errors.NotRegisteredRelayer(relayerInfo.registeredAddr);
+    }
+
+    function _selfWithdraw(
+        IERC20 token,
+        PublicInfo calldata publicInfo,
+        PublicSignals calldata publicSignals
+    ) internal {
+        if (publicInfo.recipient == address(0)) revert Errors.InvalidRecipientAddr();
+
+        token.tokenTransfer(publicInfo.recipient, publicSignals.publicOutAmt);
+    }
+
+    function _withdrawWithRelayer(
+        IERC20 token,
+        PublicInfo calldata publicInfo,
+        PublicSignals calldata publicSignals,
+        RelayerInfo calldata relayerInfo
+    ) internal {
+        if (publicInfo.recipient == address(0)) revert Errors.InvalidRecipientAddr();
+
+        // checked relayerInfo.feeRate <= publicInfo.maxAllowableFeeRate <= Constants.FEE_BASE in `_checkFeeAndRelayerInfo`
+        uint256 feeAmt = publicSignals.publicOutAmt.mulDiv(relayerInfo.feeRate, Constants.FEE_BASE);
+        token.tokenTransfer(publicInfo.recipient, publicSignals.publicOutAmt - feeAmt);
+        token.tokenTransfer(relayerInfo.feeReceiver, feeAmt);
+        emit Events.RelayInfo(msg.sender, relayerInfo, feeAmt);
+    }
 }

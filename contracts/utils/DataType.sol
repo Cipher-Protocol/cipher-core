@@ -23,6 +23,7 @@ struct PublicInfo {
     uint16 maxAllowableFeeRate;
     address payable recipient;
     IERC20 token;
+    uint32 deadline;
 }
 
 struct RelayerInfo {

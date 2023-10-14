@@ -17,7 +17,7 @@ struct TreeData {
     mapping(uint256 => bool) nullifiers;
 }
 
-library LibTreeData {
+library TreeLib {
     using IncrementalBinaryTree for IncrementalTreeData;
 
     function updateHistoryRoot(TreeData storage _tree, uint256 _root) internal {
@@ -25,8 +25,13 @@ library LibTreeData {
         _tree.historyRootsIdx = uint8(addmod(_tree.historyRootsIdx, 1, Constants.VALID_HISTORY_ROOTS_SIZE));
     }
 
-    function updateNullifiers(TreeData storage _tree, IERC20 _token, uint256[] calldata _nullifiers) internal {
-        for (uint256 i; i < _nullifiers.length; ++i) {
+    function updateNullifiers(
+        TreeData storage _tree,
+        IERC20 _token,
+        uint256[] calldata _nullifiers,
+        uint256 nullifierLen
+    ) internal {
+        for (uint256 i; i < nullifierLen; ++i) {
             uint256 nullifier = _nullifiers[i];
             if (_tree.nullifiers[nullifier]) revert Errors.InvalidNullifier(nullifier);
 
@@ -35,8 +40,13 @@ library LibTreeData {
         }
     }
 
-    function insertCommitments(TreeData storage _tree, IERC20 _token, uint256[] calldata _commitments) internal {
-        for (uint256 i; i < _commitments.length; ++i) {
+    function insertCommitments(
+        TreeData storage _tree,
+        IERC20 _token,
+        uint256[] calldata _commitments,
+        uint256 commitmentLen
+    ) internal {
+        for (uint256 i; i < commitmentLen; ++i) {
             uint256 commitment = _commitments[i];
             _tree.incrementalTreeData.insert(commitment);
             emit Events.NewCommitment(_token, commitment, _tree.incrementalTreeData.numberOfLeaves);

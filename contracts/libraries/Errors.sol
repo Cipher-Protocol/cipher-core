@@ -12,9 +12,12 @@ library Errors {
     error TokenTreeNotExists(IERC20 token);
     error InvalidProof(Proof proof);
     error InvalidRecipientAddr();
+    error InvalidFeeReceiverAddr();
     error InvalidRoot(uint256 root);
     error InvalidMaxAllowableFeeRate(uint16 maxAllowableFeeRate);
     error InvalidRelayerFeeRate(uint16 feeRate, uint16 maxAllowableFeeRate);
+    error NotRegisteredRelayer(address notRegisteredRelayerAddr);
+    error ExpiredDeadline(uint32 deadline);
 
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         Helper.sol
@@ -33,6 +36,6 @@ library Errors {
         TokenTransfer.sol
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
     error InvalidMsgValue(uint256 msgValue);
-    error TransferFailed(address payable receiver, uint256 amount);
+    error TransferNativeTokenFailed(address payable receiver, uint256 amount, bytes data);
     error AmountInconsistent(uint256 amount, uint256 transferredAmt);
 }
