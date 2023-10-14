@@ -38,7 +38,7 @@ library TokenLib {
             uint256 beforeBalance = _token.balanceOf(address(this));
             _token.safeTransferFrom(_receiver, address(this), _amount);
             uint256 transferredAmt = _token.balanceOf(address(this)) - beforeBalance;
-            if (_amount == transferredAmt) revert Errors.AmountInconsistent(_amount, transferredAmt);
+            if (_amount != transferredAmt) revert Errors.AmountInconsistent(_amount, transferredAmt);
         }
     }
 }
