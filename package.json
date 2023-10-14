@@ -9,6 +9,7 @@
     "build:circuit": "ts-node utils/build.ts && ts-node utils/merge_verifier.ts",
     "build:contract": "hardhat compile && hardhat typechain",
     "export_testdata": "ts-node -r tsconfig-paths/register utils/export_testdata.ts",
+    "deploy": "hardhat run scripts/deploy.ts",
     "test": "hardhat test",
     "test:tx": "hardhat test test/createTx.test.ts",
     "test:all-spec": "hardhat test test/createTx-all-spec.test.ts",

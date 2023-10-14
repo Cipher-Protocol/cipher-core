@@ -10,6 +10,7 @@ import "hardhat-tracer";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "tsconfig-paths/register";
+import { getString } from "./utils/helper";
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -20,7 +21,7 @@ const config: HardhatUserConfig = {
           // viaIR: true,
           optimizer: {
             enabled: true,
-            runs: 20,
+            runs: 200,
           },
           outputSelection: {
             "*": {
@@ -44,6 +45,12 @@ const config: HardhatUserConfig = {
     currency: "USD",
     gasPrice: 20,
     noColors: true,
+  },
+  networks: {
+    goerli: {
+      url: getString(process.env.GOERLI_RPC_URL),
+      accounts: [getString(process.env.GOERLI_DEPLOYER_PRIVATE_KEY)],
+    },
   },
 };
 
