@@ -3,28 +3,28 @@
     "name": "n0m4",
     "utxoData": {
       "a": [
-        "0x22b54d0bbb25275771f49b53f7f3a8044bb35bef4ad9b548ba30a90def6b8775",
-        "0x264b9efa6c2a0aeae8e4ffd9fa5fa5a74273068295b224dfdd9de2e78a13507e"
+        "0x1c0992d3ab1f610429b98fae92568a637505068a99ea1664ad67321fd4259c24",
+        "0x1843ba4a6a83dde6e8005f0f2d98b5a83c2b87fe561df290cbdfe4a96e58ab68"
       ],
       "b": [
         [
-          "0x267dcad7f0fd34098d5eec69d8882db414b5f0ecaae95ba50a476ecc30ee3cda",
-          "0x0e8e915f2de7e622c78f6ad538370a18a393a5867bec0b8505604a2256daf863"
+          "0x24d873623725b6d0e4a5f25e3ab4d9bebe9854e75e8054a8506f2ed8aa86a639",
+          "0x18517c1a9aebf8fb3e50457efd1019e76b54d6fbd4385fe8eb169c11eada90f0"
         ],
         [
-          "0x1d1f35598607f66ca4ec306b34d28649990d3ec0869bf827f7bdc13483685ba1",
-          "0x16111daecea1d87f6b0939f53d347a0bff6bdde1beca1a2e60ca0a00c36bf266"
+          "0x0b04d02d292dca7752910b574adde87148831e33b50b7bb7734091b0c4e2b670",
+          "0x0b553e6adb9f3b4fe0a76d043a6e83e0a8047fcaa67de2d256eaac7a17092896"
         ]
       ],
       "c": [
-        "0x1b2fcda0da815ed0c208f8991375980d6961652073c8f97c60f92fb201f91440",
-        "0x2f08dfe08527c591e76db16d37d9e1b24ec138c216a5b44972e39a4af99b6650"
+        "0x2dbb9f94ddc68a0181da3de5b8c13e79a81d86fc7a2883614d338d91f2cd0fbe",
+        "0x1299fa0dd0b7d4c9d46b369559e3f8acd7d22038078ba34e83737b3683a40ef5"
       ],
       "publicSignals": {
         "root": "0x094793a616afd53615c1c4d1815a853803758a243c6c7dc863775fee0e9bc9b2",
         "publicInAmt": "2000000000000000000",
         "publicOutAmt": "0",
-        "publicInfoHash": "0x0d3d2fd9581ce214353e6617504b39ee945806c7d3d8d4f8eca74fb5a65fb6ac",
+        "publicInfoHash": "0x23038d61a43bdcd91800dd93823c1fb3f81648bf2d70e8102959647a47e3e0e9",
         "inputNullifiers": [],
         "outputCommitments": [
           "0x1631ed5b9b3ccba1d0c8fce41d7fc236c52fdb162081ce48be2dd9ff57aaf45a",
@@ -37,7 +37,8 @@
     "publicInfo": {
       "maxAllowableFeeRate": "0",
       "recipient": "0xffffffffffffffffffffffffffffffffffffffff",
-      "token": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+      "token": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+      "deadline": "2524579200"
     }
   }
 ]
