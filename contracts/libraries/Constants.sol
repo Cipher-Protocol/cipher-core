@@ -4,30 +4,42 @@ pragma solidity ^0.8.19;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 library Constants {
-    /// @dev The address to represent native token on deployed network (i.e. ETH on Ethereum)
+    /// @notice The address to represent native token on deployed network (i.e. ETH on Ethereum)
     address internal constant DEFAULT_NATIVE_TOKEN_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    /// @dev The native token on deployed network
+    /// @notice The native token on deployed network
     IERC20 internal constant DEFAULT_NATIVE_TOKEN = IERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
-    /// @dev The default tree depth for the incremental tree
+    /// @notice The default tree depth for each token tree
     uint256 internal constant DEFAULT_TREE_DEPTH = 24;
 
-    /// @dev The snark scalar field
+    /// @notice The default leaf zero value = uint256(keccak256(abi.encode("cipher"))) % SNARK_SCALAR_FIELD
+    uint256 internal constant DEFAULT_LEAF_ZERO_VALUE =
+        14693734620209785393966954230592927715867821236176778989295931055453090412689;
+
+    /// @notice The max depth of merkle tree
+    uint256 internal constant MAX_DEPTH = 32;
+
+    /// @notice The snark scalar field
     uint256 internal constant SNARK_SCALAR_FIELD =
         21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
-    /// @dev The fee base for calculating fee amount
+    /// @notice The fee base for calculating fee amount
     uint16 internal constant FEE_BASE = 10000;
 
-    /// @dev The size of valid history roots
+    /// @notice The size of valid history roots
     uint8 internal constant VALID_HISTORY_ROOTS_SIZE = 32;
 
-    /// @dev The number of one bytes in decimal
+    /// @notice The number of one bytes in decimal
     uint256 internal constant NUM_OF_ONE_BYTES = 256;
 
-    /// Z_0 = uint256(keccak256(abi.encode("cipher"))) % Constants.SNARK_SCALAR_FIELD;
-    uint256 internal constant Z_0 = 14693734620209785393966954230592927715867821236176778989295931055453090412689;
+    /// @notice The default zero value for each node in the merkle tree
+    ///      Z_0 = DEFAULT_LEAF_ZERO_VALUE
+    ///      Z_1 = poseidon(Z_0, Z_0) % SNARK_SCALAR_FIELD
+    ///      Z_2 = poseidon(Z_1, Z_1) % SNARK_SCALAR_FIELD
+    ///      ...
+    ///      Z_24 = poseidon(Z_23, Z_23) % SNARK_SCALAR_FIELD
+    uint256 internal constant Z_0 = DEFAULT_LEAF_ZERO_VALUE;
     uint256 internal constant Z_1 = 17332802755933328192408765056487990934239404033451666296890662382731248045851;
     uint256 internal constant Z_2 = 13816207349929625647700150838880158024387312517940091995572778217823342715863;
     uint256 internal constant Z_3 = 15880023301658773447526522844980466981236095317046464125867625207058086698736;

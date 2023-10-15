@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ICipherVerifier} from "./ICipherVerifier.sol";
-import {Proof, PublicInfo, RelayerInfo} from "../utils/DataType.sol";
+import {Proof, PublicInfo, RelayerInfo} from "../DataType.sol";
 
 interface ICipher {
     function initTokenTree(IERC20 token) external;
@@ -20,15 +20,17 @@ interface ICipher {
 
     function updateRelayerMetadataUri(string memory newRelayerMetadataUri) external;
 
-    // function getTreeDepth(IERC20 token) external view returns (uint256);
+    function getTreeDepth(IERC20 token) external view returns (uint256);
 
     function getTreeRoot(IERC20 token) external view returns (uint256);
 
     function getTreeLeafNum(IERC20 token) external view returns (uint256);
 
-    // function getTreeZeroes(IERC20 token, uint256 level) external view returns (uint256);
-
     function getTreeLastSubtrees(IERC20 token, uint256 level) external view returns (uint256[2] memory);
+
+    function getHistoryRootIdx(IERC20 token) external view returns (uint256);
+
+    function getHistoryRoots(IERC20 token) external view returns (uint256[32] memory);
 
     function getRelayerMetadataUri(address relayerAddr) external view returns (string memory);
 

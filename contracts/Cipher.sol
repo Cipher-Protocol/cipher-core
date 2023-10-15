@@ -10,19 +10,15 @@ import {IPoseidonT3} from "./interfaces/IPoseidonT3.sol";
 // libraries
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {IncrementalBinaryTree, IncrementalTreeData} from "@zk-kit/incremental-merkle-tree.sol/IncrementalBinaryTree.sol";
 import {Constants} from "./libraries/Constants.sol";
 import {Errors} from "./libraries/Errors.sol";
 import {Events} from "./libraries/Events.sol";
 import {Helper} from "./libraries/Helper.sol";
 import {TokenLib} from "./libraries/TokenLib.sol";
-import {TreeData, TreeLib} from "./libraries/TreeLib.sol";
-import {Proof, PublicInfo, PublicSignals, RelayerInfo} from "./utils/DataType.sol";
-
-import "hardhat/console.sol";
+import {TreeLib} from "./libraries/TreeLib.sol";
+import {TreeData, Proof, PublicInfo, PublicSignals, RelayerInfo} from "./DataType.sol";
 
 contract Cipher is ICipher {
-    using IncrementalBinaryTree for IncrementalTreeData;
     using Strings for string;
     using Math for uint256;
     using TreeLib for TreeData;
@@ -97,10 +93,10 @@ contract Cipher is ICipher {
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         View function
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
-    // /// @inheritdoc ICipher
-    // function getTreeDepth(IERC20 token) external view returns (uint256) {
-    //     return treeData[token].depth;
-    // }
+    /// @inheritdoc ICipher
+    function getTreeDepth(IERC20 token) external view returns (uint256) {
+        return treeData[token].depth;
+    }
 
     /// @inheritdoc ICipher
     function getTreeRoot(IERC20 token) external view returns (uint256) {
@@ -112,14 +108,19 @@ contract Cipher is ICipher {
         return treeData[token].numberOfLeaves;
     }
 
-    // /// @inheritdoc ICipher
-    // function getTreeZeroes(IERC20 token, uint256 level) external view returns (uint256) {
-    //     return treeData[token].incrementalTreeData.zeroes[level];
-    // }
-
     /// @inheritdoc ICipher
     function getTreeLastSubtrees(IERC20 token, uint256 level) external view returns (uint256[2] memory) {
         return treeData[token].lastSubtrees[level];
+    }
+
+    /// @inheritdoc ICipher
+    function getHistoryRootIdx(IERC20 token) external view returns (uint256) {
+        return treeData[token].historyRootsIdx;
+    }
+
+    /// @inheritdoc ICipher
+    function getHistoryRoots(IERC20 token) external view returns (uint256[32] memory) {
+        return treeData[token].historyRoots;
     }
 
     /// @inheritdoc ICipher
@@ -147,12 +148,10 @@ contract Cipher is ICipher {
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
     function _initTokenTree(IERC20 token) internal {
         TreeData storage tree = treeData[token];
-        if (tree.root != 0) revert Errors.TokenTreeAlreadyInitialized(token);
+        if (tree.depth != 0) revert Errors.TokenTreeAlreadyInitialized(token);
 
-        // // NOTE: reference railgun's implementation
-        // uint256 zeroValue = uint256(keccak256(abi.encode(token))) % Constants.SNARK_SCALAR_FIELD;
-        tree.init();
-        emit Events.NewTokenTree(token);
+        tree.init(Constants.DEFAULT_TREE_DEPTH);
+        emit Events.NewTokenTree(token, Constants.DEFAULT_TREE_DEPTH, Constants.DEFAULT_LEAF_ZERO_VALUE, tree.root);
     }
 
     function _cipherTransact(
@@ -170,7 +169,7 @@ contract Cipher is ICipher {
 
         /* ======== check with token tree state ======== */
         TreeData storage tree = treeData[token];
-        if (tree.root == 0) revert Errors.TokenTreeNotExists(token);
+        if (tree.depth == 0) revert Errors.TokenTreeNotExists(token);
         if (!tree.isValidRoot(publicSignals.root)) revert Errors.InvalidRoot(publicSignals.root);
 
         /* ======== transfer token in ======== */
@@ -194,7 +193,6 @@ contract Cipher is ICipher {
             tree.updateHistoryRoot(publicSignals.root);
             tree.insertCommitments(token, poseidonT3, publicSignals.outputCommitments, outputCommitmentLen);
             // TODO: emit a event for whole info
-            emit Events.NewRoot(token, tree.root);
         }
     }
 

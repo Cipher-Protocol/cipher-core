@@ -57,14 +57,20 @@ describe("deploy", function () {
       const initTokenTreeTx = await cipher.initTokenTree(erc20.address);
       await initTokenTreeTx.wait();
 
-      await expect(initTokenTreeTx)
-        .to.emit(cipher, "NewTokenTree")
-        .withArgs(erc20.address);
-
       const calcTreeRoot = calcInitRoot(
         DEFAULT_ZERO_VALUE,
         DEFAULT_TREE_HEIGHT
       );
+
+      await expect(initTokenTreeTx)
+        .to.emit(cipher, "NewTokenTree")
+        .withArgs(
+          erc20.address,
+          DEFAULT_TREE_HEIGHT,
+          DEFAULT_ZERO_VALUE,
+          calcTreeRoot
+        );
+
       expect(await cipher.getTreeRoot(erc20.address)).to.equal(calcTreeRoot);
       expect(await cipher.getTreeLeafNum(erc20.address)).to.equal(0);
     });

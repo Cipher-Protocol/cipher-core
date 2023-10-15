@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {Proof} from "../utils/DataType.sol";
+import {Proof} from "../DataType.sol";
 
 library Errors {
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
@@ -43,4 +43,6 @@ library Errors {
         TreeLib.sol
     ***** ** *** ***** ***** ***** ***** ***** ***** ***** *****  */
     error InvalidTreeDepth(uint256 treeDepth);
+    error InvalidFieldValue(uint256 value);
+    error TreeIsFull(uint256 treeDepth, uint256 leafIndex);
 }
