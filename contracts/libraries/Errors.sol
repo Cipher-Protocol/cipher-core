@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.19;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Proof} from "../utils/DataType.sol";
@@ -38,4 +38,9 @@ library Errors {
     error InvalidMsgValue(uint256 msgValue);
     error TransferNativeTokenFailed(address payable receiver, uint256 amount, bytes data);
     error AmountInconsistent(uint256 amount, uint256 transferredAmt);
+
+    /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+        TreeLib.sol
+    ***** ** *** ***** ***** ***** ***** ***** ***** ***** *****  */
+    error InvalidTreeDepth(uint256 treeDepth);
 }

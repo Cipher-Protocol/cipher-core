@@ -2,53 +2,49 @@ import { ethers } from "hardhat";
 import {
   ERC20,
   ERC20Mock__factory,
-  IncrementalBinaryTree,
   Cipher,
   Cipher__factory,
   CipherVerifier__factory,
   CipherVerifier,
 } from "../typechain-types";
-import { DEFAULT_TREE_HEIGHT, SNARK_FIELD_SIZE } from "../config";
-import { keccak256 } from "ethers/lib/utils";
-import { BigNumber, utils } from "ethers";
-import { calcInitRoot, calcZeroValue } from "../utils/calcZeroVal";
+import { DEFAULT_TREE_HEIGHT, DEFAULT_ZERO_VALUE } from "../config";
+import { calcInitRoot } from "../utils/calcZeroVal";
 import { expect } from "chai";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+const circomlibjs = require("circomlibjs");
+const { createCode, generateABI } = circomlibjs.poseidonContract;
 
 describe("deploy", function () {
   let cipherFactory: Cipher__factory;
   let cipher: Cipher;
-  let incrementalBinaryTree: IncrementalBinaryTree;
   let cipherVerifierFactory: CipherVerifier__factory;
   let cipherVerifier: CipherVerifier;
   let Erc20Factory: ERC20Mock__factory;
   let erc20: ERC20;
+  let deployer: SignerWithAddress;
+
   beforeEach(async function () {
+    [deployer] = await ethers.getSigners();
     cipherVerifierFactory = (await ethers.getContractFactory(
       "CipherVerifier"
     )) as CipherVerifier__factory;
     cipherVerifier = await cipherVerifierFactory.deploy();
 
-    const PoseidonT3 = await ethers.getContractFactory("PoseidonT3");
-    const poseidonT3 = await PoseidonT3.deploy();
+    const poseidonT3Factory = new ethers.ContractFactory(
+      generateABI(2),
+      createCode(2),
+      deployer
+    );
+    const poseidonT3 = await poseidonT3Factory.deploy();
     await poseidonT3.deployed();
 
-    const IncrementalBinaryTreeFactory = await ethers.getContractFactory(
-      "IncrementalBinaryTree",
-      {
-        libraries: {
-          PoseidonT3: poseidonT3.address,
-        },
-      }
-    );
-    incrementalBinaryTree =
-      (await IncrementalBinaryTreeFactory.deploy()) as IncrementalBinaryTree;
-    await incrementalBinaryTree.deployed();
-    cipherFactory = (await ethers.getContractFactory("Cipher", {
-      libraries: {
-        IncrementalBinaryTree: incrementalBinaryTree.address,
-      },
-    })) as Cipher__factory;
-    cipher = (await cipherFactory.deploy(cipherVerifier.address)) as Cipher;
+    cipherFactory = (await ethers.getContractFactory(
+      "Cipher"
+    )) as Cipher__factory;
+    cipher = (await cipherFactory.deploy(
+      cipherVerifier.address,
+      poseidonT3.address
+    )) as Cipher;
     await cipher.deployed();
     Erc20Factory = (await ethers.getContractFactory(
       "ERC20Mock"
@@ -61,26 +57,12 @@ describe("deploy", function () {
       const initTokenTreeTx = await cipher.initTokenTree(erc20.address);
       await initTokenTreeTx.wait();
 
-      const zeroVal = BigNumber.from(
-        keccak256(utils.defaultAbiCoder.encode(["address"], [erc20.address]))
-      ).mod(SNARK_FIELD_SIZE);
-
       await expect(initTokenTreeTx)
         .to.emit(cipher, "NewTokenTree")
-        .withArgs(erc20.address, DEFAULT_TREE_HEIGHT, zeroVal.toString());
+        .withArgs(erc20.address);
 
-      expect(await cipher.getTreeDepth(erc20.address)).to.equal(
-        DEFAULT_TREE_HEIGHT
-      );
-
-      const zeroVals = calcZeroValue(zeroVal.toString(), DEFAULT_TREE_HEIGHT);
-      for (let i = 0; i < zeroVals.length; i++) {
-        expect(await cipher.getTreeZeroes(erc20.address, i)).to.equal(
-          zeroVals[i]
-        );
-      }
       const calcTreeRoot = calcInitRoot(
-        zeroVal.toString(),
+        DEFAULT_ZERO_VALUE,
         DEFAULT_TREE_HEIGHT
       );
       expect(await cipher.getTreeRoot(erc20.address)).to.equal(calcTreeRoot);

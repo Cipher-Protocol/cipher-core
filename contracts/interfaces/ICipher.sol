@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.19;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ICipherVerifier} from "./ICipherVerifier.sol";
@@ -20,13 +20,13 @@ interface ICipher {
 
     function updateRelayerMetadataUri(string memory newRelayerMetadataUri) external;
 
-    function getTreeDepth(IERC20 token) external view returns (uint256);
+    // function getTreeDepth(IERC20 token) external view returns (uint256);
 
     function getTreeRoot(IERC20 token) external view returns (uint256);
 
     function getTreeLeafNum(IERC20 token) external view returns (uint256);
 
-    function getTreeZeroes(IERC20 token, uint256 level) external view returns (uint256);
+    // function getTreeZeroes(IERC20 token, uint256 level) external view returns (uint256);
 
     function getTreeLastSubtrees(IERC20 token, uint256 level) external view returns (uint256[2] memory);
 
