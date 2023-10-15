@@ -3,7 +3,7 @@ evm_version = "paris"
 extra_output = [
   "storageLayout",
 ]
-fs_permissions = [{access = "read", path = "./out"}]
+fs_permissions = [{access = "read", path = "./out"}, {access = "read", path = "./tests"}]
 libraries = [
   "./node_modules/poseidon-solidity/PoseidonT3.sol:PoseidonT3:0x0255B1FD803ffC4cD6F5b46ACb02C1fD917Db1c4",
   "./node_modules/@zk-kit/incremental-merkle-tree.sol:IncrementalBinaryTree:0x45917a20Ba9B8aA221653aA63C65059257794b19",
