@@ -35,10 +35,10 @@ library Constants {
 
     /// @notice The default zero value for each node in the merkle tree
     ///      Z_0 = DEFAULT_LEAF_ZERO_VALUE
-    ///      Z_1 = poseidon(Z_0, Z_0) % SNARK_SCALAR_FIELD
-    ///      Z_2 = poseidon(Z_1, Z_1) % SNARK_SCALAR_FIELD
+    ///      Z_1 = poseidon(Z_0, Z_0)
+    ///      Z_2 = poseidon(Z_1, Z_1)
     ///      ...
-    ///      Z_24 = poseidon(Z_23, Z_23) % SNARK_SCALAR_FIELD
+    ///      Z_24 = poseidon(Z_23, Z_23)
     uint256 internal constant Z_0 = DEFAULT_LEAF_ZERO_VALUE;
     uint256 internal constant Z_1 = 17332802755933328192408765056487990934239404033451666296890662382731248045851;
     uint256 internal constant Z_2 = 13816207349929625647700150838880158024387312517940091995572778217823342715863;

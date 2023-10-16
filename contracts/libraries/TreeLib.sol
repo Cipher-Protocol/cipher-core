@@ -157,10 +157,10 @@ library TreeLib {
 
     /// @notice Default zero value for each node in the merkle tree
     ///         Z_0 = DEFAULT_LEAF_ZERO_VALUE
-    ///         Z_1 = poseidon(Z_0, Z_0) % SNARK_SCALAR_FIELD
-    ///         Z_2 = poseidon(Z_1, Z_1) % SNARK_SCALAR_FIELD
+    ///         Z_1 = poseidon(Z_0, Z_0)
+    ///         Z_2 = poseidon(Z_1, Z_1)
     ///         ...
-    ///         Z_24 = poseidon(Z_23, Z_23) % SNARK_SCALAR_FIELD
+    ///         Z_24 = poseidon(Z_23, Z_23)
     /// @param idx The index of the node in the merkle tree
     /// @return zeroValue The default zero value of the node
     function defaultZeroVal(uint256 idx) internal pure returns (uint256) {
