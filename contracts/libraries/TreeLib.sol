@@ -82,6 +82,12 @@ library TreeLib {
     }
 
     /// @notice Insert a commitment to the incremental merkle tree
+    /// @dev Insert a commitment to the incremental merkle tree and update the tree root
+    /// @param tree The tree data
+    /// @param poseidonT3 The PoseidonT3 contract
+    /// @param leaf The leaf value
+    /// @param leafIndex The index of the commitment
+    /// @return root The new root
     function insert(
         TreeData storage tree,
         IPoseidonT3 poseidonT3,

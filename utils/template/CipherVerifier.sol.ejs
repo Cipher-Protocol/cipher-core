@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 // solhint-disable const-name-snakecase
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.19;
 
 import {CipherVKeyConst} from "./CipherVKeyConst.sol";
 import {Proof} from "./utils/DataType.sol";

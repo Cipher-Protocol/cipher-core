@@ -31,6 +31,7 @@ struct TreeData {
 /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         Functions input data struct
 ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
+
 /// @notice The SNARK proof data struct
 /// @param a The proof data (a)
 /// @param b The proof data (b)
