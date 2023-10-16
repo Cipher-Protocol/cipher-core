@@ -1,4 +1,4 @@
-import { DEFAULT_TREE_HEIGHT } from "@/config";
+import { DEFAULT_TREE_HEIGHT, DEFAULT_ZERO_VALUE } from "@/config";
 import {
   multipleTxsCases,
   tripleTxsCases,
@@ -9,8 +9,7 @@ import {
   withdrawTxCases,
 } from "@test/testcase/createTx.testcase";
 import { exportTestData } from "@test/helper/ts.helper";
-import { getDefaultLeaf } from "@utils/lib/utxo.helper";
-import { ethTokenAddress, initTree } from "@utils/lib/cipher/CipherCore";
+import { initTree } from "@utils/lib/cipher/CipherCore";
 
 import { resolve } from "path";
 import { rmSync, mkdirSync, writeFileSync, existsSync } from "fs";
@@ -18,7 +17,7 @@ import { asyncPoseidonHash } from "@/utils/lib/poseidonHash";
 
 const SPEC = {
   treeHeight: DEFAULT_TREE_HEIGHT,
-  defaultLeafHash: getDefaultLeaf(ethTokenAddress).toString(),
+  defaultLeafHash: DEFAULT_ZERO_VALUE,
 };
 
 const outputBaseDir = resolve(__dirname, "../tests/testData");

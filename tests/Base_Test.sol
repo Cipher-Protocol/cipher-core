@@ -2,14 +2,14 @@
 
 pragma solidity ^0.8.20;
 
-import {Test} from "forge-std/Test.sol";
-import {PoseidonT3} from "poseidon-solidity/PoseidonT3.sol";
-
+import "forge-std/Test.sol";
 import {CipherVerifier} from "../contracts/CipherVerifier.sol";
 import {Cipher} from "../contracts/Cipher.sol";
 import {ERC20Mock} from "../contracts/mock/ERC20Mock.sol";
 
 abstract contract BaseTest is Test {
+    using stdJson for string;
+
     address internal poseidonT3;
 
     address internal merkleTree;
@@ -21,19 +21,23 @@ abstract contract BaseTest is Test {
     ERC20Mock internal erc20;
 
     function setUp() external virtual {
-        // deploy poseidonT3 library
-        poseidonT3 = address(uint160(uint256(keccak256("poseidon_t3"))));
-        deployCodeTo("PoseidonT3.sol:PoseidonT3", poseidonT3);
+        string memory root = vm.projectRoot();
+        string memory path = string.concat(root, "/tests/utils/PoseidonT3.json");
+        string memory json = vm.readFile(path);
 
-        // deploy IncrementalBinaryTree library
-        merkleTree = address(uint160(uint256(keccak256("merkle_tree"))));
-        deployCodeTo("IncrementalBinaryTree.sol:IncrementalBinaryTree", merkleTree);
+        // deploy poseidonT3 library
+        address addr;
+        bytes memory creation = json.readBytes(".creationCode");
+        assembly {
+            addr := create(0, add(0x20, creation), mload(creation))
+        }
+        poseidonT3 = addr;
 
         // deploy verifier
         verifier = new CipherVerifier();
 
         // deploy cipher
-        main = new Cipher(address(verifier));
+        main = new Cipher(address(verifier), address(poseidonT3));
 
         // deploy erc20
         erc20 = new ERC20Mock("Test", "T", 18);

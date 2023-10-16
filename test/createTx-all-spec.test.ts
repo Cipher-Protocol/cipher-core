@@ -1,38 +1,39 @@
 import hre from "hardhat";
 import "@nomiclabs/hardhat-ethers";
 import {
-  IncrementalBinaryTree,
   Cipher,
   Cipher__factory,
   CipherVerifier__factory,
   CipherVerifier,
 } from "@typechain-types";
-import { DEFAULT_TREE_HEIGHT } from "@/config";
+import { DEFAULT_TREE_HEIGHT, DEFAULT_ZERO_VALUE } from "../config";
 
-import { ethTokenAddress, initTree } from "../utils/lib/cipher/CipherCore";
+import { initTree } from "../utils/lib/cipher/CipherCore";
 import { asyncPoseidonHash } from "../utils/lib/poseidonHash";
-import { getDefaultLeaf } from "../utils/lib/utxo.helper";
 import { IncrementalQuinTree } from "../utils/lib/IncrementalQuinTree";
-import { CreateTxTestCase, generateTest } from "./helper/ts.helper";
+import { generateTest } from "./helper/ts.helper";
 import {
   doubleTxsCases,
   multipleTxsCases,
   tripleTxsCases,
 } from "@/test/testcase/createTx-all-spec.testcase";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+const circomlibjs = require("circomlibjs");
+const { createCode, generateABI } = circomlibjs.poseidonContract;
 
 const ethers = hre.ethers;
 const SPEC = {
   treeHeight: DEFAULT_TREE_HEIGHT,
-  defaultLeafHash: getDefaultLeaf(ethTokenAddress).toString(),
+  defaultLeafHash: DEFAULT_ZERO_VALUE,
 };
 
 describe("deploy", function () {
   let cipherFactory: Cipher__factory;
   let cipher: Cipher;
-  let incrementalBinaryTree: IncrementalBinaryTree;
   let cipherVerifierFactory: CipherVerifier__factory;
   let cipherVerifier: CipherVerifier;
   let tree!: IncrementalQuinTree;
+  let deployer: SignerWithAddress;
 
   const context: {
     cipher: Cipher;
@@ -47,32 +48,27 @@ describe("deploy", function () {
   });
 
   beforeEach(async function () {
+    [deployer] = await ethers.getSigners();
     cipherVerifierFactory = (await ethers.getContractFactory(
       "CipherVerifier"
     )) as CipherVerifier__factory;
     cipherVerifier = await cipherVerifierFactory.deploy();
 
-    const PoseidonT3 = await ethers.getContractFactory("PoseidonT3");
-    const poseidonT3 = await PoseidonT3.deploy();
+    const poseidonT3Factory = new ethers.ContractFactory(
+      generateABI(2),
+      createCode(2),
+      deployer
+    );
+    const poseidonT3 = await poseidonT3Factory.deploy();
     await poseidonT3.deployed();
 
-    const IncrementalBinaryTreeFactory = await ethers.getContractFactory(
-      "IncrementalBinaryTree",
-      {
-        libraries: {
-          PoseidonT3: poseidonT3.address,
-        },
-      }
-    );
-    incrementalBinaryTree =
-      (await IncrementalBinaryTreeFactory.deploy()) as IncrementalBinaryTree;
-    await incrementalBinaryTree.deployed();
-    cipherFactory = (await ethers.getContractFactory("Cipher", {
-      libraries: {
-        IncrementalBinaryTree: incrementalBinaryTree.address,
-      },
-    })) as Cipher__factory;
-    cipher = (await cipherFactory.deploy(cipherVerifier.address)) as Cipher;
+    cipherFactory = (await ethers.getContractFactory(
+      "Cipher"
+    )) as Cipher__factory;
+    cipher = (await cipherFactory.deploy(
+      cipherVerifier.address,
+      poseidonT3.address
+    )) as Cipher;
     await cipher.deployed();
 
     /** init tree */

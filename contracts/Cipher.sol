@@ -1,34 +1,34 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.19;
 
 // intefaces
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ICipher} from "./interfaces/ICipher.sol";
 import {ICipherVerifier} from "./interfaces/ICipherVerifier.sol";
+import {IPoseidonT3} from "./interfaces/IPoseidonT3.sol";
 
 // libraries
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {IncrementalBinaryTree, IncrementalTreeData} from "@zk-kit/incremental-merkle-tree.sol/IncrementalBinaryTree.sol";
 import {Constants} from "./libraries/Constants.sol";
 import {Errors} from "./libraries/Errors.sol";
 import {Events} from "./libraries/Events.sol";
 import {Helper} from "./libraries/Helper.sol";
 import {TokenLib} from "./libraries/TokenLib.sol";
-import {TreeData, TreeLib} from "./libraries/TreeLib.sol";
-import {Proof, PublicInfo, PublicSignals, RelayerInfo} from "./utils/DataType.sol";
+import {TreeLib} from "./libraries/TreeLib.sol";
+import {TreeData, Proof, PublicInfo, PublicSignals, RelayerInfo} from "./DataType.sol";
 
 contract Cipher is ICipher {
-    using IncrementalBinaryTree for IncrementalTreeData;
     using Strings for string;
     using Math for uint256;
     using TreeLib for TreeData;
     using TokenLib for IERC20;
 
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
-        Constants & Immutable
+        Immutable
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
     ICipherVerifier internal immutable cipherVerifier;
+    IPoseidonT3 internal immutable poseidonT3;
 
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         Storage
@@ -39,8 +39,9 @@ contract Cipher is ICipher {
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
         Constructor
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
-    constructor(address verifierAddr) {
+    constructor(address verifierAddr, address poseidonT3Addr) {
         cipherVerifier = ICipherVerifier(verifierAddr);
+        poseidonT3 = IPoseidonT3(poseidonT3Addr);
         _initTokenTree(Constants.DEFAULT_NATIVE_TOKEN);
     }
 
@@ -94,27 +95,32 @@ contract Cipher is ICipher {
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
     /// @inheritdoc ICipher
     function getTreeDepth(IERC20 token) external view returns (uint256) {
-        return treeData[token].incrementalTreeData.depth;
+        return treeData[token].depth;
     }
 
     /// @inheritdoc ICipher
     function getTreeRoot(IERC20 token) external view returns (uint256) {
-        return treeData[token].incrementalTreeData.root;
+        return treeData[token].root;
     }
 
     /// @inheritdoc ICipher
     function getTreeLeafNum(IERC20 token) external view returns (uint256) {
-        return treeData[token].incrementalTreeData.numberOfLeaves;
-    }
-
-    /// @inheritdoc ICipher
-    function getTreeZeroes(IERC20 token, uint256 level) external view returns (uint256) {
-        return treeData[token].incrementalTreeData.zeroes[level];
+        return treeData[token].numberOfLeaves;
     }
 
     /// @inheritdoc ICipher
     function getTreeLastSubtrees(IERC20 token, uint256 level) external view returns (uint256[2] memory) {
-        return treeData[token].incrementalTreeData.lastSubtrees[level];
+        return treeData[token].lastSubtrees[level];
+    }
+
+    /// @inheritdoc ICipher
+    function getHistoryRootIdx(IERC20 token) external view returns (uint256) {
+        return treeData[token].historyRootsIdx;
+    }
+
+    /// @inheritdoc ICipher
+    function getHistoryRoots(IERC20 token) external view returns (uint256[32] memory) {
+        return treeData[token].historyRoots;
     }
 
     /// @inheritdoc ICipher
@@ -142,12 +148,10 @@ contract Cipher is ICipher {
     ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
     function _initTokenTree(IERC20 token) internal {
         TreeData storage tree = treeData[token];
-        if (tree.incrementalTreeData.depth != 0) revert Errors.TokenTreeAlreadyInitialized(token);
+        if (tree.depth != 0) revert Errors.TokenTreeAlreadyInitialized(token);
 
-        // NOTE: reference railgun's implementation
-        uint256 zeroValue = uint256(keccak256(abi.encode(token))) % Constants.SNARK_SCALAR_FIELD;
-        tree.incrementalTreeData.init(Constants.DEFAULT_TREE_DEPTH, zeroValue);
-        emit Events.NewTokenTree(token, Constants.DEFAULT_TREE_DEPTH, zeroValue);
+        tree.init(Constants.DEFAULT_TREE_DEPTH);
+        emit Events.NewTokenTree(token, Constants.DEFAULT_TREE_DEPTH, Constants.DEFAULT_LEAF_ZERO_VALUE, tree.root);
     }
 
     function _cipherTransact(
@@ -165,7 +169,7 @@ contract Cipher is ICipher {
 
         /* ======== check with token tree state ======== */
         TreeData storage tree = treeData[token];
-        if (tree.incrementalTreeData.depth == 0) revert Errors.TokenTreeNotExists(token);
+        if (tree.depth == 0) revert Errors.TokenTreeNotExists(token);
         if (!tree.isValidRoot(publicSignals.root)) revert Errors.InvalidRoot(publicSignals.root);
 
         /* ======== transfer token in ======== */
@@ -187,9 +191,8 @@ contract Cipher is ICipher {
         if (outputCommitmentLen > 0) {
             // update original root to history roots before insert new commitment
             tree.updateHistoryRoot(publicSignals.root);
-            tree.insertCommitments(token, publicSignals.outputCommitments, outputCommitmentLen);
+            tree.insertCommitments(token, poseidonT3, publicSignals.outputCommitments, outputCommitmentLen);
             // TODO: emit a event for whole info
-            emit Events.NewRoot(token, tree.incrementalTreeData.root);
         }
     }
 

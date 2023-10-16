@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.19;
 
 import {Constants} from "./Constants.sol";
 import {Errors} from "./Errors.sol";
-import {PublicInfo} from "../utils/DataType.sol";
+import {PublicInfo} from "../DataType.sol";
 
 library Helper {
     /// @notice Calculate the utxo type

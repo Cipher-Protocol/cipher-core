@@ -5,7 +5,7 @@ import {BaseTest} from "../Base_Test.sol";
 import {TestDataFile} from "../utils/loadTestdata.sol";
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {Proof, PublicInfo, PublicSignals} from "../../contracts/utils/DataType.sol";
+import {Proof, PublicInfo, PublicSignals} from "../../contracts/DataType.sol";
 
 contract IntegrationCipherDeposit is BaseTest, TestDataFile {
     function test_0_n0m1() external {
