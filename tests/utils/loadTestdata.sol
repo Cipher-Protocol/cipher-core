@@ -5,7 +5,7 @@ pragma solidity ^0.8.20;
 import {console} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Test, stdJson} from "forge-std/Test.sol";
-import {Proof, PublicInfo, PublicSignals} from "../../contracts/utils/DataType.sol";
+import {Proof, PublicInfo, PublicSignals} from "../../contracts/DataType.sol";
 
 abstract contract TestDataFile is Test {
     using stdJson for string;

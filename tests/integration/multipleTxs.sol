@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import {BaseTest} from "../Base_Test.sol";
 import {TestDataFile} from "../utils/loadTestdata.sol";
 
-import {Proof, PublicInfo, PublicSignals} from "../../contracts/utils/DataType.sol";
+import {Proof, PublicInfo, PublicSignals} from "../../contracts/DataType.sol";
 
 contract IntegrationCipherMultipleTxs is BaseTest, TestDataFile {
     function test_0_n0m1_n1m4_n4m1_n1m2_n2m0() external {
