@@ -3,8 +3,15 @@
 pragma solidity ^0.8.19;
 
 import {CipherVKeyConst} from "./CipherVKeyConst.sol";
-import {Proof} from "./utils/DataType.sol";
+import {Proof} from "./DataType.sol";
 
+/**
+ * @title CipherVerifier contract
+ * @dev The snark verifier contract for verifying the snark proof (groth16)
+ * @dev The custom verifier to support dynamic public signals array for different utxo types (nInputs, nOutputs)
+ * @dev The implementation refers to iden3/snarkjs
+        https://github.com/iden3/snarkjs/blob/master/templates/verifier_groth16.sol.ejs
+ */
 contract CipherVerifier is CipherVKeyConst {
     // Memory data
     uint16 internal constant pVk = 0;
@@ -133,7 +140,7 @@ contract CipherVerifier is CipherVKeyConst {
              * | ------------------ | ------------- | ----------------- | ----------------------------------------------------
              */
 
-             let pMem := mload(0x40)
+            let pMem := mload(0x40)
             mstore(0x40, add(pMem, pLastMem))
 
             // Validate that all evaluations ∈ F

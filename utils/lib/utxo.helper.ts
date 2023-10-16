@@ -5,13 +5,6 @@ import { IncrementalQuinTree } from "./IncrementalQuinTree";
 import { assert } from "./helper";
 export const FIELD_SIZE_BIGINT = BigInt(SNARK_FIELD_SIZE);
 
-export function getDefaultLeaf(tokenAddress: string) {
-  const hash = BigInt(
-    utils.keccak256(utils.defaultAbiCoder.encode(["address"], [tokenAddress]))
-  );
-  return hash % FIELD_SIZE_BIGINT;
-}
-
 export function getUtxoType(nIn: number, mOut: number): string {
   if (isNaN(nIn) || isNaN(mOut)) {
     throw new Error(`Invalid nNum=${nIn}, mNum=${mOut}`);
