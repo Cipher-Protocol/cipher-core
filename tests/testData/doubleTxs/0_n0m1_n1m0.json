@@ -3,25 +3,25 @@
     "name": "n0m1",
     "utxoData": {
       "a": [
-        "0x2e3da3fdc2114f91fe8b9bc058b12a794f1a337e69094bdd9216ae3ea8968312",
-        "0x2855919869d8c7fac137b59597ea091fce17b9a15fccdc55e501236ccc989dbf"
+        "0x2ae78050cb0afaa64ab5b00ffe45b05828f119523794c861855626e30faecb78",
+        "0x21045a6637f5d95059b185cbd5bc4a963202e8d82914d148d34258425d543df0"
       ],
       "b": [
         [
-          "0x15f99eb1a33bf1236476b9fe88860619a8cbae3da469609b5fff7366ca8aa669",
-          "0x11d9fb9d21869b218455fd3f4470692e584f9f1db29df8c0c1a3042091c5bb1e"
+          "0x17822c8d2ff8d79e779605991250f5c3d2bff7810f36bd1436dd98d977295e8a",
+          "0x22c6b385a7eddecd0debd7a0ff8c126b2cf652b2fd5ea175ef04b76125f675a8"
         ],
         [
-          "0x0df3af41e10c7d0d622852cf1dee19e9fc5854fba571115acd5445a312946234",
-          "0x07aa85ea1ead85db28c9204c62fbda06a99b39c798099521091c496405732a82"
+          "0x2a4af8eda4a667f3a09dd92214214131c6aa291c7ee6449eddd5f21242d57f77",
+          "0x1a8f098acc2275e4e125f811ca4b2877a02216674c87b04bba3e9f5396ce27c1"
         ]
       ],
       "c": [
-        "0x0a13dd9cf2d1f9c2ff1fb01275e8d0ac7fd1d3a1b96c0f8145bc579bad94b048",
-        "0x08497c8ef6cbdc1689d60ee1cb114536d34c4deb65cf88dc0762b2bb94f3efe0"
+        "0x189459367f6d33fcdefba936618ed44fc4172e3e0d1f86a69f82278d1e8ec054",
+        "0x1ead853c3eb59915edc10e97456e8d4fc358c4fb8a299a324fa40a9b28a24325"
       ],
       "publicSignals": {
-        "root": "0x094793a616afd53615c1c4d1815a853803758a243c6c7dc863775fee0e9bc9b2",
+        "root": "0x1835c52bee935f545b17f880f8811ba62f1d157671fb8e5ffa2de24b7e2d2145",
         "publicInAmt": "1000000000000000000",
         "publicOutAmt": "0",
         "publicInfoHash": "0x23038d61a43bdcd91800dd93823c1fb3f81648bf2d70e8102959647a47e3e0e9",
@@ -42,25 +42,25 @@
     "name": "n1m0",
     "utxoData": {
       "a": [
-        "0x23c39b721b0e83f1aaec72695d85e4763fdadd0d855eae134838cb8ca73f19dc",
-        "0x2b823afc53a400c507786992e624cefb4191da24d4f524f8c3cb01ddcf88f76d"
+        "0x2fec82ef57e76750baf8d3508a6b676377c19dcf098f3c30c41ce2bfb7a18e9d",
+        "0x2b0efa53823c221bc76a8bd46b0e1fcac942019ee92bc4ba80493fc057267136"
       ],
       "b": [
         [
-          "0x1ee73e60c58b670fc526bcd8e80259d4dc4eacfc5be6c0bf7eb015ba7c3e6787",
-          "0x188d9ae43237c8672d9e292a3ab15d22008117bf8188311f0eb939825206fe1b"
+          "0x25497f4a824006f5c981870f6477858c587e44ed3b666f3bcb1299ef64cd9a4e",
+          "0x2aa54ea708458f5567df8bc706bb9a3e971ada02ff6a16e5ecc2114d646399df"
         ],
         [
-          "0x24f4d810416bfb24e3b59ab73f198ab10ed1b2d5023ba41c0ab7219dcf79c1e9",
-          "0x06e84d476a660b9ba9c816db46f7f64bc58c17847e991b910992b3edbe92342e"
+          "0x1bf31cb729d473356737d3ed971f1091912a75c59bb4b680bd78b69b7b5777a7",
+          "0x1320f9c8ef0c60ad0b1291904e69ffb745fb17a60aa0941ec801bb5146fd2952"
         ]
       ],
       "c": [
-        "0x08d302a489ca9b0ec209e6a47b9c81dc509f3f45a8f3095a742cc436440da0be",
-        "0x2875de645eb1151a34c4129f5b46ba68005ec3da6840394654ef8b2cfed21a65"
+        "0x1572c1f83bf296f7122890a6619bdaa72236e33729cfbd02d79d916098124eef",
+        "0x2f7e18df4cae9264666a69d06a5aad34e61b09c2113bb63ec34b5bfe762496d1"
       ],
       "publicSignals": {
-        "root": "0x148b6e93ee36bd64a8ba332e55949f2e3d8da4f9fe902292da438bb8333879ad",
+        "root": "0x06a99748681af1e70af5b23ba8e9160ba95bc8fbc6b9ad7238c525e476b51d72",
         "publicInAmt": "0",
         "publicOutAmt": "1000000000000000000",
         "publicInfoHash": "0x23038d61a43bdcd91800dd93823c1fb3f81648bf2d70e8102959647a47e3e0e9",

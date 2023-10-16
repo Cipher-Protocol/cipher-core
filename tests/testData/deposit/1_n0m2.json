@@ -3,25 +3,25 @@
     "name": "n0m2",
     "utxoData": {
       "a": [
-        "0x0efb96c22442fbd22316434aa8534cdc0b8e20fdef65130626f99c345ffb4c36",
-        "0x29ed1c420c98d0021762bbad7d6b4e38910012a2c4cac845bcefb1980c92e00a"
+        "0x05b80e610a7710b5dee1cbcb8bdc7c751eba2b6907a8ea06dd4c9641ec89aa7c",
+        "0x2eca0f512f650c60008b2da34c0ce1d5e170b158ebda3fe12235fd51dd413a6a"
       ],
       "b": [
         [
-          "0x1c09f44f99672db8feb75c728de7fa278c2b3410a70cbc2fe7d572bda882aaec",
-          "0x1c181bfe5dc86d64ff966c06d6395c1d14d86a87e3b0dbb948ab54da9c68a304"
+          "0x242cc5aeb10afeeb1380d671b1b7b9d94023ea4a6c88f93bee5db56a101ecc62",
+          "0x1281f0085c9a2174c6fc3a7b2d90852094889dff558402a31add16c3e393d8aa"
         ],
         [
-          "0x2013ecd4b04035c63913b50b4c112bd69302463bb8dcff30525a0c768c524e06",
-          "0x2ad4fba126104e4c7a5821c7db94104eb861f80264141a8cf857afe30eb51c65"
+          "0x0968b63f4fa67f9450bea7a13277839e52aa33d77f9cf5da4919ecc8e7f4c48f",
+          "0x1e331891eb011d2ad73e0e1404fa297fbe48f45a1646c7ba6cf182fb1d8ecaf5"
         ]
       ],
       "c": [
-        "0x27a17b3c431c269317739f7a60ceb0f056b3dd501c59723ee18ae55894922690",
-        "0x2ec86fc81241ce0f6467d82fc98f3f5dbaf799ab1a8024466581ba04dbefa974"
+        "0x1149dd5b85dda119d7e135ce169ae2375ba4a92603f5c9cd3c59d3cd99f52315",
+        "0x0cf4f4acb36ee84a94b5e8368f9a34854c45a6a1a668d29b21bad942c07d44f7"
       ],
       "publicSignals": {
-        "root": "0x094793a616afd53615c1c4d1815a853803758a243c6c7dc863775fee0e9bc9b2",
+        "root": "0x1835c52bee935f545b17f880f8811ba62f1d157671fb8e5ffa2de24b7e2d2145",
         "publicInAmt": "1000000000000000000",
         "publicOutAmt": "0",
         "publicInfoHash": "0x23038d61a43bdcd91800dd93823c1fb3f81648bf2d70e8102959647a47e3e0e9",
