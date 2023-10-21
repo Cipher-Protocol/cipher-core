@@ -52,6 +52,11 @@ const config: HardhatUserConfig = {
       accounts: [getString(process.env.GOERLI_DEPLOYER_PRIVATE_KEY)],
     },
   },
+  etherscan: {
+    apiKey: {
+      goerli: getString(process.env.GOERLI_ETHERSCAN_API_KEY),
+    },
+  },
 };
 
 export default config;
