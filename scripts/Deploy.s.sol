@@ -5,7 +5,7 @@ import "forge-std/Script.sol";
 import {CipherVerifier} from "../contracts/CipherVerifier.sol";
 import {Cipher} from "../contracts/Cipher.sol";
 
-contract DeploymentScript is Script {
+abstract contract DeploymentBase is Script {
     using stdJson for string;
 
     uint256 private privkey;
@@ -19,11 +19,17 @@ contract DeploymentScript is Script {
         vm.stopBroadcast();
     }
 
+    modifier selectFork() {
+        _selectFork();
+        _;
+    }
+
     function setUp() external {
-        privkey = vm.envUint("GOERLI_DEPLOYER_PRIVATE_KEY");
+        privkey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         poseidonSalt = vm.envUint("POSEIDON_SALT");
         verifierSalt = vm.envUint("VERIFIER_SALT");
         cipherSalt = vm.envUint("CIPHER_SALT");
+        _initFork();
     }
 
     function run() external {
@@ -32,7 +38,11 @@ contract DeploymentScript is Script {
         Cipher cipher = _deployCipher(address(verifier), poseidon);
     }
 
-    function _deployPoseidon() broadcast private returns (address addr) {
+    function _initFork() internal virtual;
+
+    function _selectFork() internal virtual;
+
+    function _deployPoseidon() selectFork broadcast private returns (address addr) {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/tests/utils/PoseidonT3.json");
         string memory json = vm.readFile(path);
@@ -44,12 +54,12 @@ contract DeploymentScript is Script {
         }
     }
 
-    function _deployVerifier() broadcast private returns (CipherVerifier verifier) {
+    function _deployVerifier() selectFork broadcast private returns (CipherVerifier verifier) {
         bytes32 salt = bytes32(verifierSalt);
         verifier = new CipherVerifier{salt: salt}();
     }
 
-    function _deployCipher(address verifier, address poseidon) broadcast private returns (Cipher cipher) {
+    function _deployCipher(address verifier, address poseidon) selectFork broadcast private returns (Cipher cipher) {
         bytes32 salt = bytes32(cipherSalt);
         cipher = new Cipher{salt: salt}(verifier, poseidon);
     }
