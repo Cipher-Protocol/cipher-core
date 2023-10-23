@@ -2,10 +2,22 @@
 
 pragma solidity ^0.8.19;
 
+// testing framework
 import "forge-std/Test.sol";
+
+// source & mock
 import {CipherVerifier} from "../contracts/CipherVerifier.sol";
 import {Cipher} from "../contracts/Cipher.sol";
-import {ERC20Mock} from "../contracts/mock/ERC20Mock.sol";
+import {ERC20Mock} from "./mock/ERC20Mock.sol";
+
+// interfaces
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IPoseidonT3} from "../contracts/interfaces/IPoseidonT3.sol";
+
+// events, errors and constants
+import {Constants} from "../contracts/libraries/Constants.sol";
+import {Errors} from "../contracts/libraries/Errors.sol";
+import {Events} from "../contracts/libraries/Events.sol";
 
 abstract contract BaseTest is Test {
     using stdJson for string;
