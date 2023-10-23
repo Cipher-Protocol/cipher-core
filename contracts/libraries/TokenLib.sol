@@ -10,35 +10,35 @@ library TokenLib {
     using SafeERC20 for IERC20;
 
     /// @notice Customized transfer function to support both native token and ERC20 token
-    /// @param _token The token to transfer
-    /// @param _receiver The receiver address
-    /// @param _amount The amount to transfer
-    function tokenTransfer(IERC20 _token, address payable _receiver, uint256 _amount) internal {
-        if (_token == Constants.DEFAULT_NATIVE_TOKEN) {
-            (bool success, bytes memory data) = _receiver.call{value: _amount}("");
-            if (!success) revert Errors.TransferNativeTokenFailed(_receiver, _amount, data);
+    /// @param token The token to transfer
+    /// @param receiver The receiver address
+    /// @param amount The amount to transfer
+    function tokenTransfer(IERC20 token, address payable receiver, uint256 amount) internal {
+        if (token == Constants.DEFAULT_NATIVE_TOKEN) {
+            (bool success, bytes memory data) = receiver.call{value: amount}("");
+            if (!success) revert Errors.TransferNativeTokenFailed(receiver, amount, data);
         } else {
-            _token.safeTransfer(_receiver, _amount);
+            token.safeTransfer(receiver, amount);
         }
     }
 
     /// @notice Customized transferFrom function to support both native token and ERC20 token
     /// @dev If transfer native token, `msg.value` should equal to input amount
     ///      If transfer ERC20 token, `msg.value` should equal to 0
-    /// @param _token The token to transfer
-    /// @param _receiver The receiver address
-    /// @param _amount The amount to transfer
-    function tokenTransferFrom(IERC20 _token, address _receiver, uint256 _amount) internal {
-        if (_token == Constants.DEFAULT_NATIVE_TOKEN) {
+    /// @param token The token to transfer
+    /// @param sender The sender address
+    /// @param amount The amount to transfer
+    function tokenTransferFrom(IERC20 token, address sender, uint256 amount) internal {
+        if (token == Constants.DEFAULT_NATIVE_TOKEN) {
             // if transfer native token, `msg.value` should equal to input amount
-            if (msg.value != _amount) revert Errors.InvalidMsgValue(msg.value);
+            if (msg.value != amount) revert Errors.InvalidMsgValue(msg.value);
         } else {
             // if transfer ERC20, `msg.value` should equal to 0
             if (msg.value != 0) revert Errors.InvalidMsgValue(msg.value);
-            uint256 beforeBalance = _token.balanceOf(address(this));
-            _token.safeTransferFrom(_receiver, address(this), _amount);
-            uint256 transferredAmt = _token.balanceOf(address(this)) - beforeBalance;
-            if (_amount != transferredAmt) revert Errors.AmountInconsistent(_amount, transferredAmt);
+            uint256 transferredAmt = token.balanceOf(address(this));
+            token.safeTransferFrom(sender, address(this), amount);
+            transferredAmt = token.balanceOf(address(this)) - transferredAmt;
+            if (amount != transferredAmt) revert Errors.AmountInconsistent(amount, transferredAmt);
         }
     }
 }
