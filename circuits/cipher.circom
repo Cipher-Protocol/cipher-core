@@ -5,12 +5,18 @@ include "../node_modules/circomlib/circuits/poseidon.circom";
 include "./merkleProof.circom";
 include "./signature.circom";
 
-/*
-commitment = hash(amount, hashedSaltOrUserId, random)
-nullifier = hash(commitment, leafIdx, saltOrSeed)
-*/
+/** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+    commitment = hash(amount, hashedSaltOrUserId, random)
+    nullifier  = hash(commitment, leafIdx, saltOrSeed)
 
-// Universal JoinSplit transaction with n inputs and m outputs
+    using the same rule in userId and hashedSalt for specific user or bearer token
+    userId     = hash(seed)
+    hashedSalt = hash(salt)
+***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
+
+//TODO: remove input signal root, inputNullifier and outputCommitment
+//TODO: and calculate from circom to become contract input
+// UTXO-based transaction with n inputs and m outputs
 template Cipher(levels, nIns, mOuts) {
     signal input root; // public
     signal input publicInAmt; // public
@@ -20,7 +26,7 @@ template Cipher(levels, nIns, mOuts) {
     // utxo input signals
     signal input inputNullifier[nIns]; // public
     signal input inAmount[nIns];
-    // seed = sign(msg) by user's EOA
+    // seed generated from signed message by user's EOA
     // salt for keeping cipher transferable, seed for a specified user
     signal input inSaltOrSeed[nIns]; 
     signal input inRandom[nIns];
@@ -46,16 +52,9 @@ template Cipher(levels, nIns, mOuts) {
     var sumIns = 0;
     var sumOuts = 0;
 
-    // check public input amount greater than or equal to zero
+    // Num2Bits to check public input amount greater than or equal to zero
     _ <== Num2Bits(252)(publicInAmt);
-    signal signal_pub_in_gtEq <== GreaterEqThan(252)([publicInAmt,0]);
-    signal_pub_in_gtEq === 1;
-
-    // check public output amount greater than or equal to zero
     _ <== Num2Bits(252)(publicOutAmt);
-    signal signal_pub_out_gtEq <== GreaterEqThan(252)([publicOutAmt,0]);
-    signal_pub_out_gtEq === 1;
-
 
     // verify correctness of utxo inputs
     for (var i = 0; i < nIns; i++) {
@@ -64,11 +63,6 @@ template Cipher(levels, nIns, mOuts) {
 
         // calculate input commitment hash from input signal
         inCommitmentHash[i] <== Poseidon(3)([inAmount[i], inHashedSaltOrUserId[i], inRandom[i]]);
-        
-        //TODO: check why need this?
-        // calculate signature from input signal
-        // inSignature[i] <== Signature()(inSaltOrSeed[i], inCommitmentHash[i], inPathIndices[i]);
-        // inNullifier[i] <== Poseidon(3)([inCommitmentHash[i], inPathIndices[i], inSignature[i]]);
         
         // calculate nullifier from input signal
         inNullifier[i] <== Poseidon(3)([inCommitmentHash[i], inPathIndices[i], inSaltOrSeed[i]]);
@@ -90,8 +84,10 @@ template Cipher(levels, nIns, mOuts) {
         outCommitmentHash[i] <== Poseidon(3)([outAmount[i], outHashedSaltOrUserId[i], outRandom[i]]);
         // check that output commitment hash matches the public input
         outCommitmentHash[i] === outputCommitment[i];
-        // Check that amount fits into 248 bits to prevent overflow
-        _ <== Num2Bits(248)(outAmount[i]);
+        // Check that amount fits into 244 bits to prevent overflow
+        // max number of inputs and outputs are number of 1 byte (256) in contract
+        // 244 <= 253 - (nIns > mOuts ? log2(nIns) : log2(mOuts));
+        _ <== Num2Bits(244)(outAmount[i]);
 
         sumOuts += outAmount[i];
     }
