@@ -8,11 +8,17 @@ import {Cipher} from "../contracts/Cipher.sol";
 abstract contract DeploymentBase is Script {
     using stdJson for string;
 
+    /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+        variables
+    ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
     uint256 private privkey;
     uint256 poseidonSalt;
     uint256 verifierSalt;
     uint256 cipherSalt;
 
+    /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+        modifiers
+    ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
     modifier broadcast() {
         vm.startBroadcast(privkey);
         _;
@@ -24,6 +30,9 @@ abstract contract DeploymentBase is Script {
         _;
     }
 
+    /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+        Script external functions
+    ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
     function setUp() external {
         privkey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         poseidonSalt = vm.envUint("POSEIDON_SALT");
@@ -38,10 +47,16 @@ abstract contract DeploymentBase is Script {
         Cipher cipher = _deployCipher(address(verifier), poseidon);
     }
 
+    /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+        internal virtual functions
+    ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
     function _initFork() internal virtual;
 
     function _selectFork() internal virtual;
 
+    /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+        private functions
+    ***** ***** ***** ***** ***** ***** ***** ***** ***** *****  */
     function _deployPoseidon() selectFork broadcast private returns (address addr) {
         string memory root = vm.projectRoot();
         string memory path = string.concat(root, "/tests/utils/PoseidonT3.json");
