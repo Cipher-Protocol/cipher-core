@@ -8,11 +8,11 @@ import {TokenLib} from "../../contracts/libraries/TokenLib.sol";
 contract TokenLibMock {
     using TokenLib for IERC20;
 
-    function doTransfer(IERC20 _erc20, address _receiver, uint256 _amount) external payable {
-        _erc20.tokenTransfer(payable(_receiver), _amount);
+    function doTransfer(IERC20 _erc20, address _sender, uint256 _amount) external payable {
+        _erc20.tokenTransfer(payable(_sender), _amount);
     }
 
-    function doTransferFrom(IERC20 _erc20, address _receiver, uint256 _amount) external payable {
-        _erc20.tokenTransferFrom(payable(_receiver), _amount);
+    function doTransferFrom(IERC20 _erc20, address _sender, uint256 _amount) external payable {
+        _erc20.tokenTransferFrom(payable(_sender), _amount);
     }
 }

@@ -25,8 +25,8 @@ contract TestTokenLib is BaseTest {
         assertEq(address(tokenLibMock).balance, 1 ether);
 
         // erc20 transferFrom
-        erc20.approve(address(tokenLibMock), 1 ether);
-        tokenLibMock.doTransferFrom(IERC20(erc20), address(this), 1 ether);
-        assertEq(erc20.balanceOf(address(tokenLibMock)), 1 ether);
+        IERC20(erc20).approve(address(tokenLibMock), 10 ether);
+        tokenLibMock.doTransferFrom(erc20, address(this), 10 ether);
+        assertEq(erc20.balanceOf(address(tokenLibMock)), 10 ether);
     }
 }
