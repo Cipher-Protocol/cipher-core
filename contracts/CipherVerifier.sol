@@ -97,6 +97,18 @@ contract CipherVerifier is CipherVKeyConst {
                     IC4x := n0m2_IC4x
                     IC4y := n0m2_IC4y
                 }
+                case hex"0003" {
+                    IC0x := n0m3_IC0x
+                    IC0y := n0m3_IC0y
+                    IC1x := n0m3_IC1x
+                    IC1y := n0m3_IC1y
+                    IC2x := n0m3_IC2x
+                    IC2y := n0m3_IC2y
+                    IC3x := n0m3_IC3x
+                    IC3y := n0m3_IC3y
+                    IC4x := n0m3_IC4x
+                    IC4y := n0m3_IC4y
+                }
                 case hex"0004" {
                     IC0x := n0m4_IC0x
                     IC0y := n0m4_IC0y
@@ -144,6 +156,18 @@ contract CipherVerifier is CipherVKeyConst {
                     IC3y := n1m2_IC3y
                     IC4x := n1m2_IC4x
                     IC4y := n1m2_IC4y
+                }
+                case hex"0103" {
+                    IC0x := n1m3_IC0x
+                    IC0y := n1m3_IC0y
+                    IC1x := n1m3_IC1x
+                    IC1y := n1m3_IC1y
+                    IC2x := n1m3_IC2x
+                    IC2y := n1m3_IC2y
+                    IC3x := n1m3_IC3x
+                    IC3y := n1m3_IC3y
+                    IC4x := n1m3_IC4x
+                    IC4y := n1m3_IC4y
                 }
                 case hex"0104" {
                     IC0x := n1m4_IC0x
@@ -193,6 +217,18 @@ contract CipherVerifier is CipherVKeyConst {
                     IC4x := n2m2_IC4x
                     IC4y := n2m2_IC4y
                 }
+                case hex"0203" {
+                    IC0x := n2m3_IC0x
+                    IC0y := n2m3_IC0y
+                    IC1x := n2m3_IC1x
+                    IC1y := n2m3_IC1y
+                    IC2x := n2m3_IC2x
+                    IC2y := n2m3_IC2y
+                    IC3x := n2m3_IC3x
+                    IC3y := n2m3_IC3y
+                    IC4x := n2m3_IC4x
+                    IC4y := n2m3_IC4y
+                }
                 case hex"0204" {
                     IC0x := n2m4_IC0x
                     IC0y := n2m4_IC0y
@@ -204,6 +240,66 @@ contract CipherVerifier is CipherVKeyConst {
                     IC3y := n2m4_IC3y
                     IC4x := n2m4_IC4x
                     IC4y := n2m4_IC4y
+                }
+                case hex"0300" {
+                    IC0x := n3m0_IC0x
+                    IC0y := n3m0_IC0y
+                    IC1x := n3m0_IC1x
+                    IC1y := n3m0_IC1y
+                    IC2x := n3m0_IC2x
+                    IC2y := n3m0_IC2y
+                    IC3x := n3m0_IC3x
+                    IC3y := n3m0_IC3y
+                    IC4x := n3m0_IC4x
+                    IC4y := n3m0_IC4y
+                }
+                case hex"0301" {
+                    IC0x := n3m1_IC0x
+                    IC0y := n3m1_IC0y
+                    IC1x := n3m1_IC1x
+                    IC1y := n3m1_IC1y
+                    IC2x := n3m1_IC2x
+                    IC2y := n3m1_IC2y
+                    IC3x := n3m1_IC3x
+                    IC3y := n3m1_IC3y
+                    IC4x := n3m1_IC4x
+                    IC4y := n3m1_IC4y
+                }
+                case hex"0302" {
+                    IC0x := n3m2_IC0x
+                    IC0y := n3m2_IC0y
+                    IC1x := n3m2_IC1x
+                    IC1y := n3m2_IC1y
+                    IC2x := n3m2_IC2x
+                    IC2y := n3m2_IC2y
+                    IC3x := n3m2_IC3x
+                    IC3y := n3m2_IC3y
+                    IC4x := n3m2_IC4x
+                    IC4y := n3m2_IC4y
+                }
+                case hex"0303" {
+                    IC0x := n3m3_IC0x
+                    IC0y := n3m3_IC0y
+                    IC1x := n3m3_IC1x
+                    IC1y := n3m3_IC1y
+                    IC2x := n3m3_IC2x
+                    IC2y := n3m3_IC2y
+                    IC3x := n3m3_IC3x
+                    IC3y := n3m3_IC3y
+                    IC4x := n3m3_IC4x
+                    IC4y := n3m3_IC4y
+                }
+                case hex"0304" {
+                    IC0x := n3m4_IC0x
+                    IC0y := n3m4_IC0y
+                    IC1x := n3m4_IC1x
+                    IC1y := n3m4_IC1y
+                    IC2x := n3m4_IC2x
+                    IC2y := n3m4_IC2y
+                    IC3x := n3m4_IC3x
+                    IC3y := n3m4_IC3y
+                    IC4x := n3m4_IC4x
+                    IC4y := n3m4_IC4y
                 }
                 case hex"0400" {
                     IC0x := n4m0_IC0x
@@ -253,6 +349,7 @@ contract CipherVerifier is CipherVKeyConst {
                     IC4x := n4m4_IC4x
                     IC4y := n4m4_IC4y
                 }
+
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -273,6 +370,12 @@ contract CipherVerifier is CipherVKeyConst {
                     deltax2 := n0m2_deltax2
                     deltay1 := n0m2_deltay1
                     deltay2 := n0m2_deltay2
+                }
+                case hex"0003" {
+                    deltax1 := n0m3_deltax1
+                    deltax2 := n0m3_deltax2
+                    deltay1 := n0m3_deltay1
+                    deltay2 := n0m3_deltay2
                 }
                 case hex"0004" {
                     deltax1 := n0m4_deltax1
@@ -298,6 +401,12 @@ contract CipherVerifier is CipherVKeyConst {
                     deltay1 := n1m2_deltay1
                     deltay2 := n1m2_deltay2
                 }
+                case hex"0103" {
+                    deltax1 := n1m3_deltax1
+                    deltax2 := n1m3_deltax2
+                    deltay1 := n1m3_deltay1
+                    deltay2 := n1m3_deltay2
+                }
                 case hex"0104" {
                     deltax1 := n1m4_deltax1
                     deltax2 := n1m4_deltax2
@@ -322,11 +431,47 @@ contract CipherVerifier is CipherVKeyConst {
                     deltay1 := n2m2_deltay1
                     deltay2 := n2m2_deltay2
                 }
+                case hex"0203" {
+                    deltax1 := n2m3_deltax1
+                    deltax2 := n2m3_deltax2
+                    deltay1 := n2m3_deltay1
+                    deltay2 := n2m3_deltay2
+                }
                 case hex"0204" {
                     deltax1 := n2m4_deltax1
                     deltax2 := n2m4_deltax2
                     deltay1 := n2m4_deltay1
                     deltay2 := n2m4_deltay2
+                }
+                case hex"0300" {
+                    deltax1 := n3m0_deltax1
+                    deltax2 := n3m0_deltax2
+                    deltay1 := n3m0_deltay1
+                    deltay2 := n3m0_deltay2
+                }
+                case hex"0301" {
+                    deltax1 := n3m1_deltax1
+                    deltax2 := n3m1_deltax2
+                    deltay1 := n3m1_deltay1
+                    deltay2 := n3m1_deltay2
+                }
+                case hex"0302" {
+                    deltax1 := n3m2_deltax1
+                    deltax2 := n3m2_deltax2
+                    deltay1 := n3m2_deltay1
+                    deltay2 := n3m2_deltay2
+                }
+                case hex"0303" {
+                    deltax1 := n3m3_deltax1
+                    deltax2 := n3m3_deltax2
+                    deltay1 := n3m3_deltay1
+                    deltay2 := n3m3_deltay2
+                }
+                case hex"0304" {
+                    deltax1 := n3m4_deltax1
+                    deltax2 := n3m4_deltax2
+                    deltay1 := n3m4_deltay1
+                    deltay2 := n3m4_deltay2
                 }
                 case hex"0400" {
                     deltax1 := n4m0_deltax1
@@ -352,6 +497,7 @@ contract CipherVerifier is CipherVKeyConst {
                     deltay1 := n4m4_deltay1
                     deltay2 := n4m4_deltay2
                 }
+
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -373,6 +519,11 @@ contract CipherVerifier is CipherVKeyConst {
                     ecMulAcc(_pVk, n0m2_IC5x, n0m2_IC5y, calldataload(add(outputCommitmentsPos, 32)))
                     ecMulAcc(_pVk, n0m2_IC6x, n0m2_IC6y, calldataload(add(outputCommitmentsPos, 64)))
                 }
+                case hex"0003" {
+                    ecMulAcc(_pVk, n0m3_IC5x, n0m3_IC5y, calldataload(add(outputCommitmentsPos, 32)))
+                    ecMulAcc(_pVk, n0m3_IC6x, n0m3_IC6y, calldataload(add(outputCommitmentsPos, 64)))
+                    ecMulAcc(_pVk, n0m3_IC7x, n0m3_IC7y, calldataload(add(outputCommitmentsPos, 96)))
+                }
                 case hex"0004" {
                     ecMulAcc(_pVk, n0m4_IC5x, n0m4_IC5y, calldataload(add(outputCommitmentsPos, 32)))
                     ecMulAcc(_pVk, n0m4_IC6x, n0m4_IC6y, calldataload(add(outputCommitmentsPos, 64)))
@@ -390,6 +541,12 @@ contract CipherVerifier is CipherVKeyConst {
                     ecMulAcc(_pVk, n1m2_IC5x, n1m2_IC5y, calldataload(add(inputNullifiersPos, 32)))
                     ecMulAcc(_pVk, n1m2_IC6x, n1m2_IC6y, calldataload(add(outputCommitmentsPos, 32)))
                     ecMulAcc(_pVk, n1m2_IC7x, n1m2_IC7y, calldataload(add(outputCommitmentsPos, 64)))
+                }
+                case hex"0103" {
+                    ecMulAcc(_pVk, n1m3_IC5x, n1m3_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n1m3_IC6x, n1m3_IC6y, calldataload(add(outputCommitmentsPos, 32)))
+                    ecMulAcc(_pVk, n1m3_IC7x, n1m3_IC7y, calldataload(add(outputCommitmentsPos, 64)))
+                    ecMulAcc(_pVk, n1m3_IC8x, n1m3_IC8y, calldataload(add(outputCommitmentsPos, 96)))
                 }
                 case hex"0104" {
                     ecMulAcc(_pVk, n1m4_IC5x, n1m4_IC5y, calldataload(add(inputNullifiersPos, 32)))
@@ -413,6 +570,13 @@ contract CipherVerifier is CipherVKeyConst {
                     ecMulAcc(_pVk, n2m2_IC7x, n2m2_IC7y, calldataload(add(outputCommitmentsPos, 32)))
                     ecMulAcc(_pVk, n2m2_IC8x, n2m2_IC8y, calldataload(add(outputCommitmentsPos, 64)))
                 }
+                case hex"0203" {
+                    ecMulAcc(_pVk, n2m3_IC5x, n2m3_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n2m3_IC6x, n2m3_IC6y, calldataload(add(inputNullifiersPos, 64)))
+                    ecMulAcc(_pVk, n2m3_IC7x, n2m3_IC7y, calldataload(add(outputCommitmentsPos, 32)))
+                    ecMulAcc(_pVk, n2m3_IC8x, n2m3_IC8y, calldataload(add(outputCommitmentsPos, 64)))
+                    ecMulAcc(_pVk, n2m3_IC9x, n2m3_IC9y, calldataload(add(outputCommitmentsPos, 96)))
+                }
                 case hex"0204" {
                     ecMulAcc(_pVk, n2m4_IC5x, n2m4_IC5y, calldataload(add(inputNullifiersPos, 32)))
                     ecMulAcc(_pVk, n2m4_IC6x, n2m4_IC6y, calldataload(add(inputNullifiersPos, 64)))
@@ -420,6 +584,41 @@ contract CipherVerifier is CipherVKeyConst {
                     ecMulAcc(_pVk, n2m4_IC8x, n2m4_IC8y, calldataload(add(outputCommitmentsPos, 64)))
                     ecMulAcc(_pVk, n2m4_IC9x, n2m4_IC9y, calldataload(add(outputCommitmentsPos, 96)))
                     ecMulAcc(_pVk, n2m4_IC10x, n2m4_IC10y, calldataload(add(outputCommitmentsPos, 128)))
+                }
+                case hex"0300" {
+                    ecMulAcc(_pVk, n3m0_IC5x, n3m0_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n3m0_IC6x, n3m0_IC6y, calldataload(add(inputNullifiersPos, 64)))
+                    ecMulAcc(_pVk, n3m0_IC7x, n3m0_IC7y, calldataload(add(inputNullifiersPos, 96)))
+                }
+                case hex"0301" {
+                    ecMulAcc(_pVk, n3m1_IC5x, n3m1_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n3m1_IC6x, n3m1_IC6y, calldataload(add(inputNullifiersPos, 64)))
+                    ecMulAcc(_pVk, n3m1_IC7x, n3m1_IC7y, calldataload(add(inputNullifiersPos, 96)))
+                    ecMulAcc(_pVk, n3m1_IC8x, n3m1_IC8y, calldataload(add(outputCommitmentsPos, 32)))
+                }
+                case hex"0302" {
+                    ecMulAcc(_pVk, n3m2_IC5x, n3m2_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n3m2_IC6x, n3m2_IC6y, calldataload(add(inputNullifiersPos, 64)))
+                    ecMulAcc(_pVk, n3m2_IC7x, n3m2_IC7y, calldataload(add(inputNullifiersPos, 96)))
+                    ecMulAcc(_pVk, n3m2_IC8x, n3m2_IC8y, calldataload(add(outputCommitmentsPos, 32)))
+                    ecMulAcc(_pVk, n3m2_IC9x, n3m2_IC9y, calldataload(add(outputCommitmentsPos, 64)))
+                }
+                case hex"0303" {
+                    ecMulAcc(_pVk, n3m3_IC5x, n3m3_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n3m3_IC6x, n3m3_IC6y, calldataload(add(inputNullifiersPos, 64)))
+                    ecMulAcc(_pVk, n3m3_IC7x, n3m3_IC7y, calldataload(add(inputNullifiersPos, 96)))
+                    ecMulAcc(_pVk, n3m3_IC8x, n3m3_IC8y, calldataload(add(outputCommitmentsPos, 32)))
+                    ecMulAcc(_pVk, n3m3_IC9x, n3m3_IC9y, calldataload(add(outputCommitmentsPos, 64)))
+                    ecMulAcc(_pVk, n3m3_IC10x, n3m3_IC10y, calldataload(add(outputCommitmentsPos, 96)))
+                }
+                case hex"0304" {
+                    ecMulAcc(_pVk, n3m4_IC5x, n3m4_IC5y, calldataload(add(inputNullifiersPos, 32)))
+                    ecMulAcc(_pVk, n3m4_IC6x, n3m4_IC6y, calldataload(add(inputNullifiersPos, 64)))
+                    ecMulAcc(_pVk, n3m4_IC7x, n3m4_IC7y, calldataload(add(inputNullifiersPos, 96)))
+                    ecMulAcc(_pVk, n3m4_IC8x, n3m4_IC8y, calldataload(add(outputCommitmentsPos, 32)))
+                    ecMulAcc(_pVk, n3m4_IC9x, n3m4_IC9y, calldataload(add(outputCommitmentsPos, 64)))
+                    ecMulAcc(_pVk, n3m4_IC10x, n3m4_IC10y, calldataload(add(outputCommitmentsPos, 96)))
+                    ecMulAcc(_pVk, n3m4_IC11x, n3m4_IC11y, calldataload(add(outputCommitmentsPos, 128)))
                 }
                 case hex"0400" {
                     ecMulAcc(_pVk, n4m0_IC5x, n4m0_IC5y, calldataload(add(inputNullifiersPos, 32)))
@@ -452,6 +651,7 @@ contract CipherVerifier is CipherVKeyConst {
                     ecMulAcc(_pVk, n4m4_IC11x, n4m4_IC11y, calldataload(add(outputCommitmentsPos, 96)))
                     ecMulAcc(_pVk, n4m4_IC12x, n4m4_IC12y, calldataload(add(outputCommitmentsPos, 128)))
                 }
+
                 default {
                     // this is not allowed
                     mstore(0, 0)
@@ -604,6 +804,6 @@ contract CipherVerifier is CipherVKeyConst {
 
             mstore(0, success)
             return(0, 0x20)
-        }
-    }
-}
+         }
+     }
+ }
