@@ -3,14 +3,13 @@ pragma circom 2.1.6;
 include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/poseidon.circom";
 include "./merkleProof.circom";
-include "./signature.circom";
 
 /*
 commitment = hash(amount, hashedSaltOrUserId, random)
 nullifier = hash(commitment, leafIdx, saltOrSeed)
 */
 
-// Universal JoinSplit transaction with n inputs and m outputs
+// Universal UTXO circuit with n inputs and m outputs
 template Cipher(levels, nIns, mOuts) {
     signal input root; // public
     signal input publicInAmt; // public
@@ -64,12 +63,6 @@ template Cipher(levels, nIns, mOuts) {
 
         // calculate input commitment hash from input signal
         inCommitmentHash[i] <== Poseidon(3)([inAmount[i], inHashedSaltOrUserId[i], inRandom[i]]);
-        
-        //TODO: check why need this?
-        // calculate signature from input signal
-        // inSignature[i] <== Signature()(inSaltOrSeed[i], inCommitmentHash[i], inPathIndices[i]);
-        // inNullifier[i] <== Poseidon(3)([inCommitmentHash[i], inPathIndices[i], inSignature[i]]);
-        
         // calculate nullifier from input signal
         inNullifier[i] <== Poseidon(3)([inCommitmentHash[i], inPathIndices[i], inSaltOrSeed[i]]);
         // check that nullifier matches the public input
