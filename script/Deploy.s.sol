@@ -42,9 +42,9 @@ abstract contract DeploymentBase is Script {
     }
 
     function run() external {
-        address poseidon = _deployPoseidon();
+        // address poseidon = _deployPoseidon();
         CipherVerifier verifier = _deployVerifier();
-        Cipher cipher = _deployCipher(address(verifier), poseidon);
+        Cipher cipher = _deployCipher(address(verifier), address(0x0f4c79bF128bd3f0Cf09F658186d3928396c59Bb));
     }
 
     /** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
